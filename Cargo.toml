@@ -6,3 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix-web = "4"
+actix-session = { version = "0.7", features = ["cookie-session"] }
+actix-cors = "0.6.2"
+actix-identity = "0.4"
+env_logger = "0.9.0"
+futures-util = "0.3.23"
+log = "0.4.17"
+serde = { version = "^1.0.101", features = ["derive"] }
+sqlx = { version = "0.6", features = [ "runtime-actix-native-tls", "mysql" ] }
+bcrypt = "0.13"
+rand = "0.8"
