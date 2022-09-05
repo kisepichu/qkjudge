@@ -1,2 +1,7 @@
-/target
+/target/*
+!/target/release/comproblems
+
 env.sh
+init_db.sh
+
+/world-db
