@@ -1,5 +1,11 @@
 use actix_identity::Identity;
 use actix_web::{get, HttpResponse, Responder};
+use serde::Serialize;
+
+#[derive(Serialize)]
+struct WhoamiResponse {
+    username: String,
+}
 
 #[get("/user/whoami")]
 async fn get_whoami(id: Identity) -> impl Responder {
@@ -7,5 +13,5 @@ async fn get_whoami(id: Identity) -> impl Responder {
     if username == "" {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
-    HttpResponse::Ok().body(username)
+    HttpResponse::Ok().json(WhoamiResponse { username: username })
 }

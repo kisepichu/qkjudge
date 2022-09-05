@@ -1,3 +1,4 @@
+mod execute;
 mod hello;
 mod index;
 mod login;
@@ -7,6 +8,8 @@ mod preflight;
 mod signup;
 mod whoami;
 
+pub use self::execute::get_execute;
+pub use self::execute::post_execute;
 pub use self::hello::get_hello;
 pub use self::index::get_index;
 pub use self::login::post_login;
