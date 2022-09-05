@@ -13,7 +13,7 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "actix_web=info");
     std::env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
-    let address = match env::var("NARO3_ADDRESS") {
+    let address = match env::var("QKJUDGE_ADDRESS") {
         Ok(val) => val,
         Err(_e) => "localhost".to_string(),
     };
