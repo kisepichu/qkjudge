@@ -1,5 +1,5 @@
 /target/*
-!/target/release/comproblems
+!/target/release/qkjudge
 /routes
 
 env.sh
