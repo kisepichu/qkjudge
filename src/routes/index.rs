@@ -1,19 +1,11 @@
-
-
-
-
-use actix_web::{
-    get, HttpRequest, HttpResponse,
-    Responder,
-};
-
-
-
-
-
+use actix_identity::Identity;
+use actix_web::{get, HttpRequest, HttpResponse, Responder};
 
 #[get("/")]
-async fn get_index(req: HttpRequest) -> impl Responder {
+async fn get_index(req: HttpRequest, id: Identity) -> impl Responder {
     println!("Request: {req:?}");
-    HttpResponse::Ok().body("Hello, World! frontend: https://tqk.blue/reactpractice/")
+    HttpResponse::Ok().body(format!(
+        "Hello, {}!",
+        id.identity().unwrap_or("guest".to_owned())
+    ))
 }

@@ -1,8 +1,6 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use bcrypt::{hash, DEFAULT_COST};
-
 use serde::Deserialize;
-
 use std::sync::*;
 
 #[derive(Deserialize)]
@@ -11,7 +9,7 @@ struct LoginRequest {
     password: String,
 }
 
-#[post("/signup")]
+#[post("/user/signup")]
 async fn post_signup(
     req: web::Json<LoginRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,

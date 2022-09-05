@@ -1,18 +1,7 @@
+use actix_identity::Identity;
+use actix_web::{get, HttpResponse, Responder};
 
-use actix_identity::{Identity};
-
-
-use actix_web::{
-    get, HttpResponse,
-    Responder,
-};
-
-
-
-
-
-
-#[get("/whoami")]
+#[get("/user/whoami")]
 async fn get_whoami(id: Identity) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
     if username == "" {

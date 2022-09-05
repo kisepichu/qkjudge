@@ -1,11 +1,7 @@
-use actix_identity::{Identity};
-
+use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse, Responder};
 use bcrypt::verify;
-
 use serde::Deserialize;
-
-
 use std::sync::*;
 
 #[derive(Deserialize)]
@@ -21,7 +17,7 @@ struct User {
     HashedPass: String,
 }
 
-#[post("/login")]
+#[post("/user/login")]
 async fn post_login(
     req: web::Json<LoginRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,

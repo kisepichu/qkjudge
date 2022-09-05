@@ -473,23 +473,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "comproblems"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-identity",
- "actix-session",
- "actix-web",
- "bcrypt",
- "env_logger",
- "futures-util",
- "log",
- "rand",
- "serde",
- "sqlx",
-]
-
-[[package]]
 name = "const-oid"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1444,6 +1427,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0a2ca2c61bc9f3d74d2886294ab7b9853abd9c1ad903a3ac7815c58989bb7bab"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "qkjudge"
+version = "0.1.1"
+dependencies = [
+ "actix-cors",
+ "actix-identity",
+ "actix-session",
+ "actix-web",
+ "bcrypt",
+ "env_logger",
+ "futures-util",
+ "log",
+ "rand",
+ "serde",
+ "sqlx",
 ]
 
 [[package]]

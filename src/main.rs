@@ -1,13 +1,8 @@
-
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::cookie::SameSite;
 use actix_web::web::Data;
-use actix_web::{
-    middleware, App, HttpServer,
-};
-
+use actix_web::{middleware, App, HttpServer};
 use rand::Rng;
-
 use std::env;
 use std::sync::*;
 
