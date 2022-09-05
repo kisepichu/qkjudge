@@ -1,5 +1,6 @@
 /target/*
 !/target/release/comproblems
+/routes
 
 env.sh
 init_db.sh

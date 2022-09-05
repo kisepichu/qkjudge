@@ -1,10 +1,10 @@
-use actix_identity::{CookieIdentityPolicy, Identity, IdentityService};
+use actix_identity::{Identity};
 
 use actix_web::{post, web, HttpResponse, Responder};
 use bcrypt::verify;
 
 use serde::Deserialize;
-use serde::Serialize;
+
 
 use std::sync::*;
 

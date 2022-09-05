@@ -1,28 +1,14 @@
-use actix_cors::Cors;
-use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::cookie::SameSite;
-use actix_web::web::Data;
-use actix_web::{
-    delete, get, http, middleware, options, post, web, App, HttpRequest, HttpResponse, HttpServer,
-    Responder,
-};
-use bcrypt::{hash, verify, DEFAULT_COST};
-use rand::Rng;
-use serde::{Deserialize, Serialize};
-use std::env;
+use actix_web::{post, web, HttpResponse, Responder};
+use bcrypt::{hash, DEFAULT_COST};
+
+use serde::Deserialize;
+
 use std::sync::*;
 
 #[derive(Deserialize)]
 struct LoginRequest {
     username: String,
     password: String,
-}
-
-#[derive(Default)]
-#[allow(non_snake_case)]
-struct User {
-    Username: String,
-    HashedPass: String,
 }
 
 #[post("/signup")]

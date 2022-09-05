@@ -1,6 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{
-    delete, get, http, middleware, options, post, web, App, HttpRequest, HttpResponse, HttpServer,
+    delete, HttpResponse,
     Responder,
 };
 
