@@ -10,6 +10,12 @@ struct ProblemNewRequest {
     path: String,
 }
 
+#[derive(Deserialize, Default)]
+struct Problem {
+    id: i32,
+    path: String,
+}
+
 #[derive(Serialize)]
 struct ProblemNewResponse {
     problem_id: i32,
@@ -53,14 +59,18 @@ async fn post_problem_new(
         }
     };
 
-    let ret = sqlx::query!(
-        "INSERT INTO problems (path) VALUES (?) RETURNING id;",
-        req.path
-    )
-    .fetch_one(&*pool)
-    .await
-    .unwrap()
-    .get::<i32, _>(0);
+    // RETURNING unsupported?
+    sqlx::query!("INSERT INTO problems (path) VALUES (?);", req.path)
+        .execute(&*pool)
+        .await
+        .unwrap();
 
-    HttpResponse::Created().json(ProblemNewResponse { problem_id: ret })
+    let problem = sqlx::query_as!(Problem, "SELECT * FROM problems WHERE path=(?)", req.path)
+        .fetch_one(&*pool)
+        .await
+        .unwrap();
+
+    HttpResponse::Created().json(ProblemNewResponse {
+        problem_id: problem.id,
+    })
 }
