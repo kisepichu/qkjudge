@@ -79,6 +79,13 @@ async fn post_submit(
     req: web::Json<SubmitRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
+    // ログインしていなかったら弾く
+    // let username = id.identity().unwrap_or("".to_owned());
+    // if username == "" {
+    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
+    // }
+    let username = "tqk";
+    // 問題のフォルダ problem_path を取得
     let pool = pool_data.lock().unwrap();
     let problem_path = sqlx::query_as!(
         ProblemLocation,
@@ -90,6 +97,7 @@ async fn post_submit(
     .unwrap_or(Default::default())
     .path;
 
+    // 問題の情報 info を取得
     let problems_root = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
         .replace("\r", "");
@@ -103,9 +111,9 @@ async fn post_submit(
     let docs = YamlLoader::load_from_str(&info_raw).unwrap();
     let info = &docs[0];
 
+    // テストケースの個数やパスを取得
     let inputs = files(problems_root.clone() + &problem_path + "/in").unwrap();
     let mut testcase_num = 0;
-    let mut progress_num = 0;
     for input_path in inputs.iter() {
         let output_long = problems_root.clone()
             + &problem_path
@@ -116,6 +124,23 @@ async fn post_submit(
             testcase_num += 1;
         }
     }
+
+    // submission を db に insert
+    let submission_id = sqlx::query!(
+        "INSERT INTO submissions (author, problem_id, testcase_num, language, source) VALUES (?, ?, ?, ?, ?);",
+        username,
+        req.problem_id,
+        testcase_num,
+        req.language,
+        req.source
+    )
+    .execute(&*pool)
+    .await
+    .unwrap()
+    .last_insert_id();
+    println!("submission id: {}", submission_id);
+
+    // ジャッジ
     println!("testing {} testcases...", testcase_num);
     for input_path in inputs.iter() {
         // input ファイルが out 側にも存在するなら、実行してたしかめる
@@ -125,18 +150,20 @@ async fn post_submit(
             + "/out/"
             + &input_path.clone().replace(".in", ".out");
         if Path::new(&output_long).exists() {
-            progress_num += 1;
             let mut input_file = File::open(input_long).expect("file not found");
             let mut input = String::new();
             input_file
                 .read_to_string(&mut input)
                 .expect("something went wrong reading the file");
-            let mut output_file = File::open(output_long).expect("file not found");
-            let mut output_raw = String::new();
-            output_file
-                .read_to_string(&mut output_raw)
+            let mut expected_file = File::open(output_long).expect("file not found");
+            let mut expected_raw = String::new();
+            expected_file
+                .read_to_string(&mut expected_raw)
                 .expect("something went wrong reading the file");
-            let output = format_output(output_raw);
+            let expected = format_output(expected_raw);
+
+            let mut result = "AC".to_string();
+            let mut will_continue = true;
 
             let client = reqwest::Client::new();
             let res = client
@@ -153,31 +180,48 @@ async fn post_submit(
                 .unwrap()
                 .json::<CompilerApiResponse>()
                 .await
-                .unwrap();
+                .unwrap_or(Default::default());
+            let output = format_output(res.output);
 
-            let expected = format_output(res.output);
-
-            let mut result = format!("{}/{}", progress_num, testcase_num);
-            let mut ok = true;
-
-            let cpu_time = res.cpuTime.parse::<f64>().unwrap();
-            let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-            if timelimit < cpu_time {
-                result = "TLE".to_string();
-                ok = false;
-            } else if expected != output {
-                result = "WA".to_string();
-                ok = false;
+            if res.statusCode == 429 {
+                result = "KK".to_string();
+                will_continue = false;
+            } else if res.statusCode == 200 {
+                let cpu_time = res.cpuTime.parse::<f64>().unwrap();
+                let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
+                if timelimit < cpu_time {
+                    result = "TLE".to_string();
+                    will_continue = false;
+                } else if output != expected {
+                    result = "WA".to_string();
+                    will_continue = false;
+                }
+            } else {
+                println!("{}", res.statusCode);
+                result = "UK".to_string();
+                will_continue = false;
             }
+
             println!("{}", result);
 
-            // db operation...
+            sqlx::query!(
+                "INSERT INTO tasks (submission_id, input, output, expected, result, memory, cpu_time) VALUES (?, ?, ?, ?, ?, ?, ?);",
+                submission_id,
+                input,
+                output,
+                expected,
+                result,
+                res.memory,
+                res.cpuTime,
+            )
+            .execute(&*pool)
+            .await
+            .unwrap();
 
-            if !ok {
+            if !will_continue {
                 break;
             }
             println!("ok");
-            break; // kari
         }
     }
     HttpResponse::NoContent().finish()
