@@ -4,7 +4,7 @@ work_dir: "."
 use_mariadb: true
 startup: |
   chmod 777 ./target/release/qkjudge
-  git clone -b dist https://github.com/tqkoh/qkproblems.git
+  git clone -b dist https://github.com/tqkoh/qkproblems.git problems
 entrypoint: ./target/release/qkjudge
 http_proxy: 8080
 https: on
