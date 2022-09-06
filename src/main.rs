@@ -67,6 +67,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::post_execute)
             .service(routes::get_problems)
             .service(routes::post_problem_new)
+            .service(routes::get_problems_pid)
     })
     .bind((address, 8080))?
     .run()
