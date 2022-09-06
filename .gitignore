@@ -3,6 +3,8 @@
 /routes
 
 env.sh
+env.showcase.json
+env.dev.showcase.json
 init_db.sh
 
 /world-db

@@ -20,7 +20,7 @@ async fn post_signup(
     }
     let hashed_pass = hash(&req.password, DEFAULT_COST).unwrap();
     let count = sqlx::query!(
-        r#"SELECT COUNT(*) as value FROM users WHERE Username=?"#,
+        r#"SELECT COUNT(*) as value FROM users WHERE username=?"#,
         req.username
     )
     .fetch_one(&*pool)
@@ -34,7 +34,7 @@ async fn post_signup(
     }
 
     sqlx::query!(
-        "INSERT INTO users (Username, HashedPass) VALUES (?, ?);",
+        "INSERT INTO users (username, hashed_pass) VALUES (?, ?);",
         req.username,
         hashed_pass
     )
