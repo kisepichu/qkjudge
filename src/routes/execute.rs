@@ -46,7 +46,10 @@ async fn post_execute(req: web::Json<ExecuteRequest>, id: Identity) -> impl Resp
         }))
         .send()
         .await
-        .unwrap().json::<CompilerApiResponse>().await.unwrap();
+        .unwrap()
+        .json::<CompilerApiResponse>()
+        .await
+        .unwrap();
     HttpResponse::Ok().json(ExecuteResponse {
         output: res.output,
         status_code: res.statusCode,

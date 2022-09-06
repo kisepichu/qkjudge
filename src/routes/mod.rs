@@ -9,6 +9,7 @@ mod problem_new;
 mod problems;
 mod problems_pid;
 mod signup;
+mod submit;
 mod whoami;
 
 pub use self::execute::get_execute;
@@ -23,4 +24,5 @@ pub use self::problem_new::post_problem_new;
 pub use self::problems::get_problems;
 pub use self::problems_pid::get_problems_pid;
 pub use self::signup::post_signup;
+pub use self::submit::post_submit;
 pub use self::whoami::get_whoami;
