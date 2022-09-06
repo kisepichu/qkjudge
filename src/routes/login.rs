@@ -11,10 +11,9 @@ struct LoginRequest {
 }
 
 #[derive(Default)]
-#[allow(non_snake_case)]
 struct User {
-    Username: String,
-    HashedPass: String,
+    username: String,
+    hashed_pass: String,
 }
 
 #[post("/user/login")]
@@ -24,13 +23,13 @@ async fn post_login(
     id: Identity,
 ) -> impl Responder {
     let pool = pool_data.lock().unwrap();
-    let user = sqlx::query_as!(User, "SELECT * FROM users WHERE Username = ?", req.username)
+    let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = ?", req.username)
         .fetch_one(&*pool)
         .await
         .unwrap_or(Default::default());
-    let hashed_pass = user.HashedPass;
+    let hashed_pass = user.hashed_pass;
     let valid = verify(&req.password, &hashed_pass).unwrap_or(false);
-    if !valid || user.Username == "" {
+    if !valid || user.username == "" {
         return HttpResponse::Forbidden().body("username or password is wrong");
     }
 

@@ -12,6 +12,7 @@ struct ExecuteRequest {
 }
 
 #[derive(Deserialize, Default)]
+#[allow(non_snake_case)]
 struct CompilerApiResponse {
     output: String,
     statusCode: i32,
@@ -22,9 +23,9 @@ struct CompilerApiResponse {
 #[derive(Serialize)]
 struct ExecuteResponse {
     output: String,
-    statusCode: i32,
+    status_code: i32,
     memory: String,
-    cpuTime: String,
+    cpu_time: String,
 }
 
 #[post("/execute")]
@@ -48,9 +49,9 @@ async fn post_execute(req: web::Json<ExecuteRequest>, id: Identity) -> impl Resp
         .unwrap().json::<CompilerApiResponse>().await.unwrap();
     HttpResponse::Ok().json(ExecuteResponse {
         output: res.output,
-        statusCode: res.statusCode,
+        status_code: res.statusCode,
         memory: res.memory,
-        cpuTime: res.cpuTime,
+        cpu_time: res.cpuTime,
     })
 }
 
