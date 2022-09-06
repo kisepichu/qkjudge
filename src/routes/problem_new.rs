@@ -1,11 +1,18 @@
 use actix_web::{post, web, HttpResponse, Responder};
-use bcrypt::{hash, DEFAULT_COST};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use sqlx::Row;
+use std::fs::File;
+use std::io::prelude::*;
 use std::sync::*;
 
 #[derive(Deserialize)]
 struct ProblemNewRequest {
     path: String,
+}
+
+#[derive(Serialize)]
+struct ProblemNewResponse {
+    problem_id: i32,
 }
 
 #[post("/problem/new")]
@@ -30,10 +37,30 @@ async fn post_problem_new(
         ));
     }
 
-    sqlx::query!("INSERT INTO problems (path) VALUES (?);", req.path)
-        .execute(&*pool)
-        .await
-        .unwrap();
+    let path = std::env::var("PROBLEMS_ROOT")
+        .expect("PROBLEMS_ROOT not set")
+        .replace("\r", "")
+        + &req.path
+        + "/problem.yaml";
+    println!("{:?}", path);
+    match File::open(path) {
+        Ok(_file) => true,
+        Err(e) => {
+            return HttpResponse::BadRequest().body(format!(
+                "upload to problems repository before register. err: {}",
+                e
+            ));
+        }
+    };
 
-    HttpResponse::Created().finish()
+    let ret = sqlx::query!(
+        "INSERT INTO problems (path) VALUES (?) RETURNING id;",
+        req.path
+    )
+    .fetch_one(&*pool)
+    .await
+    .unwrap()
+    .get::<i32, _>(0);
+
+    HttpResponse::Created().json(ProblemNewResponse { problem_id: ret })
 }
