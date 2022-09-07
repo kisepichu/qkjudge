@@ -2,7 +2,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::fs::File;
-use std::io::prelude::*;
+
 use std::sync::*;
 
 #[derive(Deserialize)]
@@ -59,18 +59,13 @@ async fn post_problem_new(
         }
     };
 
-    // RETURNING unsupported?
-    sqlx::query!("INSERT INTO problems (path) VALUES (?);", req.path)
+    let problem_id = sqlx::query!("INSERT INTO problems (path) VALUES (?);", req.path)
         .execute(&*pool)
         .await
-        .unwrap();
-
-    let problem = sqlx::query_as!(Problem, "SELECT * FROM problems WHERE path=(?)", req.path)
-        .fetch_one(&*pool)
-        .await
-        .unwrap();
+        .unwrap()
+        .last_insert_id() as i32;
 
     HttpResponse::Created().json(ProblemNewResponse {
-        problem_id: problem.id,
+        problem_id: problem_id,
     })
 }

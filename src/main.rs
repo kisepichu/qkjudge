@@ -1,4 +1,5 @@
 use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_rt;
 use actix_web::cookie::SameSite;
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};
@@ -8,7 +9,7 @@ use std::sync::*;
 
 mod routes;
 
-#[actix_web::main]
+#[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "actix_web=info");
     std::env::set_var("RUST_BACKTRACE", "1");
@@ -68,6 +69,10 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_problems)
             .service(routes::post_problem_new)
             .service(routes::get_problems_pid)
+            .service(routes::post_submit)
+            .service(routes::get_submissions_sid)
+            .service(routes::get_submissions)
+            .service(routes::get_tasks_tid)
     })
     .bind((address, 8080))?
     .run()

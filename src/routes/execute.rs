@@ -1,12 +1,13 @@
 use actix_identity::Identity;
 use actix_web::{get, post, web, HttpResponse, Responder};
-use futures_util::TryFutureExt;
+
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 #[derive(Deserialize)]
 struct ExecuteRequest {
     language: String,
+    language_version: String,
     source: String,
     input: String,
 }
@@ -42,11 +43,15 @@ async fn post_execute(req: web::Json<ExecuteRequest>, id: Identity) -> impl Resp
             "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
             "script": req.source,
             "language": req.language,
+            "versionIndex": req.language_version,
             "stdin": req.input
         }))
         .send()
         .await
-        .unwrap().json::<CompilerApiResponse>().await.unwrap();
+        .unwrap()
+        .json::<CompilerApiResponse>()
+        .await
+        .unwrap();
     HttpResponse::Ok().json(ExecuteResponse {
         output: res.output,
         status_code: res.statusCode,
