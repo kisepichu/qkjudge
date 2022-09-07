@@ -26,7 +26,7 @@
 
 ## db のスキーマのマイグレーションについて
 
-sqldef を使う。テーブル定義をそのまま書いた sql (例えば、[migrations/v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/v0.3.2.sql)) を用意して、以下のコマンドを実行すれば、今の構造との差分を自動で計算してくれる。
+sqldef を使う。テーブル定義をそのまま書いた sql (例えば、[migrations/v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/v0.3.2.sql)) を用意して、以下のコマンドを実行すれば、今の構造との差分を自動で計算してくれる。言語によらず使えるの好き
 
 ```bash
 mysqldef -uroot qkjudge < migrations/v0.3.2.sql
@@ -56,4 +56,4 @@ $
 ~~めも: v0.3.0 以降しか対応してないのでそれより前を渡さないように~~
 更新先が v1.0.0 以降しかできないように除外した
 
-ナンもシランのでいい方法あったら教えてください :person_bowing:
+ナンもシランのでもっといい方法あるか調べぶ

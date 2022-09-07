@@ -48,11 +48,11 @@ struct GetSubmissionsResponse {
 #[get("/submissions")]
 async fn get_submissions(
     id: Identity,
-    req: web::Query<SubmissionsQuery>,
+    query: web::Query<SubmissionsQuery>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let submissions_in_page = 3;
-    let page = req.page.unwrap_or(1);
+    let submissions_in_page = 10;
+    let page = query.page.unwrap_or(1);
     // ログインしていなかったら弾く
     // let username = id.identity().unwrap_or("".to_owned());
     // if username == "" {

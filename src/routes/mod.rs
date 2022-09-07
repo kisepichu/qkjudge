@@ -10,6 +10,7 @@ mod problems;
 mod problems_pid;
 mod signup;
 mod submissions;
+mod submissions_sid;
 mod submit;
 mod whoami;
 
@@ -26,5 +27,6 @@ pub use self::problems::get_problems;
 pub use self::problems_pid::get_problems_pid;
 pub use self::signup::post_signup;
 pub use self::submissions::get_submissions;
+pub use self::submissions_sid::get_submissions_sid;
 pub use self::submit::post_submit;
 pub use self::whoami::get_whoami;
