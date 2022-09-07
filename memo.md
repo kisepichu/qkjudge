@@ -53,4 +53,7 @@ $
 をして、(showcase 側のバージョンが v0.3.1 なことを確認して、)<br>
 生成された [migrations/out/v0.3.1_to_v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/out/v0.3.1_to_v0.3.2.sql) の内容を Showcase 側(https://phpmyadmin.trap.show/)から実行すればいい。
 
+~~めも: v0.3.0 以降しか対応してないのでそれより前を渡さないように~~
+更新先が v1.0.0 以降しかできないように除外した
+
 ナンもシランのでいい方法あったら教えてください :person_bowing:

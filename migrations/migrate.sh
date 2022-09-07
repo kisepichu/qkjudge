@@ -9,7 +9,9 @@ before=${a[1]}
 echo current version: $before
 
 after=$1
-if [ $before = $after ]; then
+if [ ${after:1:1} = "0" ]; then
+	echo target version $after too old
+elif [ $before = $after ]; then
 	echo no change
 elif [ -f $after.sql ]; then
 	diff="out/${before}_to_$after.sql"
