@@ -21,12 +21,36 @@
   - sqlx: db 操作するやつ sql 文をそのまま書く感じでわかりやすい！<br>
   手元でデータベース起動してないとビルドできなくて、そういう column があるかや型などチェックしてくれる NOT NULL つけ忘れると Option 型になるのでハマるの注意
   - reqwest: http クライアント Compiler API に接続するため
-- sqldef: db マイグレーションのツール 説明:
+- sqldef: db マイグレーションのツール テーブル定義の sql を書くだけでわかりやすい！ 詳しくは下
 
-テーブル定義の sql を書くだけでわかりやすい！
+
+## db のスキーマのマイグレーションについて
+
+sqldef を使う。テーブル定義をそのまま書いた sql (例えば、[migrations/v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/v0.3.2.sql)) を用意して、以下のコマンドを実行すれば、今の構造との差分を自動で計算してくれる。
 
 ```bash
-mysqldef -uroot qkjudge < migrations/v0.2.2.sql > "migrations/out/v0.2.1_to_v0.2.2.sql"
+mysqldef -uroot qkjudge < migrations/v0.3.2.sql
 ```
 
-こういう感じで実行すると実際に変更するときの sql が自動生成されるので、showcase の dev や master の環境の db にはそれを入力する(https://phpmyadmin.trap.show/ から。showcase のアプリのページからユーザー情報をみれる)
+- 問題点 1: バージョン管理の機能はない！(一つの sql ファイルを編集するべきかもしれないが、下の理由によりだるい)
+- 問題点 2: Showcase は `mysql` コマンドなどが直接叩けないので(https://phpmyadmin.trap.show/ から操作する)、当然 sqldef も動かせない！
+
+解決: <br>
+自分でバージョン管理する。`migrations` テーブルを作り、今のバージョンを保存しておく。<br>
+`mysqldef` は実行した差分の sql も標準出力するので、それを実行し、そのあとにバージョンを書き込む。<br>
+Showcase 上では、バージョンを確認し、手元で実行した差分 SQL 実行とバージョン設定をする。<br>
+<br>
+[↑ を楽にするスクリプト](https://github.com/tqkoh/qkjudge/blob/dev/migrations/migrate.sh) を使うと、v0.3.1 から v0.3.2 に変更する場合、手元で
+
+```bash
+$ cd migrations
+$ source migrate.sh v0.3.2
+current version: v0.3.1
+current version: v0.3.2
+$ 
+```
+
+をして、(showcase 側のバージョンが v0.3.1 なことを確認して、)<br>
+生成された [migrations/out/v0.3.1_to_v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/out/v0.3.1_to_v0.3.2.sql) の内容を Showcase 側(https://phpmyadmin.trap.show/)から実行すればいい。
+
+ナンもシランのでいい方法あったら教えてください :person_bowing:
