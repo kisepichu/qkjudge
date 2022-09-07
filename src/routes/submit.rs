@@ -74,6 +74,7 @@ async fn post_submit(
     req: web::Json<SubmitRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
+    let max_save_io_length = 1024;
     // ログインしていなかったら弾く
     // let username = id.identity().unwrap_or("".to_owned());
     // if username == "" {
@@ -81,7 +82,7 @@ async fn post_submit(
     // }
     let username = "tqk";
     // 問題のフォルダ problem_path を取得
-    let pool = pool_data.lock().unwrap();
+    let mut pool = pool_data.lock().unwrap();
     let problem_path = sqlx::query_as!(
         ProblemLocation,
         "SELECT * FROM problems WHERE id=?;",
@@ -134,6 +135,7 @@ async fn post_submit(
     .await
     .unwrap()
     .last_insert_id();
+    std::mem::drop(pool);
     println!("submission id: {}", submission_id);
 
     // ジャッジ
@@ -205,12 +207,29 @@ async fn post_submit(
 
             println!("{}", result);
 
+            let input_reduced = if input.len() <= max_save_io_length {
+                input
+            } else {
+                input[..max_save_io_length].to_string() + "..."
+            };
+            let output_reduced = if output.len() <= max_save_io_length {
+                output
+            } else {
+                output[..max_save_io_length].to_string() + "..."
+            };
+            let expected_reduced = if expected.len() <= max_save_io_length {
+                expected
+            } else {
+                expected[..max_save_io_length].to_string() + "..."
+            };
+
+            pool = pool_data.lock().unwrap();
             sqlx::query!(
                 "INSERT INTO tasks (submission_id, input, output, expected, result, memory, cpu_time) VALUES (?, ?, ?, ?, ?, ?, ?);",
                 submission_id,
-                input,
-                output,
-                expected,
+                input_reduced,
+                output_reduced,
+                expected_reduced,
                 result,
                 res.memory,
                 res.cpuTime,
@@ -218,6 +237,7 @@ async fn post_submit(
             .execute(&*pool)
             .await
             .unwrap();
+            std::mem::drop(pool);
 
             if !will_continue {
                 break;
@@ -226,6 +246,7 @@ async fn post_submit(
         }
     }
 
+    pool = pool_data.lock().unwrap();
     sqlx::query!(
         "UPDATE submissions SET result=? WHERE id=?;",
         whole_result,
