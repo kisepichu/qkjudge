@@ -1,6 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{get, post, web, HttpResponse, Responder};
-use futures_util::TryFutureExt;
+
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 

@@ -2,7 +2,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::fs::File;
-use std::io::prelude::*;
+
 use std::sync::*;
 
 #[derive(Deserialize)]

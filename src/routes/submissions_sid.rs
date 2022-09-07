@@ -1,10 +1,10 @@
 use actix_identity::Identity;
 use actix_web::cookie::time::PrimitiveDateTime;
 use actix_web::{get, web, HttpResponse, Responder};
-use chrono::{DateTime, Local, NaiveDateTime, Utc};
-use serde::{Deserialize, Serialize, Serializer};
+
+use serde::{Deserialize, Serialize};
 use std::sync::*;
-use std::time;
+
 extern crate yaml_rust;
 
 #[derive(Deserialize)]
@@ -38,7 +38,7 @@ struct GetSubmissionsSidResponse {
 
 #[get("/submissions/{submission_id}")]
 async fn get_submissions_sid(
-    id: Identity,
+    _id: Identity,
     path: web::Path<SubmissionsSidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
@@ -47,7 +47,7 @@ async fn get_submissions_sid(
     // if username == "" {
     //     return HttpResponse::Forbidden().body("not logged in".to_owned());
     // }
-    let username = "tqk";
+    let _username = "tqk";
 
     let pool = pool_data.lock().unwrap();
     let submission = sqlx::query_as!(

@@ -70,7 +70,7 @@ fn format_output(s: String) -> String {
 
 #[post("/submit")]
 async fn post_submit(
-    id: Identity,
+    _id: Identity,
     req: web::Json<SubmitRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {

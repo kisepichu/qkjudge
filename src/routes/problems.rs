@@ -28,7 +28,7 @@ struct GetProblemsResponse {
 
 #[get("/problems")]
 async fn get_problems(
-    id: Identity,
+    _id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
     let pool = pool_data.lock().unwrap();

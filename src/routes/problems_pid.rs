@@ -24,7 +24,7 @@ struct GetProblemsPidResponse {
 
 #[get("/problems/{problem_id}")]
 async fn get_problems_pid(
-    id: Identity,
+    _id: Identity,
     problem_id: web::Path<i32>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
