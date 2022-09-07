@@ -32,11 +32,6 @@ struct Problem {
     difficulty: i64,
 }
 
-#[derive(Serialize)]
-struct GetProblemsResponse {
-    problems: Vec<Problem>,
-}
-
 #[derive(Deserialize, Default)]
 #[allow(non_snake_case)]
 struct CompilerApiResponse {
@@ -89,7 +84,7 @@ async fn post_submit(
     let pool = pool_data.lock().unwrap();
     let problem_path = sqlx::query_as!(
         ProblemLocation,
-        "SELECT * FROM problems WHERE id=?",
+        "SELECT * FROM problems WHERE id=?;",
         req.problem_id
     )
     .fetch_one(&*pool)
@@ -127,10 +122,11 @@ async fn post_submit(
 
     // submission を db に insert
     let submission_id = sqlx::query!(
-        "INSERT INTO submissions (author, problem_id, testcase_num, language, source) VALUES (?, ?, ?, ?, ?);",
+        "INSERT INTO submissions (author, problem_id, testcase_num, result, language, source) VALUES (?, ?, ?, ?, ?, ?);",
         username,
         req.problem_id,
         testcase_num,
+        "WJ".to_string(),
         req.language,
         req.source
     )
@@ -141,6 +137,7 @@ async fn post_submit(
     println!("submission id: {}", submission_id);
 
     // ジャッジ
+    let mut whole_result = "AC".to_string();
     println!("testing {} testcases...", testcase_num);
     for input_path in inputs.iter() {
         // input ファイルが out 側にも存在するなら、実行してたしかめる
@@ -185,20 +182,24 @@ async fn post_submit(
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
+                whole_result = "KK".to_string();
                 will_continue = false;
             } else if res.statusCode == 200 {
                 let cpu_time = res.cpuTime.parse::<f64>().unwrap();
                 let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
                 if timelimit < cpu_time {
                     result = "TLE".to_string();
+                    whole_result = "TLE".to_string();
                     will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();
+                    whole_result = "WA".to_string();
                     will_continue = false;
                 }
             } else {
                 println!("{}", res.statusCode);
                 result = "UK".to_string();
+                whole_result = "UK".to_string();
                 will_continue = false;
             }
 
@@ -224,5 +225,15 @@ async fn post_submit(
             println!("ok");
         }
     }
+
+    sqlx::query!(
+        "UPDATE submissions SET result=? WHERE id=?;",
+        whole_result,
+        submission_id
+    )
+    .execute(&*pool)
+    .await
+    .unwrap();
+
     HttpResponse::NoContent().finish()
 }

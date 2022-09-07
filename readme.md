@@ -2,9 +2,10 @@
 
 休憩ジャッジ
 
-競プロ問題公開したい
+競プロ問題公開したい！
 
-予定: https://tqk.blue/apis/
+コンパイルや実行部分はいったん外部アプリに任せる
 
-実行部分は(セキュリティ的に)むずそうすぎたので外部アプリ [compiler api](https://www.jdoodle.com/compiler-api/) 使おうかな いつか自分でチャレンジ
+[API 予定](https://tqk.blue/apis/)
 
+[開発メモ](https://github.com/tqkoh/qkjudge/blob/dev/memo.md)
