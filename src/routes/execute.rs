@@ -7,6 +7,7 @@ use serde_json::json;
 #[derive(Deserialize)]
 struct ExecuteRequest {
     language: String,
+    language_version: String,
     source: String,
     input: String,
 }
@@ -42,6 +43,7 @@ async fn post_execute(req: web::Json<ExecuteRequest>, id: Identity) -> impl Resp
             "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
             "script": req.source,
             "language": req.language,
+            "versionIndex": req.language_version,
             "stdin": req.input
         }))
         .send()

@@ -21,6 +21,7 @@ struct Submission {
     testcase_num: i32,
     result: String,
     language: String,
+    language_version: String,
     source: String,
 }
 
@@ -34,6 +35,7 @@ struct GetSubmissionsSidResponse {
     progress_num: i32,
     result: String,
     language: String,
+    language_version: String,
     source: String,
 }
 
@@ -68,6 +70,7 @@ async fn get_submissions_sid(
         testcase_num: 0,
         result: "".to_string(),
         language: "".to_string(),
+        language_version: "".to_string(),
         source: "".to_string(),
     });
 
@@ -95,6 +98,7 @@ async fn get_submissions_sid(
         progress_num: progress_num,
         result: submission.result,
         language: submission.language,
+        language_version: submission.language_version,
         source: submission.source,
     })
 }

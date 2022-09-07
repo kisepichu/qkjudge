@@ -1,4 +1,5 @@
 use actix_identity::{CookieIdentityPolicy, IdentityService};
+use actix_rt;
 use actix_web::cookie::SameSite;
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};

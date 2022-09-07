@@ -15,6 +15,7 @@ extern crate yaml_rust;
 struct SubmitRequest {
     problem_id: i32,
     language: String,
+    language_version: String,
     source: String,
 }
 
@@ -108,7 +109,8 @@ async fn post_submit(
     let info = &docs[0];
 
     // テストケースの個数やパスを取得
-    let inputs = files(problems_root.clone() + &problem_path + "/in").unwrap();
+    let mut inputs = files(problems_root.clone() + &problem_path + "/in").unwrap();
+    inputs.sort();
     let mut testcase_num = 0;
     for input_path in inputs.iter() {
         let output_long = problems_root.clone()
@@ -123,12 +125,13 @@ async fn post_submit(
 
     // submission を db に insert
     let submission_id = sqlx::query!(
-        "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?);",
+        "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language, language_version, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?);",
         username,
         req.problem_id,
         testcase_num,
         "WJ".to_string(),
         req.language,
+        req.language_version,
         req.source
     )
     .execute(&*pool)
@@ -172,6 +175,7 @@ async fn post_submit(
                     "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
                     "script": req.source,
                     "language": req.language,
+                    "versionIndex": req.language_version,
                     "stdin": input
                 }))
                 .send()
