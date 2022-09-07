@@ -1,17 +1,31 @@
 use actix_identity::Identity;
+use actix_web::cookie::time::PrimitiveDateTime;
 use actix_web::{get, web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
+use chrono::{DateTime, Local, NaiveDateTime, Utc};
+use serde::{Deserialize, Serialize, Serializer};
 use std::sync::*;
+use std::time;
 extern crate yaml_rust;
 
 #[derive(Deserialize)]
 struct SubmissionsQuery {
-    submissions_page: Option<i32>,
+    page: Option<i32>,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Deserialize)]
 struct SubmissionSummary {
     id: i32,
+    date: PrimitiveDateTime,
+    author: String,
+    problem_id: i32,
+    result: String,
+    language: String,
+}
+
+#[derive(Serialize)]
+struct SubmissionSummaryInResponse {
+    id: i32,
+    date: String,
     author: String,
     problem_id: i32,
     result: String,
@@ -28,7 +42,7 @@ struct Problem {
 
 #[derive(Serialize)]
 struct GetSubmissionsResponse {
-    submissions: Vec<SubmissionSummary>,
+    submissions: Vec<SubmissionSummaryInResponse>,
 }
 
 #[get("/submissions")]
@@ -38,7 +52,7 @@ async fn get_submissions(
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
     let submissions_in_page = 3;
-    let page = req.submissions_page.unwrap_or(1);
+    let page = req.page.unwrap_or(1);
     // ログインしていなかったら弾く
     // let username = id.identity().unwrap_or("".to_owned());
     // if username == "" {
@@ -53,7 +67,7 @@ async fn get_submissions(
     let pool = pool_data.lock().unwrap();
     let submissions = sqlx::query_as!(
         SubmissionSummary,
-        "SELECT id, author, problem_id, result, language FROM submissions LIMIT ?, ?;",
+        "SELECT id, date, author, problem_id, result, language FROM submissions LIMIT ?, ?;",
         submissions_in_page * (page - 1),
         submissions_in_page
     )
@@ -62,6 +76,16 @@ async fn get_submissions(
     .unwrap_or(vec![]);
 
     HttpResponse::Ok().json(GetSubmissionsResponse {
-        submissions: submissions,
+        submissions: submissions
+            .iter()
+            .map(|s| SubmissionSummaryInResponse {
+                id: s.id.clone(),
+                date: s.date.to_string(),
+                author: s.author.clone(),
+                problem_id: s.problem_id.clone(),
+                result: s.result.clone(),
+                language: s.language.clone(),
+            })
+            .collect::<Vec<SubmissionSummaryInResponse>>(),
     })
 }

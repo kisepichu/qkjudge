@@ -122,7 +122,7 @@ async fn post_submit(
 
     // submission を db に insert
     let submission_id = sqlx::query!(
-        "INSERT INTO submissions (author, problem_id, testcase_num, result, language, source) VALUES (?, ?, ?, ?, ?, ?);",
+        "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?);",
         username,
         req.problem_id,
         testcase_num,
