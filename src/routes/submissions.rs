@@ -55,13 +55,6 @@ async fn get_submissions(
 ) -> impl Responder {
     let submissions_in_page = 10;
     let page = query.page.unwrap_or(1);
-    // ログインしていなかったら弾く
-    // let username = id.identity().unwrap_or("".to_owned());
-    // if username == "" {
-    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
-    // }
-    let _username = "tqk";
-
     if page <= 0 {
         return HttpResponse::BadRequest().body("submissions_page must be positive");
     }

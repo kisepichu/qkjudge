@@ -71,17 +71,16 @@ fn format_output(s: String) -> String {
 
 #[post("/submit")]
 async fn post_submit(
-    _id: Identity,
+    id: Identity,
     req: web::Json<SubmitRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
     let max_save_io_length = 1024;
     // ログインしていなかったら弾く
-    // let username = id.identity().unwrap_or("".to_owned());
-    // if username == "" {
-    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
-    // }
-    let username = "tqk";
+    let username = id.identity().unwrap_or("".to_owned());
+    if username == "" {
+        return HttpResponse::Forbidden().body("not logged in".to_owned());
+    }
     // 問題のフォルダ problem_path を取得
     let mut pool = pool_data.lock().unwrap();
     let problem_path = sqlx::query_as!(
@@ -162,7 +161,7 @@ async fn post_submit(
             expected_file
                 .read_to_string(&mut expected_raw)
                 .expect("something went wrong reading the file");
-            let expected = format_output(expected_raw);
+            let expected = format_output(expected_raw.clone());
 
             let mut result = "AC".to_string();
             let mut will_continue = true;
@@ -184,7 +183,8 @@ async fn post_submit(
                 .json::<CompilerApiResponse>()
                 .await
                 .unwrap_or(Default::default());
-            let output = format_output(res.output);
+            let output_raw = res.output;
+            let output = format_output(output_raw.clone());
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
@@ -216,15 +216,15 @@ async fn post_submit(
             } else {
                 input[..max_save_io_length].to_string() + "..."
             };
-            let output_reduced = if output.len() <= max_save_io_length {
-                output
+            let output_reduced = if output_raw.len() <= max_save_io_length {
+                output_raw
             } else {
-                output[..max_save_io_length].to_string() + "..."
+                output_raw[..max_save_io_length].to_string() + "..."
             };
-            let expected_reduced = if expected.len() <= max_save_io_length {
-                expected
+            let expected_reduced = if expected_raw.len() <= max_save_io_length {
+                expected_raw
             } else {
-                expected[..max_save_io_length].to_string() + "..."
+                expected_raw[..max_save_io_length].to_string() + "..."
             };
 
             pool = pool_data.lock().unwrap();

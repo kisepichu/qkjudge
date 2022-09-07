@@ -12,6 +12,7 @@ mod signup;
 mod submissions;
 mod submissions_sid;
 mod submit;
+mod tasks_tid;
 mod whoami;
 
 pub use self::execute::get_execute;
@@ -29,4 +30,5 @@ pub use self::signup::post_signup;
 pub use self::submissions::get_submissions;
 pub use self::submissions_sid::get_submissions_sid;
 pub use self::submit::post_submit;
+pub use self::tasks_tid::get_tasks_tid;
 pub use self::whoami::get_whoami;

@@ -12,6 +12,11 @@ struct SubmissionsSidPath {
     submission_id: i32,
 }
 
+#[derive(Deserialize, Serialize)]
+struct TaskId {
+    id: i32,
+}
+
 #[derive(Serialize, Deserialize)]
 struct Submission {
     id: i32,
@@ -32,7 +37,7 @@ struct GetSubmissionsSidResponse {
     author: String,
     problem_id: i32,
     testcase_num: i32,
-    progress_num: i32,
+    task_ids: Vec<TaskId>,
     result: String,
     language: String,
     language_version: String,
@@ -45,14 +50,6 @@ async fn get_submissions_sid(
     path: web::Path<SubmissionsSidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    // println!("get_submissions_pid: 0");
-    // ログインしていなかったら弾く
-    // let username = id.identity().unwrap_or("".to_owned());
-    // if username == "" {
-    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
-    // }
-    let _username = "tqk";
-
     let pool = pool_data.lock().unwrap();
     // println!("get_submissions_pid: 1");
     let submission = sqlx::query_as!(
@@ -79,14 +76,14 @@ async fn get_submissions_sid(
     }
 
     // println!("get_submissions_pid: 2");
-    let progress_num = sqlx::query!(
-        r#"SELECT COUNT(*) as value FROM tasks WHERE submission_id=?"#,
+    let task_ids = sqlx::query_as!(
+        TaskId,
+        "SELECT id FROM tasks WHERE submission_id=?",
         submission.id
     )
-    .fetch_one(&*pool)
+    .fetch_all(&*pool)
     .await
-    .unwrap()
-    .value as i32;
+    .unwrap();
     // println!("get_submissions_pid: 3");
 
     HttpResponse::Ok().json(GetSubmissionsSidResponse {
@@ -95,7 +92,7 @@ async fn get_submissions_sid(
         author: submission.author,
         problem_id: submission.problem_id,
         testcase_num: submission.testcase_num,
-        progress_num: progress_num,
+        task_ids: task_ids,
         result: submission.result,
         language: submission.language,
         language_version: submission.language_version,
