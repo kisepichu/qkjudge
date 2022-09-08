@@ -2,6 +2,7 @@
 
 ## gps
 
+純粋~~培養~~ 脱却部<br>
 手元と dev と master がある
 - http://localhost:8080
   - https 通信うまくできず..ので手元ではログインせずに試してる
@@ -21,12 +22,12 @@
   - sqlx: db 操作するやつ sql 文をそのまま書く感じでわかりやすい！<br>
   手元でデータベース起動してないとビルドできなくて、そういう column があるかや型などチェックしてくれる NOT NULL つけ忘れると Option 型になるのでハマるの注意
   - reqwest: http クライアント Compiler API に接続するため
-- sqldef: ~~db マイグレーションのツール テーブル定義の sql を書くだけでわかりやすい！ 詳しくは下~~
+- sqldef: db マイグレーションのツール テーブル定義の sql を書くだけでわかりやすい！ 詳しくは下 sqlx CLI に乗り換える鴨
 
 
 ## db のスキーマのマイグレーションについて
 
-sqlx の CLI があってマイグレーション機能あるのシランかった...こんど試す<br>
+(rust の) sqlx の CLI があってマイグレーション機能あるのシランかった...こんど試す<br>
 以下今やってるやつ<br>
 <br>
 sqldef を使う。テーブル定義をそのまま書いた sql (例えば、[migrations/v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/v0.3.2.sql)) を用意して、以下のコマンドを実行すれば、今の構造との差分を自動で計算してくれる。言語によらず使えるの好き
@@ -54,7 +55,7 @@ $
 ```
 
 をして、(showcase 側のバージョンが v0.3.1 なことを確認して、)<br>
-生成された [migrations/out/v0.3.1_to_v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/out/v0.3.1_to_v0.3.2.sql) の内容を Showcase 側(https://phpmyadmin.trap.show/)から実行すればいい。
+生成された [migrations/out/v0.3.1_to_v0.3.2.sql](https://github.com/tqkoh/qkjudge/blob/dev/migrations/out/v0.3.1_to_v0.3.2.sql) の内容を Showcase 側(https://phpmyadmin.trap.show/) から実行すればいい。
 
 ~~めも: v0.3.0 以降しか対応してないのでそれより前を渡さないように~~
 更新先が v1.0.0 以降しかできないように除外した
