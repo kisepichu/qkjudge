@@ -44,7 +44,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(Data::new(pool_data.clone()))
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .add(("Access-Control-Allow-Origin", "https://tqk.blue"))
+                    .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
                     .add(("Access-Control-Allow-Credentials", "true"))
                     .add(("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS"))
                     .add(("Access-Control-Allow-Headers", "Content-Type")),

@@ -204,8 +204,8 @@ async fn post_submit(
                 }
             } else {
                 println!("{}", res.statusCode);
-                result = "UK".to_string();
-                whole_result = "UK".to_string();
+                result = "UE".to_string();
+                whole_result = "UE".to_string();
                 will_continue = false;
             }
 
