@@ -6,7 +6,7 @@
 
 コンパイルや実行部分はいったん外部アプリに任せる
 
-サイト(WIP): [QK Judge](https://tqk.blue/qkjudge)
+サイト(WIP): [QK Judge](https://judge.tqk.blue)
 
 ここはサーバーのリポジトリです クライアント: [qkjudge-UI](https://github.com/tqkoh/qkjudge-UI)
 
