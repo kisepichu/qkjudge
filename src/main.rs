@@ -56,7 +56,9 @@ async fn main() -> std::io::Result<()> {
                     .secure(true),
             ))
             .wrap(middleware::Logger::default())
-            .service(routes::options_any_handler)
+            .service(routes::options_0_handler)
+            .service(routes::options_1_handler)
+            .service(routes::options_2_handler)
             .service(routes::get_index_handler)
             .service(routes::post_signup_handler)
             .service(routes::post_login_handler)
