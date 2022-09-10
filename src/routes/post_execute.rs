@@ -31,10 +31,10 @@ struct ExecuteResponse {
 
 #[post("/execute")]
 async fn post_execute_handler(req: web::Json<ExecuteRequest>, id: Identity) -> impl Responder {
-    let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
-        return HttpResponse::Forbidden().body("not logged in".to_owned());
-    }
+    // let username = id.identity().unwrap_or("".to_owned());
+    // if username == "" {
+    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
+    // }
     let client = reqwest::Client::new();
     let res = client
         .post("https://api.jdoodle.com/v1/execute")
@@ -51,7 +51,20 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, id: Identity) -> i
         .unwrap()
         .json::<CompilerApiResponse>()
         .await
-        .unwrap();
+        .unwrap_or(CompilerApiResponse {
+            output: "".to_string(),
+            statusCode: -1,
+            memory: "-1".to_string(),
+            cpuTime: "-1".to_string()
+        });
+    if res.statusCode < 0 {
+        return HttpResponse::BadRequest().json(ExecuteResponse {
+            output: res.output,
+            status_code: res.statusCode,
+            memory: res.memory,
+            cpu_time: res.cpuTime,
+        });
+    }
     HttpResponse::Ok().json(ExecuteResponse {
         output: res.output,
         status_code: res.statusCode,
