@@ -4,6 +4,7 @@ use actix_web::{get, web, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 use std::sync::*;
+use tokio::sync::Mutex;
 
 extern crate yaml_rust;
 
@@ -57,7 +58,7 @@ async fn get_submissions_handler(
         return HttpResponse::BadRequest().body("submissions_page must be positive");
     }
 
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     let submissions = sqlx::query_as!(
         SubmissionSummary,
         "SELECT id, date, author, problem_id, result, language_id FROM submissions LIMIT ?, ?;",

@@ -3,6 +3,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use bcrypt::verify;
 use serde::Deserialize;
 use std::sync::*;
+use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 struct LoginRequest {
@@ -22,7 +23,7 @@ async fn post_login_handler(
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     id: Identity,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     let user = sqlx::query_as!(User, "SELECT * FROM users WHERE username = ?", req.username)
         .fetch_one(&*pool)
         .await

@@ -10,6 +10,6 @@
 
 ここはサーバーのリポジトリです クライアント: [qkjudge-UI](https://github.com/tqkoh/qkjudge-UI)
 
-[API 予定](https://tqk.blue/apis/)
+[API 予定](https://apis.tqk.blue/)
 
 [開発メモ](https://github.com/tqkoh/qkjudge/blob/dev/memo.md)
