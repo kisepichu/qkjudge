@@ -1,5 +1,5 @@
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_rt;
+use actix_rt::{self, Arbiter};
 use actix_web::cookie::SameSite;
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};
@@ -38,10 +38,14 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
 
     let pool_data = Arc::new(Mutex::new(pool));
+
+    let arbiter = Arbiter::new();
+    let arbiter_data = Arc::new(Mutex::new(arbiter));
     let private_key = rand::thread_rng().gen::<[u8; 32]>();
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool_data.clone()))
+            .app_data(Data::new(arbiter_data.clone()))
             .wrap(
                 middleware::DefaultHeaders::new()
                     .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
