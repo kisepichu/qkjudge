@@ -115,6 +115,14 @@ async fn judge(
             let mut will_continue = true;
 
             let client = reqwest::Client::new();
+            println!("req: {}", &json!({
+                "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
+                "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
+                "script": req.source,
+                "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
+                "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
+                "stdin": input
+            }).to_string());
             let res = client
                 .post("https://api.jdoodle.com/v1/execute")
                 .json(&json!({
@@ -130,7 +138,7 @@ async fn judge(
                 .unwrap()
                 .json::<CompilerApiResponse>()
                 .await
-                .unwrap_or(Default::default());
+                .unwrap();
             let output_raw = res.output;
             let output = format_output(output_raw.clone());
 
@@ -229,6 +237,7 @@ async fn post_submit_handler(
     if username == "" {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
+    // let username = "tqk";
     // 問題のフォルダ problem_path を取得
 
     let arbiter = arbiter_data.lock().await;
