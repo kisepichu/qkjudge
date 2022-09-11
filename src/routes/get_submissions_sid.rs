@@ -16,8 +16,9 @@ struct SubmissionsSidPath {
 }
 
 #[derive(Deserialize, Serialize)]
-struct TaskId {
+struct TaskSummary {
     id: i32,
+    result: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -39,7 +40,7 @@ struct GetSubmissionsSidResponse {
     author: String,
     problem_id: i32,
     testcase_num: i32,
-    task_ids: Vec<TaskId>,
+    tasks: Vec<TaskSummary>,
     result: String,
     language_id: i32,
     source: String,
@@ -76,9 +77,9 @@ async fn get_submissions_sid_handler(
     }
 
     // println!("get_submissions_pid: 2");
-    let task_ids = sqlx::query_as!(
-        TaskId,
-        "SELECT id FROM tasks WHERE submission_id=?",
+    let tasks = sqlx::query_as!(
+        TaskSummary,
+        "SELECT id, result FROM tasks WHERE submission_id=?",
         submission.id
     )
     .fetch_all(&*pool)
@@ -92,7 +93,7 @@ async fn get_submissions_sid_handler(
         author: submission.author,
         problem_id: submission.problem_id,
         testcase_num: submission.testcase_num,
-        task_ids: task_ids,
+        tasks: tasks,
         result: submission.result,
         language_id: submission.language_id,
         source: submission.source,
