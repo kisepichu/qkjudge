@@ -7,6 +7,7 @@ use rand::Rng;
 use std::env;
 use std::sync::*;
 
+mod languages;
 mod routes;
 
 #[actix_rt::main]
@@ -18,7 +19,6 @@ async fn main() -> std::io::Result<()> {
         Ok(val) => val,
         Err(_e) => "localhost".to_string(),
     };
-
     let database = env::var("MARIADB_DATABASE").expect("MARIADB_DATABASE is not set");
     let user = env::var("MARIADB_USERNAME").expect("MARIADB_USERNAME is not set");
     let password = env::var("MARIADB_PASSWORD").expect("MARIADB_PASSWORD is not set");

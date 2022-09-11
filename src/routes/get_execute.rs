@@ -1,5 +1,5 @@
 use actix_identity::Identity;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;

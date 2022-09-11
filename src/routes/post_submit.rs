@@ -9,13 +9,14 @@ use std::io::prelude::*;
 use std::path::Path;
 use std::sync::*;
 use yaml_rust::YamlLoader;
+
+use crate::languages::LANGUAGES;
 extern crate yaml_rust;
 
 #[derive(Deserialize)]
 struct SubmitRequest {
     problem_id: i32,
-    language: String,
-    language_version: String,
+    language_id: i32,
     source: String,
 }
 
@@ -124,13 +125,12 @@ async fn post_submit_handler(
 
     // submission を db に insert
     let submission_id = sqlx::query!(
-        "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language, language_version, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?, ?);",
+        "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language_id, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?);",
         username,
         req.problem_id,
         testcase_num,
         "WJ".to_string(),
-        req.language,
-        req.language_version,
+        req.language_id,
         req.source
     )
     .execute(&*pool)
@@ -173,8 +173,8 @@ async fn post_submit_handler(
                     "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
                     "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
                     "script": req.source,
-                    "language": req.language,
-                    "versionIndex": req.language_version,
+                    "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
+                    "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
                     "stdin": input
                 }))
                 .send()

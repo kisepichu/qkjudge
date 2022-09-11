@@ -5,6 +5,8 @@ use actix_web::{get, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use std::sync::*;
 
+use crate::languages::LANGUAGES;
+
 extern crate yaml_rust;
 
 #[derive(Deserialize)]
@@ -25,8 +27,7 @@ struct Submission {
     problem_id: i32,
     testcase_num: i32,
     result: String,
-    language: String,
-    language_version: String,
+    language_id: i32,
     source: String,
 }
 
@@ -66,8 +67,7 @@ async fn get_submissions_sid_handler(
         problem_id: 0,
         testcase_num: 0,
         result: "".to_string(),
-        language: "".to_string(),
-        language_version: "".to_string(),
+        language_id: -1,
         source: "".to_string(),
     });
 
@@ -94,8 +94,12 @@ async fn get_submissions_sid_handler(
         testcase_num: submission.testcase_num,
         task_ids: task_ids,
         result: submission.result,
-        language: submission.language,
-        language_version: submission.language_version,
+        language: LANGUAGES[submission.language_id as usize]
+            .language_code
+            .to_string(),
+        language_version: LANGUAGES[submission.language_id as usize]
+            .version_index
+            .to_string(),
         source: submission.source,
     })
 }
