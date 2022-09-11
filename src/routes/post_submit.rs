@@ -20,6 +20,11 @@ struct SubmitRequest {
     source: String,
 }
 
+#[derive(Serialize)]
+struct SubmitResponse {
+    id: i32,
+}
+
 #[derive(Default, Deserialize)]
 struct ProblemLocation {
     id: i32,
@@ -260,5 +265,7 @@ async fn post_submit_handler(
     .await
     .unwrap();
 
-    HttpResponse::NoContent().finish()
+    HttpResponse::Ok().json(SubmitResponse {
+        id: submission_id as i32,
+    })
 }
