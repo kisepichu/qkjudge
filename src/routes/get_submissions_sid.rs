@@ -40,8 +40,7 @@ struct GetSubmissionsSidResponse {
     testcase_num: i32,
     task_ids: Vec<TaskId>,
     result: String,
-    language: String,
-    language_version: String,
+    language_id: i32,
     source: String,
 }
 
@@ -94,12 +93,7 @@ async fn get_submissions_sid_handler(
         testcase_num: submission.testcase_num,
         task_ids: task_ids,
         result: submission.result,
-        language: LANGUAGES[submission.language_id as usize]
-            .language_code
-            .to_string(),
-        language_version: LANGUAGES[submission.language_id as usize]
-            .version_index
-            .to_string(),
+        language_id: submission.language_id,
         source: submission.source,
     })
 }
