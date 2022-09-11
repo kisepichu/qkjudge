@@ -19,8 +19,7 @@ struct SubmissionSummary {
     author: String,
     problem_id: i32,
     result: String,
-    language: String,
-    language_version: String,
+    language_id: i32,
 }
 
 #[derive(Serialize)]
@@ -30,8 +29,7 @@ struct SubmissionSummaryInResponse {
     author: String,
     problem_id: i32,
     result: String,
-    language: String,
-    language_version: String,
+    language_id: i32,
 }
 
 #[derive(Serialize)]
@@ -62,7 +60,7 @@ async fn get_submissions_handler(
     let pool = pool_data.lock().unwrap();
     let submissions = sqlx::query_as!(
         SubmissionSummary,
-        "SELECT id, date, author, problem_id, result, language, language_version FROM submissions LIMIT ?, ?;",
+        "SELECT id, date, author, problem_id, result, language_id FROM submissions LIMIT ?, ?;",
         submissions_in_page * (page - 1),
         submissions_in_page
     )
@@ -79,8 +77,7 @@ async fn get_submissions_handler(
                 author: s.author.clone(),
                 problem_id: s.problem_id.clone(),
                 result: s.result.clone(),
-                language: s.language.clone(),
-                language_version: s.language_version.clone(),
+                language_id: s.language_id,
             })
             .collect::<Vec<SubmissionSummaryInResponse>>(),
     })

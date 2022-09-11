@@ -17,8 +17,8 @@ struct Problem {
 }
 
 #[derive(Serialize)]
-struct ProblemNewResponse {
-    problem_id: i32,
+struct PostProblemsResponse {
+    id: i32,
 }
 
 #[post("/problems")]
@@ -65,7 +65,5 @@ async fn post_problems_handler(
         .unwrap()
         .last_insert_id() as i32;
 
-    HttpResponse::Created().json(ProblemNewResponse {
-        problem_id: problem_id,
-    })
+    HttpResponse::Created().json(PostProblemsResponse { id: problem_id })
 }

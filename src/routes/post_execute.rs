@@ -1,13 +1,14 @@
 use actix_identity::Identity;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
+use crate::languages::LANGUAGES;
+
 #[derive(Deserialize)]
 struct ExecuteRequest {
-    language: String,
-    language_version: String,
+    language_id: i32,
     source: String,
     input: String,
 }
@@ -30,7 +31,7 @@ struct ExecuteResponse {
 }
 
 #[post("/execute")]
-async fn post_execute_handler(req: web::Json<ExecuteRequest>, id: Identity) -> impl Responder {
+async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> impl Responder {
     // let username = id.identity().unwrap_or("".to_owned());
     // if username == "" {
     //     return HttpResponse::Forbidden().body("not logged in".to_owned());
@@ -42,8 +43,8 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, id: Identity) -> i
             "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
             "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
             "script": req.source,
-            "language": req.language,
-            "versionIndex": req.language_version,
+            "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
+            "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
             "stdin": req.input
         }))
         .send()

@@ -15,7 +15,7 @@ struct ProblemLocation {
 
 #[derive(Serialize)]
 struct GetProblemsPidResponse {
-    problem_id: i32,
+    id: i32,
     title: String,
     author: String,
     difficulty: i64,
@@ -39,13 +39,22 @@ async fn get_problems_pid_handler(
     .unwrap_or(Default::default())
     .path;
 
+    if (problem_path == "") {
+        return HttpResponse::NotFound().finish();
+    }
+
     let info_path = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
         .replace("\r", "")
         + &problem_path
         + "/problem.yaml";
     println!("{:?}", info_path);
-    let mut info_file = File::open(info_path).expect("file not found");
+    let mut info_file = match File::open(info_path) {
+        Ok(f) => f,
+        Err(_e) => {
+            return HttpResponse::InternalServerError().body("problemm configure file not found")
+        }
+    };
     let mut info_raw = String::new();
     info_file
         .read_to_string(&mut info_raw)
@@ -58,14 +67,22 @@ async fn get_problems_pid_handler(
         .replace("\r", "")
         + &problem_path
         + "/statement.md";
-    let mut statement_file = File::open(statement_path).expect("file not found");
+    let mut statement_file = match File::open(statement_path) {
+        Ok(f) => f,
+        Err(_e) => {
+            return HttpResponse::InternalServerError().body("problemm statement file not found")
+        }
+    };
     let mut statement_raw = String::new();
-    statement_file
-        .read_to_string(&mut statement_raw)
-        .expect("something went wrong reading the file");
+    match statement_file.read_to_string(&mut statement_raw) {
+        Ok(r) => r,
+        Err(_e) => {
+            return HttpResponse::InternalServerError().body("problemm configure file not found")
+        }
+    };
 
     HttpResponse::Ok().json(GetProblemsPidResponse {
-        problem_id: problem_id.into_inner(),
+        id: problem_id.into_inner(),
         title: info["title"].as_str().unwrap().to_string(),
         author: info["author"].as_str().unwrap().to_string(),
         difficulty: info["difficulty"].as_i64().unwrap(),
