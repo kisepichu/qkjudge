@@ -4,6 +4,7 @@ use sqlx::Row;
 use std::fs::File;
 
 use std::sync::*;
+use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 struct ProblemNewRequest {
@@ -26,7 +27,7 @@ async fn post_problems_handler(
     req: web::Json<ProblemNewRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     let count = sqlx::query!(
         r#"SELECT COUNT(*) as value FROM problems WHERE path=?"#,
         req.path

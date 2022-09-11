@@ -4,6 +4,7 @@ use actix_web::{get, web, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 use std::sync::*;
+use tokio::sync::Mutex;
 
 extern crate yaml_rust;
 
@@ -30,7 +31,7 @@ async fn get_tasks_tid_handler(
     path: web::Path<TasksTidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     // println!("get_submissions_pid: 1");
     let task = sqlx::query_as!(Task, "SELECT * FROM tasks WHERE id=?", path.task_id)
         .fetch_one(&*pool)

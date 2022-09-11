@@ -246,6 +246,7 @@ async fn post_submit_handler(
         .path;
     }
 
+    // println!("submit 1")
     // 問題の情報 info を取得
     let problems_root = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
@@ -260,6 +261,7 @@ async fn post_submit_handler(
     let docs = YamlLoader::load_from_str(&info_raw).unwrap();
     let info = &docs[0];
 
+    // println!("submit 2")
     // テストケースの個数やパスを取得
     let mut inputs = files(problems_root.clone() + &problem_path + "/in").unwrap();
     inputs.sort();
@@ -275,6 +277,7 @@ async fn post_submit_handler(
         }
     }
 
+    // println!("submit 3")
     // submission を db に insert
     let mut submission_id: i32 = 0;
     {
@@ -295,6 +298,7 @@ async fn post_submit_handler(
     }
     println!("submission id: {}", submission_id);
 
+    // println!("submit 4")
     // ジャッジ
     // let mut whole_result = "AC".to_string();
     // println!("testing {} testcases...", testcase_num);
@@ -418,6 +422,7 @@ async fn post_submit_handler(
         submission_id as i32,
     ));
 
+    // println!("submit 5")
     HttpResponse::Ok().json(SubmitResponse {
         id: submission_id as i32,
     })

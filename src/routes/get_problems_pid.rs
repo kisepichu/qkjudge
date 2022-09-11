@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::prelude::*;
 use std::sync::*;
+use tokio::sync::Mutex;
 use yaml_rust::YamlLoader;
 extern crate yaml_rust;
 
@@ -28,7 +29,7 @@ async fn get_problems_pid_handler(
     problem_id: web::Path<i32>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     let problem_path = sqlx::query_as!(
         ProblemLocation,
         "SELECT * FROM problems WHERE id=?",

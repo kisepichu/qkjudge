@@ -4,6 +4,7 @@ use actix_web::{get, web, HttpResponse, Responder};
 
 use serde::{Deserialize, Serialize};
 use std::sync::*;
+use tokio::sync::Mutex;
 
 use crate::languages::LANGUAGES;
 
@@ -50,7 +51,7 @@ async fn get_submissions_sid_handler(
     path: web::Path<SubmissionsSidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     // println!("get_submissions_pid: 1");
     let submission = sqlx::query_as!(
         Submission,

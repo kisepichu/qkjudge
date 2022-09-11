@@ -2,6 +2,7 @@ use actix_web::{post, web, HttpResponse, Responder};
 use bcrypt::{hash, DEFAULT_COST};
 use serde::Deserialize;
 use std::sync::*;
+use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 struct LoginRequest {
@@ -14,7 +15,7 @@ async fn post_signup_handler(
     req: web::Json<LoginRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().unwrap();
+    let pool = pool_data.lock().await;
     if req.username == "" || req.password == "" {
         return HttpResponse::BadRequest().body("username or password cannot be empty");
     }
