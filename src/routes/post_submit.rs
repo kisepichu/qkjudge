@@ -46,8 +46,8 @@ struct Problem {
 struct CompilerApiResponse {
     output: String,
     statusCode: i32,
-    memory: String,
-    cpuTime: String,
+    memory: Option<String>,
+    cpuTime: Option<String>,
 }
 
 fn files<P: AsRef<Path>>(path: P) -> io::Result<Vec<String>> {
@@ -115,7 +115,7 @@ async fn judge(
             let mut will_continue = true;
 
             let client = reqwest::Client::new();
-            println!("req: {}", &json!({
+            println!("request: {}", &json!({
                 "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
                 "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
                 "script": req.source,
@@ -141,13 +141,19 @@ async fn judge(
                 .unwrap();
             let output_raw = res.output;
             let output = format_output(output_raw.clone());
+            let cpuTime = res.cpuTime.unwrap_or("-1".to_string());
+            let memory = res.memory.unwrap_or("-1".to_string());
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
                 whole_result = "KK".to_string();
                 will_continue = false;
+            } else if cpuTime == "-1" {
+                result = "CE".to_string();
+                whole_result = "CE".to_string();
+                will_continue = false;
             } else if res.statusCode == 200 {
-                let cpu_time = res.cpuTime.parse::<f64>().unwrap();
+                let cpu_time = cpuTime.parse::<f64>().unwrap();
                 let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
                 if timelimit < cpu_time {
                     result = "TLE".to_string();
@@ -191,8 +197,8 @@ async fn judge(
                 output_reduced,
                 expected_reduced,
                 result,
-                res.memory,
-                res.cpuTime,
+                memory,
+                cpuTime,
             )
             .execute(&*pool)
             .await
