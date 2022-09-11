@@ -15,7 +15,7 @@ struct ProblemLocation {
 
 #[derive(Serialize)]
 struct GetProblemsPidResponse {
-    problem_id: i32,
+    id: i32,
     title: String,
     author: String,
     difficulty: i64,
@@ -82,7 +82,7 @@ async fn get_problems_pid_handler(
     };
 
     HttpResponse::Ok().json(GetProblemsPidResponse {
-        problem_id: problem_id.into_inner(),
+        id: problem_id.into_inner(),
         title: info["title"].as_str().unwrap().to_string(),
         author: info["author"].as_str().unwrap().to_string(),
         difficulty: info["difficulty"].as_i64().unwrap(),

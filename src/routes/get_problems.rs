@@ -15,7 +15,7 @@ struct ProblemLocation {
 
 #[derive(Serialize)]
 struct Problem {
-    problem_id: i32,
+    id: i32,
     title: String,
     author: String,
     difficulty: i64,
@@ -52,7 +52,7 @@ async fn get_problems_handler(
         let doc = &docs[0];
 
         ret.push(Problem {
-            problem_id: problem.id,
+            id: problem.id,
             title: doc["title"].as_str().unwrap().to_string(),
             author: doc["author"].as_str().unwrap().to_string(),
             difficulty: doc["difficulty"].as_i64().unwrap(),
