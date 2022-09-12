@@ -150,8 +150,8 @@ async fn judge(
                 will_continue = false;
             } else if res.statusCode == 200 {
                 let cpu_time_f = cpu_time.parse::<f64>().unwrap();
-                let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || timelimit < cpu_time_f {
+                let time_limit = info["time_limit"].clone().as_f64().unwrap_or(2.0);
+                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
                     output_raw = "(TLE)".to_string();
@@ -371,8 +371,8 @@ async fn post_submit_handler(
     //             will_continue = false;
     //         } else if res.statusCode == 200 {
     //             let cpu_time = res.cpuTime.parse::<f64>().unwrap();
-    //             let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-    //             if timelimit < cpu_time {
+    //             let time_limit = info["time_limit"].clone().as_f64().unwrap_or(2.0);
+    //             if time_limit < cpu_time {
     //                 result = "TLE".to_string();
     //                 whole_result = "TLE".to_string();
     //                 will_continue = false;

@@ -15,12 +15,15 @@ struct ProblemLocation {
 }
 
 #[derive(Serialize)]
+#[allow(non_snake_case)]
 struct GetProblemsPidResponse {
     id: i32,
     title: String,
     author: String,
     difficulty: i64,
     statement: String,
+    time_limit: String,
+    memory_limit: String,
 }
 
 #[get("/problems/{problem_id}")]
@@ -88,5 +91,7 @@ async fn get_problems_pid_handler(
         author: info["author"].as_str().unwrap().to_string(),
         difficulty: info["difficulty"].as_i64().unwrap(),
         statement: statement_raw,
+        time_limit: info["time_limit"].as_str().unwrap().to_string(),
+        memory_limit: info["memory_limit"].as_str().unwrap().to_string(),
     })
 }
