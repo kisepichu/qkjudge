@@ -57,26 +57,27 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
     let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
     let memory = res.memory.unwrap_or("-1".to_string());
     let mut result = "OK".to_string();
+    let mut output = res.output.clone();
 
     if res.statusCode == 429 {
         result = "KK".to_string();
-    } else if cpu_time == "-1" {
-        result = "CE".to_string();
     } else if res.statusCode == 200 {
         if res.output.starts_with("\n\n\n JDoodle - Timeout") {
             result = "TLE".to_string();
+            output = "(TLE)".to_string()
         } else if res.output.ends_with("JDoodle - output Limit reached.\n") {
             result = "OLE".to_string();
+            output = "(OLE)".to_string();
         } else if cpu_time == "-1" {
             result = "CE".to_string();
         } else {
-            result = "OK".to_string();
+            // result = "OK".to_string();
         }
     } else {
         result = format!("UE {}", res.statusCode);
     }
     HttpResponse::Ok().json(ExecuteResponse {
-        output: res.output,
+        output: output,
         status_code: res.statusCode,
         result: result,
         memory: memory,

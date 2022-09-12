@@ -139,7 +139,7 @@ async fn judge(
                 .json::<CompilerApiResponse>()
                 .await
                 .unwrap();
-            let output_raw = res.output;
+            let mut output_raw = res.output;
             let output = format_output(output_raw.clone());
             let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
             let memory = res.memory.unwrap_or("-1".to_string());
@@ -154,10 +154,12 @@ async fn judge(
                 if output_raw.starts_with("\n\n\n JDoodle - Timeout") || timelimit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
+                    output_raw = "(TLE)".to_string();
                     will_continue = false;
                 } else if output_raw.ends_with("JDoodle - output Limit reached.\n") {
                     result = "OLE".to_string();
                     whole_result = "OLE".to_string();
+                    output_raw = "(OLE)".to_string();
                     will_continue = false;
                 } else if cpu_time == "-1" {
                     result = "CE".to_string();
