@@ -61,7 +61,7 @@ async fn get_submissions_handler(
     let pool = pool_data.lock().await;
     let submissions = sqlx::query_as!(
         SubmissionSummary,
-        "SELECT id, date, author, problem_id, result, language_id FROM submissions LIMIT ?, ?;",
+        "SELECT id, date, author, problem_id, result, language_id FROM submissions ORDER BY id DESC LIMIT ?, ?;",
         submissions_in_page * (page - 1),
         submissions_in_page
     )
