@@ -52,40 +52,53 @@ async fn get_submissions_sid_handler(
     path: web::Path<SubmissionsSidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    let pool = pool_data.lock().await;
     // println!("get_submissions_pid: 1");
-    let submission = sqlx::query_as!(
-        Submission,
-        "SELECT * FROM submissions WHERE id=?",
-        path.submission_id
-    )
-    .fetch_one(&*pool)
-    .await
-    .unwrap_or(Submission {
-        id: 0,
-        date: PrimitiveDateTime::MIN,
-        author: "".to_string(),
-        problem_id: 0,
-        testcase_num: 0,
-        result: "".to_string(),
-        language_id: -1,
-        source: "".to_string(),
-    });
+    let submission: Submission;
+    {
+        let pool = pool_data.lock().await;
+        submission = sqlx::query_as!(
+            Submission,
+            "SELECT * FROM submissions WHERE id=?",
+            path.submission_id
+        )
+        .fetch_one(&*pool)
+        .await
+        .unwrap_or(Submission {
+            id: 0,
+            date: PrimitiveDateTime::MIN,
+            author: "".to_string(),
+            problem_id: 0,
+            testcase_num: 0,
+            result: "".to_string(),
+            language_id: -1,
+            source: "".to_string(),
+        });
+    }
 
     if submission.id == 0 {
         return HttpResponse::NotFound().finish();
     }
 
-    // println!("get_submissions_pid: 2");
-    let tasks = sqlx::query_as!(
-        TaskSummary,
-        "SELECT id, result FROM tasks WHERE submission_id=?",
-        submission.id
-    )
-    .fetch_all(&*pool)
-    .await
-    .unwrap();
-    // println!("get_submissions_pid: 3");
+    let tasks: Vec<TaskSummary>;
+    {
+        let pool = pool_data.lock().await;
+
+        tasks = sqlx::query_as!(
+            TaskSummary,
+            "SELECT id, result FROM tasks WHERE submission_id=?",
+            submission.id
+        )
+        .fetch_all(&*pool)
+        .await
+        .unwrap();
+    }
+    let progress_num = tasks.len();
+
+    let result = if (submission.result == "WJ") {
+        format!("WJ {}/{}", progress_num, submission.testcase_num)
+    } else {
+        submission.result
+    };
 
     HttpResponse::Ok().json(GetSubmissionsSidResponse {
         id: submission.id,
@@ -94,7 +107,7 @@ async fn get_submissions_sid_handler(
         problem_id: submission.problem_id,
         testcase_num: submission.testcase_num,
         tasks: tasks,
-        result: submission.result,
+        result: result,
         language_id: submission.language_id,
         source: submission.source,
     })

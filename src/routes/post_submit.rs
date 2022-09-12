@@ -139,25 +139,31 @@ async fn judge(
                 .json::<CompilerApiResponse>()
                 .await
                 .unwrap();
-            let output_raw = res.output;
+            let mut output_raw = res.output;
             let output = format_output(output_raw.clone());
-            let cpuTime = res.cpuTime.unwrap_or("-1".to_string());
+            let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
             let memory = res.memory.unwrap_or("-1".to_string());
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
                 whole_result = "KK".to_string();
                 will_continue = false;
-            } else if cpuTime == "-1" {
-                result = "CE".to_string();
-                whole_result = "CE".to_string();
-                will_continue = false;
             } else if res.statusCode == 200 {
-                let cpu_time = cpuTime.parse::<f64>().unwrap();
+                let cpu_time_f = cpu_time.parse::<f64>().unwrap();
                 let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-                if timelimit < cpu_time {
+                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || timelimit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
+                    output_raw = "(TLE)".to_string();
+                    will_continue = false;
+                } else if output_raw.ends_with("JDoodle - output Limit reached.\n") {
+                    result = "OLE".to_string();
+                    whole_result = "OLE".to_string();
+                    output_raw = "(OLE)".to_string();
+                    will_continue = false;
+                } else if cpu_time == "-1" {
+                    result = "CE".to_string();
+                    whole_result = "CE".to_string();
                     will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();
@@ -165,9 +171,8 @@ async fn judge(
                     will_continue = false;
                 }
             } else {
-                println!("{}", res.statusCode);
-                result = "UE".to_string();
-                whole_result = "UE".to_string();
+                result = format!("UE {}", res.statusCode);
+                whole_result = format!("UE {}", res.statusCode);
                 will_continue = false;
             }
 
@@ -198,7 +203,7 @@ async fn judge(
                 expected_reduced,
                 result,
                 memory,
-                cpuTime,
+                cpu_time,
             )
             .execute(&*pool)
             .await
