@@ -43,6 +43,7 @@ struct Problem {
 
 #[derive(Serialize)]
 struct GetSubmissionsResponse {
+    pages_number: i32,
     submissions: Vec<SubmissionSummaryInResponse>,
 }
 
@@ -69,7 +70,15 @@ async fn get_submissions_handler(
     .await
     .unwrap_or(vec![]);
 
+    let submissions_number = sqlx::query!("SELECT COUNT(*) as value FROM submissions;")
+        .fetch_one(&*pool)
+        .await
+        .unwrap()
+        .value as i32;
+    let pages_number = (submissions_number + submissions_in_page - 1) / submissions_in_page;
+
     HttpResponse::Ok().json(GetSubmissionsResponse {
+        pages_number: pages_number,
         submissions: submissions
             .iter()
             .map(|s| SubmissionSummaryInResponse {
