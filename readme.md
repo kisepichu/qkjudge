@@ -8,7 +8,7 @@
 
 サイト(WIP): [QK Judge](https://judge.tqk.blue)
 
-ここはサーバーのリポジトリです クライアント: [qkjudge-UI](https://github.com/tqkoh/qkjudge-UI)
+ここはサーバー クライアント: [qkjudge-UI](https://github.com/tqkoh/qkjudge-UI) 問題: [qkjudge-problems](https://github.com/tqkoh/qkjudge-problems)
 
 [API 予定](https://apis.tqk.blue/)
 
