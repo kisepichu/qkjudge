@@ -80,7 +80,6 @@ async fn get_submissions_sid_handler(
     }
 
     let tasks: Vec<TaskSummary>;
-    let progress_num: i32;
     {
         let pool = pool_data.lock().await;
 
@@ -92,16 +91,8 @@ async fn get_submissions_sid_handler(
         .fetch_all(&*pool)
         .await
         .unwrap();
-
-        progress_num = sqlx::query!(
-            "SELECT COUNT(*) as value FROM tasks WHERE submission_id=?",
-            submission.id
-        )
-        .fetch_one(&*pool)
-        .await
-        .unwrap()
-        .value as i32;
     }
+    let progress_num = tasks.len();
 
     let result = if (submission.result == "WJ") {
         format!("WJ {}/{}", progress_num, submission.testcase_num)
