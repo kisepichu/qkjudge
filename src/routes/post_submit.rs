@@ -160,7 +160,7 @@ async fn judge(
                     .unwrap_or("-1")
                     .parse::<f64>()
                     .unwrap_or(2.0);
-                let memory_limit = info["memory_limit"].clone().as_i64().unwrap_or(1024);
+                let memory_limit = info["memory_limit"].clone().as_i64().unwrap_or(1024) * 1000;
                 if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
