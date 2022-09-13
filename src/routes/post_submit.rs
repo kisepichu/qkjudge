@@ -123,7 +123,7 @@ async fn judge(
                 "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
                 "stdin": input
             }).to_string());
-            let res = client
+            let res_or_err = client
                 .post("https://api.jdoodle.com/v1/execute")
                 .json(&json!({
                     "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
@@ -137,8 +137,18 @@ async fn judge(
                 .await
                 .unwrap()
                 .json::<CompilerApiResponse>()
-                .await
-                .unwrap();
+                .await;
+
+            let res = match res_or_err {
+                Ok(res) => res,
+                Err(_err) => CompilerApiResponse {
+                    output: "".to_string(),
+                    statusCode: 0,
+                    memory: Some("".to_string()),
+                    cpuTime: Some("".to_string()),
+                },
+            };
+
             let mut output_raw = res.output;
             let output = format_output(output_raw.clone());
             let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
@@ -264,6 +274,11 @@ async fn post_submit_handler(
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
     // let username = "tqk";
+
+    if req.source == "" {
+        return HttpResponse::BadRequest().json(SubmitResponse { id: -1 });
+    }
+
     // 問題のフォルダ problem_path を取得
 
     let arbiter = arbiter_data.lock().await;
