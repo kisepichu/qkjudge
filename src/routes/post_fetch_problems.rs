@@ -1,7 +1,9 @@
 use std::{fs::File, io::Read, sync::Arc};
 
 use actix_identity::Identity;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
+use hmac::{digest::MacError, Hmac, Mac};
+use sha2::Sha256;
 use sqlx::{query, query_as};
 use std::collections::HashMap;
 use tokio::sync::Mutex;
@@ -30,17 +32,46 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
     Ok(docs[0].to_owned())
 }
 
+type HmacSha256 = Hmac<Sha256>;
+
 #[post("/fetch/problems")]
 async fn post_fetch_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
+    req: HttpRequest,
 ) -> impl Responder {
-    let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
-        return HttpResponse::Forbidden().body("not logged in".to_owned());
-    } else if username != "admin" {
-        return HttpResponse::Forbidden().body("not permitted".to_owned());
+    let sign_github = match req.headers().get("X-Hub-Signature-256") {
+        Some(s) => s.to_str().expect("to_str failed").to_string(),
+        None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    };
+
+    let mut mac = HmacSha256::new_from_slice(
+        std::env::var("HMAC_KEY")
+            .expect("env HMAC_KEY not set")
+            .as_bytes(),
+    )
+    .expect("hmac error");
+
+    mac.update(sign_github.as_bytes());
+
+    let expected = std::env::var("GITHUB_WEBHOOK_TOKEN")
+        .expect("env GITHUB_WEBHOOK_TOKEN not set")
+        .as_bytes()
+        .to_owned();
+    // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
+    match mac.verify_slice(&expected) {
+        Ok(()) => (),
+        Err(MacError) => return HttpResponse::Forbidden().body("verify failed"),
     }
+
+    // {
+    //     let username = id.identity().unwrap_or("".to_owned());
+    //     if username == "" {
+    //         return HttpResponse::Forbidden().body("not logged in".to_owned());
+    //     } else if username != "admin" {
+    //         return HttpResponse::Forbidden().body("not permitted".to_owned());
+    //     }
+    // }
 
     let status = std::process::Command::new("git")
         .args(&[
