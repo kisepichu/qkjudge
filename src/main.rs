@@ -80,6 +80,7 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_submissions_sid_handler)
             .service(routes::get_submissions_handler)
             .service(routes::get_tasks_tid_handler)
+            .service(routes::post_fetch_problems_handler)
     })
     .bind((address, 8080))?
     .run()
