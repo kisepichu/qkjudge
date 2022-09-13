@@ -6,8 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 use tokio::sync::Mutex;
 
-
-
 extern crate yaml_rust;
 
 #[derive(Deserialize)]
@@ -61,7 +59,7 @@ async fn get_submissions_sid_handler(
         submission = sqlx::query_as!(
             Submission,
             r#"SELECT submissions.id, date, submissions.author, problem_id, title AS problem_title, testcase_num, result, language_id, source
-            FROM submissions INNER JOIN problems ON submissions.id=problems.id WHERE submissions.id=?"#,
+            FROM submissions INNER JOIN problems ON submissions.problem_id=problems.id WHERE submissions.id=?"#,
             path.submission_id
         )
         .fetch_one(&*pool)
