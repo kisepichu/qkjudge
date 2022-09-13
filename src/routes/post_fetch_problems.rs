@@ -42,21 +42,18 @@ async fn post_fetch_problems_handler(
         return HttpResponse::Forbidden().body("not permitted".to_owned());
     }
 
-    let output = match std::process::Command::new("git")
+    let status = std::process::Command::new("git")
         .args(&[
             "-C",
             &std::env::var("PROBLEMS_REPO_ROOT").unwrap_or("problems".to_string()),
             "pull",
         ])
-        .output()
-    {
-        Ok(c) => c,
-        Err(_e) => {
-            println!("failed to start pull");
-            return HttpResponse::InternalServerError().body("post_fetch_problems_handler: 0");
-        }
-    };
-    println!("{:?}", String::from_utf8_lossy(&output.stdout));
+        .status()
+        .expect("failed to execute git pull");
+
+    if !status.success() {
+        return HttpResponse::InternalServerError().body("git pull failed");
+    }
 
     let config_path = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
