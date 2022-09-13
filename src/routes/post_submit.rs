@@ -1,6 +1,7 @@
 use actix_identity::Identity;
 use actix_rt::Arbiter;
 use actix_web::{post, web, HttpResponse, Responder};
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fs::File;
@@ -123,7 +124,7 @@ async fn judge(
                 "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
                 "stdin": input
             }).to_string());
-            let res = client
+            let res_or_err = client
                 .post("https://api.jdoodle.com/v1/execute")
                 .json(&json!({
                     "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
@@ -137,12 +138,31 @@ async fn judge(
                 .await
                 .unwrap()
                 .json::<CompilerApiResponse>()
-                .await
-                .unwrap();
+                .await;
+
+            let res = match res_or_err {
+                Ok(res) => res,
+                Err(err) => CompilerApiResponse {
+                    output: "".to_string(),
+                    statusCode: err
+                        .status()
+                        .unwrap_or(StatusCode::from_u16(400).unwrap())
+                        .to_string()
+                        .parse::<i32>()
+                        .unwrap_or(400),
+                    memory: Some("-1".to_string()),
+                    cpuTime: Some("-1".to_string()),
+                },
+            };
+
             let mut output_raw = res.output;
             let output = format_output(output_raw.clone());
             let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
-            let memory = res.memory.unwrap_or("-1".to_string());
+            let memory = res
+                .memory
+                .unwrap_or("1024".to_string())
+                .parse::<i64>()
+                .unwrap_or(1024);
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
@@ -150,8 +170,14 @@ async fn judge(
                 will_continue = false;
             } else if res.statusCode == 200 {
                 let cpu_time_f = cpu_time.parse::<f64>().unwrap();
-                let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || timelimit < cpu_time_f {
+                let time_limit = info["time_limit"]
+                    .clone()
+                    .as_str()
+                    .unwrap_or("-1")
+                    .parse::<f64>()
+                    .unwrap_or(2.0);
+                let memory_limit = info["memory_limit"].clone().as_i64().unwrap_or(1024) * 1000;
+                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
                     output_raw = "(TLE)".to_string();
@@ -164,6 +190,11 @@ async fn judge(
                 } else if cpu_time == "-1" {
                     result = "CE".to_string();
                     whole_result = "CE".to_string();
+                    will_continue = false;
+                } else if memory_limit < memory {
+                    result = "MLE".to_string();
+                    whole_result = "MLE".to_string();
+                    output_raw = "(MLE)".to_string();
                     will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();
@@ -249,6 +280,11 @@ async fn post_submit_handler(
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
     // let username = "tqk";
+
+    if req.source == "" {
+        return HttpResponse::BadRequest().json(SubmitResponse { id: -1 });
+    }
+
     // 問題のフォルダ problem_path を取得
 
     let arbiter = arbiter_data.lock().await;
@@ -280,6 +316,29 @@ async fn post_submit_handler(
         .expect("something went wrong reading the file");
     let docs = YamlLoader::load_from_str(&info_raw).unwrap();
     let info = &docs[0];
+
+    if info["title"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("title is not defined correctly in problem.yaml");
+    }
+    if info["author"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("author is not defined correctly in problem.yaml");
+    }
+    if info["difficulty"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("difficulty is not defined correctly in problem.yaml");
+    }
+    if info["time_limit"].as_str().is_none()
+        || info["time_limit"].as_str().unwrap().parse::<f64>().is_err()
+    {
+        return HttpResponse::InternalServerError()
+            .body("time_limit is not defined correctly in problem.yaml");
+    }
+    if info["memory_limit"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("memory_limit is not defined correctly in problem.yaml");
+    }
 
     // println!("submit 2")
     // テストケースの個数やパスを取得
@@ -371,8 +430,8 @@ async fn post_submit_handler(
     //             will_continue = false;
     //         } else if res.statusCode == 200 {
     //             let cpu_time = res.cpuTime.parse::<f64>().unwrap();
-    //             let timelimit = info["timelimit"].clone().as_f64().unwrap_or(2.0);
-    //             if timelimit < cpu_time {
+    //             let time_limit = info["time_limit"].clone().as_f64().unwrap_or(2.0);
+    //             if time_limit < cpu_time {
     //                 result = "TLE".to_string();
     //                 whole_result = "TLE".to_string();
     //                 will_continue = false;

@@ -1,6 +1,7 @@
 use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse, Responder};
 
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -37,8 +38,18 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
     // if username == "" {
     //     return HttpResponse::Forbidden().body("not logged in".to_owned());
     // }
+    if req.source == "" {
+        return HttpResponse::BadRequest().json(ExecuteResponse {
+            output: "".to_string(),
+            status_code: 400,
+            result: "".to_string(),
+            memory: "-1".to_string(),
+            cpu_time: "-1".to_string(),
+        });
+    }
+
     let client = reqwest::Client::new();
-    let res = client
+    let res_or_err = client
         .post("https://api.jdoodle.com/v1/execute")
         .json(&json!({
             "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
@@ -52,8 +63,21 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         .await
         .unwrap()
         .json::<CompilerApiResponse>()
-        .await
-        .unwrap();
+        .await;
+    let res = match res_or_err {
+        Ok(res) => res,
+        Err(err) => CompilerApiResponse {
+            output: "".to_string(),
+            statusCode: err
+                .status()
+                .unwrap_or(StatusCode::from_u16(400).unwrap())
+                .to_string()
+                .parse::<i32>()
+                .unwrap_or(400),
+            memory: Some("-1".to_string()),
+            cpuTime: Some("-1".to_string()),
+        },
+    };
     let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
     let memory = res.memory.unwrap_or("-1".to_string());
     let mut result = "OK".to_string();

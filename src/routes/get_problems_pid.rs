@@ -21,6 +21,8 @@ struct GetProblemsPidResponse {
     author: String,
     difficulty: i64,
     statement: String,
+    time_limit: String,
+    memory_limit: i64,
 }
 
 #[get("/problems/{problem_id}")]
@@ -63,6 +65,29 @@ async fn get_problems_pid_handler(
     let docs = YamlLoader::load_from_str(&info_raw).unwrap();
     let info = &docs[0];
 
+    if info["title"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("title is not defined correctly in problem.yaml");
+    }
+    if info["author"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("author is not defined correctly in problem.yaml");
+    }
+    if info["difficulty"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("difficulty is not defined correctly in problem.yaml");
+    }
+    if info["time_limit"].as_str().is_none()
+        || info["time_limit"].as_str().unwrap().parse::<f64>().is_err()
+    {
+        return HttpResponse::InternalServerError()
+            .body("time_limit is not defined correctly in problem.yaml");
+    }
+    if info["memory_limit"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("memory_limit is not defined correctly in problem.yaml");
+    }
+
     let statement_path = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
         .replace("\r", "")
@@ -88,5 +113,7 @@ async fn get_problems_pid_handler(
         author: info["author"].as_str().unwrap().to_string(),
         difficulty: info["difficulty"].as_i64().unwrap(),
         statement: statement_raw,
+        time_limit: info["time_limit"].as_str().unwrap().to_string(),
+        memory_limit: info["memory_limit"].as_i64().unwrap(),
     })
 }
