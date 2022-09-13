@@ -41,7 +41,7 @@ async fn post_fetch_problems_handler(
     req: HttpRequest,
 ) -> impl Responder {
     let sign_github = match req.headers().get("X-Hub-Signature-256") {
-        Some(s) => s.to_str().expect("to_str failed").to_string(),
+        Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
         None => return HttpResponse::Forbidden().body("signature is not set in header"),
     };
 
@@ -52,18 +52,18 @@ async fn post_fetch_problems_handler(
     )
     .expect("hmac error");
 
-    mac.update(sign_github[7..].as_bytes());
-    println!("sign_github length: {}", sign_github[7..].to_string().len());
+    println!("sign_github length: {}", sign_github.len());
 
     let expected = std::env::var("GITHUB_WEBHOOK_TOKEN")
         .expect("env GITHUB_WEBHOOK_TOKEN not set")
         .as_bytes()
         .to_owned();
     println!("expected length: {}", expected.len());
+    mac.update(&expected);
     // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
-    match mac.verify_slice(&expected) {
-        Ok(()) => (),
-        Err(MacError) => return HttpResponse::Forbidden().body("verify failed"),
+    match mac.verify_slice(sign_github) {
+        Ok(_k) => (),
+        Err(_e) => return HttpResponse::Forbidden().body("verify failed"),
     }
 
     // {
