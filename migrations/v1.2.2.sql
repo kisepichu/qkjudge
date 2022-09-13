@@ -1,0 +1,50 @@
+CREATE TABLE `problems` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+	`title` varchar(100) NOT NULL,
+	`author` varchar(100) NOT NULL,
+	`difficulty` int(11) NOT NULL,
+	`time_limit` varchar(100) NOT NULL,
+	`memory_limit` int(11) NOT NULL,
+  `path` varchar(100) NOT NULL,
+	`hidden` boolean NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `users` (
+  `username` varchar(30) NOT NULL,
+  `hashed_pass` varchar(200) NOT NULL,
+  PRIMARY KEY (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `submissions` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`date` datetime NOT NULL,
+	`author` varchar(30) NOT NULL,
+	`problem_id` int(11) NOT NULL,
+	`testcase_num` int(11) NOT NULL,
+	`result` varchar(10) NOT NULL,
+	`language_id` int(11) NOT NULL,
+	`source` text NOT NULL,
+	CONSTRAINT fk_author FOREIGN KEY (author) REFERENCES users(username),
+	CONSTRAINT fk_problem_id FOREIGN KEY (problem_id) REFERENCES problems(id),
+	PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `tasks` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`submission_id` int(11) NOT NULL,
+	`input` text NOT NULL,
+	`output` text NOT NULL,
+	`expected` text NOT NULL,
+	`result` varchar(10) NOT NULL,
+	`memory` varchar(10) NOT NULL,
+	`cpu_time` varchar(10) NOT NULL,
+	CONSTRAINT fk_submission_id FOREIGN KEY (submission_id) REFERENCES submissions(id),
+	PRIMARY KEY (`id`)
+);
+
+CREATE TABLE `migrations` (
+	`id` int(11) NOT NULL AUTO_INCREMENT,
+	`version` varchar(10) NOT NULL,
+	PRIMARY KEY (`id`)
+);
