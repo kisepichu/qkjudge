@@ -47,6 +47,8 @@ async fn post_fetch_problems_handler(
             "-C",
             &std::env::var("PROBLEMS_REPO_ROOT").unwrap_or("problems".to_string()),
             "pull",
+            "origin",
+            "dist:dist",
         ])
         .status()
         .expect("failed to execute git pull");
