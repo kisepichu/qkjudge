@@ -52,7 +52,7 @@ async fn post_fetch_problems_handler(
     )
     .expect("hmac error");
 
-    mac.update(sign_github.as_bytes());
+    mac.update(sign_github[7..].as_bytes());
 
     let expected = std::env::var("GITHUB_WEBHOOK_TOKEN")
         .expect("env GITHUB_WEBHOOK_TOKEN not set")
