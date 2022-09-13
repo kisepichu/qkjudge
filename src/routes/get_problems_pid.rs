@@ -5,13 +5,19 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::sync::*;
 use tokio::sync::Mutex;
-use yaml_rust::YamlLoader;
+
 extern crate yaml_rust;
 
 #[derive(Default, Deserialize)]
-struct ProblemLocation {
+struct Problem {
     id: i32,
+    title: String,
+    author: String,
+    difficulty: i32,
+    time_limit: String,
+    memory_limit: i32,
     path: String,
+    visible: i8,
 }
 
 #[derive(Serialize)]
@@ -19,10 +25,10 @@ struct GetProblemsPidResponse {
     id: i32,
     title: String,
     author: String,
-    difficulty: i64,
+    difficulty: i32,
     statement: String,
     time_limit: String,
-    memory_limit: i64,
+    memory_limit: i32,
 }
 
 #[get("/problems/{problem_id}")]
@@ -32,66 +38,27 @@ async fn get_problems_pid_handler(
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
     let pool = pool_data.lock().await;
-    let problem_path = sqlx::query_as!(
-        ProblemLocation,
-        "SELECT * FROM problems WHERE id=?",
+    let problem = sqlx::query_as!(
+        Problem,
+        "SELECT id, title, author, difficulty, time_limit, memory_limit, path, visible FROM problems WHERE id=?",
         problem_id.to_string()
     )
     .fetch_one(&*pool)
     .await
-    .unwrap_or(Default::default())
-    .path;
+    .unwrap_or(Default::default());
 
-    if (problem_path == "") {
+    if problem.visible == 0 {
+        return HttpResponse::Forbidden().body("hidden");
+    }
+
+    if problem.path == "" {
         return HttpResponse::NotFound().finish();
-    }
-
-    let info_path = std::env::var("PROBLEMS_ROOT")
-        .expect("PROBLEMS_ROOT not set")
-        .replace("\r", "")
-        + &problem_path
-        + "/problem.yaml";
-    println!("{:?}", info_path);
-    let mut info_file = match File::open(info_path) {
-        Ok(f) => f,
-        Err(_e) => {
-            return HttpResponse::InternalServerError().body("problemm configure file not found")
-        }
-    };
-    let mut info_raw = String::new();
-    info_file
-        .read_to_string(&mut info_raw)
-        .expect("something went wrong reading the file");
-    let docs = YamlLoader::load_from_str(&info_raw).unwrap();
-    let info = &docs[0];
-
-    if info["title"].as_str().is_none() {
-        return HttpResponse::InternalServerError()
-            .body("title is not defined correctly in problem.yaml");
-    }
-    if info["author"].as_str().is_none() {
-        return HttpResponse::InternalServerError()
-            .body("author is not defined correctly in problem.yaml");
-    }
-    if info["difficulty"].as_i64().is_none() {
-        return HttpResponse::InternalServerError()
-            .body("difficulty is not defined correctly in problem.yaml");
-    }
-    if info["time_limit"].as_str().is_none()
-        || info["time_limit"].as_str().unwrap().parse::<f64>().is_err()
-    {
-        return HttpResponse::InternalServerError()
-            .body("time_limit is not defined correctly in problem.yaml");
-    }
-    if info["memory_limit"].as_i64().is_none() {
-        return HttpResponse::InternalServerError()
-            .body("memory_limit is not defined correctly in problem.yaml");
     }
 
     let statement_path = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
         .replace("\r", "")
-        + &problem_path
+        + &problem.path
         + "/statement.md";
     let mut statement_file = match File::open(statement_path) {
         Ok(f) => f,
@@ -109,11 +76,11 @@ async fn get_problems_pid_handler(
 
     HttpResponse::Ok().json(GetProblemsPidResponse {
         id: problem_id.into_inner(),
-        title: info["title"].as_str().unwrap().to_string(),
-        author: info["author"].as_str().unwrap().to_string(),
-        difficulty: info["difficulty"].as_i64().unwrap(),
+        title: problem.title,
+        author: problem.author,
+        difficulty: problem.difficulty,
         statement: statement_raw,
-        time_limit: info["time_limit"].as_str().unwrap().to_string(),
-        memory_limit: info["memory_limit"].as_i64().unwrap(),
+        time_limit: problem.time_limit,
+        memory_limit: problem.memory_limit,
     })
 }

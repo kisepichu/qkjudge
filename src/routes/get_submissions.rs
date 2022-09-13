@@ -19,6 +19,7 @@ struct SubmissionSummary {
     date: PrimitiveDateTime,
     author: String,
     problem_id: i32,
+    problem_title: String,
     result: String,
     language_id: i32,
 }
@@ -29,6 +30,7 @@ struct SubmissionSummaryInResponse {
     date: String,
     author: String,
     problem_id: i32,
+    problem_title: String,
     result: String,
     language_id: i32,
 }
@@ -62,7 +64,9 @@ async fn get_submissions_handler(
     let pool = pool_data.lock().await;
     let submissions = sqlx::query_as!(
         SubmissionSummary,
-        "SELECT id, date, author, problem_id, result, language_id FROM submissions ORDER BY id DESC LIMIT ?, ?;",
+        r#"SELECT submissions.id, date, submissions.author, problem_id, title AS problem_title, result, language_id
+        FROM submissions INNER JOIN problems ON submissions.problem_id=problems.id
+        ORDER BY id DESC LIMIT ?, ?;"#,
         submissions_in_page * (page - 1),
         submissions_in_page
     )
@@ -86,6 +90,7 @@ async fn get_submissions_handler(
                 date: s.date.to_string(),
                 author: s.author.clone(),
                 problem_id: s.problem_id.clone(),
+                problem_title: s.problem_title.clone(),
                 result: s.result.clone(),
                 language_id: s.language_id,
             })

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 use tokio::sync::Mutex;
 
-use crate::languages::LANGUAGES;
+
 
 extern crate yaml_rust;
 
@@ -27,6 +27,7 @@ struct Submission {
     date: PrimitiveDateTime,
     author: String,
     problem_id: i32,
+    problem_title: String,
     testcase_num: i32,
     result: String,
     language_id: i32,
@@ -39,6 +40,7 @@ struct GetSubmissionsSidResponse {
     date: String,
     author: String,
     problem_id: i32,
+    problem_title: String,
     testcase_num: i32,
     tasks: Vec<TaskSummary>,
     result: String,
@@ -58,7 +60,8 @@ async fn get_submissions_sid_handler(
         let pool = pool_data.lock().await;
         submission = sqlx::query_as!(
             Submission,
-            "SELECT * FROM submissions WHERE id=?",
+            r#"SELECT submissions.id, date, submissions.author, problem_id, title AS problem_title, testcase_num, result, language_id, source
+            FROM submissions INNER JOIN problems ON submissions.id=problems.id WHERE submissions.id=?"#,
             path.submission_id
         )
         .fetch_one(&*pool)
@@ -68,6 +71,7 @@ async fn get_submissions_sid_handler(
             date: PrimitiveDateTime::MIN,
             author: "".to_string(),
             problem_id: 0,
+            problem_title: "".to_string(),
             testcase_num: 0,
             result: "".to_string(),
             language_id: -1,
@@ -94,7 +98,7 @@ async fn get_submissions_sid_handler(
     }
     let progress_num = tasks.len();
 
-    let result = if (submission.result == "WJ") {
+    let result = if submission.result == "WJ" {
         format!("WJ {}/{}", progress_num, submission.testcase_num)
     } else {
         submission.result
@@ -105,6 +109,7 @@ async fn get_submissions_sid_handler(
         date: submission.date.to_string(),
         author: submission.author,
         problem_id: submission.problem_id,
+        problem_title: submission.problem_title,
         testcase_num: submission.testcase_num,
         tasks: tasks,
         result: result,
