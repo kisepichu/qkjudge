@@ -1,6 +1,7 @@
 use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse, Responder};
 
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -65,11 +66,16 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         .await;
     let res = match res_or_err {
         Ok(res) => res,
-        Err(_err) => CompilerApiResponse {
+        Err(err) => CompilerApiResponse {
             output: "".to_string(),
-            statusCode: 0,
-            memory: Some("".to_string()),
-            cpuTime: Some("".to_string()),
+            statusCode: err
+                .status()
+                .unwrap_or(StatusCode::from_u16(400).unwrap())
+                .to_string()
+                .parse::<i32>()
+                .unwrap_or(400),
+            memory: Some("-1".to_string()),
+            cpuTime: Some("-1".to_string()),
         },
     };
     let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
