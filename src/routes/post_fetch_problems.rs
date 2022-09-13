@@ -35,12 +35,12 @@ async fn post_fetch_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
-    // let username = id.identity().unwrap_or("".to_owned());
-    // if username == "" {
-    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
-    // } else if username != "admin" {
-    //     return HttpResponse::Forbidden().body("not permitted".to_owned());
-    // }
+    let username = id.identity().unwrap_or("".to_owned());
+    if username == "" {
+        return HttpResponse::Forbidden().body("not logged in".to_owned());
+    } else if username != "admin" {
+        return HttpResponse::Forbidden().body("not permitted".to_owned());
+    }
 
     let output = match std::process::Command::new("git")
         .args(&[
