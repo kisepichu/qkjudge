@@ -142,7 +142,11 @@ async fn judge(
             let mut output_raw = res.output;
             let output = format_output(output_raw.clone());
             let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
-            let memory = res.memory.unwrap_or("-1".to_string());
+            let memory = res
+                .memory
+                .unwrap_or("1024".to_string())
+                .parse::<i64>()
+                .unwrap_or(1024);
 
             if res.statusCode == 429 {
                 result = "KK".to_string();
@@ -150,7 +154,13 @@ async fn judge(
                 will_continue = false;
             } else if res.statusCode == 200 {
                 let cpu_time_f = cpu_time.parse::<f64>().unwrap();
-                let time_limit = info["time_limit"].clone().as_f64().unwrap_or(2.0);
+                let time_limit = info["time_limit"]
+                    .clone()
+                    .as_str()
+                    .unwrap_or("-1")
+                    .parse::<f64>()
+                    .unwrap_or(2.0);
+                let memory_limit = info["memory_limit"].clone().as_i64().unwrap_or(1024);
                 if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();
@@ -164,6 +174,11 @@ async fn judge(
                 } else if cpu_time == "-1" {
                     result = "CE".to_string();
                     whole_result = "CE".to_string();
+                    will_continue = false;
+                } else if memory_limit < memory {
+                    result = "MLE".to_string();
+                    whole_result = "MLE".to_string();
+                    output_raw = "(MLE)".to_string();
                     will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();
@@ -280,6 +295,29 @@ async fn post_submit_handler(
         .expect("something went wrong reading the file");
     let docs = YamlLoader::load_from_str(&info_raw).unwrap();
     let info = &docs[0];
+
+    if info["title"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("title is not defined correctly in problem.yaml");
+    }
+    if info["author"].as_str().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("author is not defined correctly in problem.yaml");
+    }
+    if info["difficulty"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("difficulty is not defined correctly in problem.yaml");
+    }
+    if info["time_limit"].as_str().is_none()
+        || info["time_limit"].as_str().unwrap().parse::<f64>().is_err()
+    {
+        return HttpResponse::InternalServerError()
+            .body("time_limit is not defined correctly in problem.yaml");
+    }
+    if info["memory_limit"].as_i64().is_none() {
+        return HttpResponse::InternalServerError()
+            .body("memory_limit is not defined correctly in problem.yaml");
+    }
 
     // println!("submit 2")
     // テストケースの個数やパスを取得
