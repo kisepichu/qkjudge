@@ -53,13 +53,13 @@ async fn post_fetch_problems_handler(
     .expect("hmac error");
 
     mac.update(sign_github[7..].as_bytes());
-    println!("{}", sign_github[7..].to_string().len());
+    println!("sign_github length: {}", sign_github[7..].to_string().len());
 
     let expected = std::env::var("GITHUB_WEBHOOK_TOKEN")
         .expect("env GITHUB_WEBHOOK_TOKEN not set")
         .as_bytes()
         .to_owned();
-    println!("{}", expected.len());
+    println!("expected length: {}", expected.len());
     // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
     match mac.verify_slice(&expected) {
         Ok(()) => (),
