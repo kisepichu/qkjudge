@@ -42,7 +42,7 @@ type HmacSha1 = Hmac<Sha1>;
 use hex;
 
 pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
-    let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
+    let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
     hmac.update(message);
     let expected = hex::encode(hmac.finalize().into_bytes());
     println!("expected: {}", expected);
@@ -66,21 +66,12 @@ async fn post_fetch_problems_handler(
         Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
         None => return HttpResponse::Forbidden().body("signature is not set in header"),
     };
-    println!(
-        "sign_github_sha1: {}",
-        req.headers()
-            .get("X-Hub-Signature")
-            .unwrap()
-            .to_str()
-            .expect("to_str failed")[5..]
-            .to_string()
-    );
 
     let message = String::from_utf8(bytes.to_vec()).unwrap();
     // println!("message: {}", message);
     let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-    if (validate(secret.as_bytes(), sign_github_sha1, message.as_bytes())) {
+    if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
         println!("ok");
     } else {
         println!("ng");
