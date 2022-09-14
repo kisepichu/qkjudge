@@ -26,4 +26,6 @@ chrono = "0.4.22" # 日時を扱うやつ
 time = { version = "0.3.14", features = ["serde"] }
 hmac = "0.12.1"
 sha2 = "0.10.5"
+sha-1 = "0.10.0"
 hex-literal = "0.3.4"
+hex = "0.4.3"
