@@ -45,23 +45,13 @@ async fn post_fetch_problems_handler(
         None => return HttpResponse::Forbidden().body("signature is not set in header"),
     };
 
-    let mut mac = HmacSha256::new_from_slice(
-        std::env::var("HMAC_KEY")
-            .expect("env HMAC_KEY not set")
-            .as_bytes(),
-    )
-    .expect("hmac error");
+    let random = std::env::var("HMAC_KEY").expect("env HMAC_KEY not set");
+    let expected = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-    println!("sign_github length: {}", sign_github.len());
-
-    let expected = std::env::var("GITHUB_WEBHOOK_TOKEN")
-        .expect("env GITHUB_WEBHOOK_TOKEN not set")
-        .as_bytes()
-        .to_owned();
-    println!("expected length: {}", expected.len());
-    mac.update(&expected);
+    let mut mac = HmacSha256::new_from_slice(random.as_bytes()).expect("hmac error");
+    mac.update(sign_github);
     // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
-    match mac.verify_slice(sign_github) {
+    match mac.verify_slice(expected.as_bytes()) {
         Ok(_k) => (),
         Err(_e) => return HttpResponse::Forbidden().body("verify failed"),
     }
