@@ -19,6 +19,11 @@ enum SolutionStatus {
     SolutionStatusNum,
 }
 
+#[derive(Deserialize)]
+struct SubmissionId {
+    id: i32,
+}
+
 #[derive(Default, Deserialize)]
 struct Problem {
     id: i32,
@@ -41,6 +46,7 @@ struct GetProblemsPidResponse {
     time_limit: String,
     memory_limit: i32,
     status: SolutionStatus,
+    last_submission: i32,
 }
 
 #[get("/problems/{problem_id}")]
@@ -88,31 +94,35 @@ async fn get_problems_pid_handler(
     };
 
     let mut status = SolutionStatus::NotLogged;
+    let mut last_submission = -1;
     if username != "" {
         let pool = pool_data.lock().await;
-        let count_ac = sqlx::query!(
-            "SELECT COUNT(*) as value FROM submissions WHERE problem_id=? AND author=? AND result='AC' LIMIT 1",
+        let submission_ac = sqlx::query_as!(
+            SubmissionId,
+            "SELECT id FROM submissions WHERE problem_id=? AND author=? AND result='AC' LIMIT 1",
             problem_id.to_string(),
             username,
         )
         .fetch_one(&*pool)
         .await
-        .unwrap()
-        .value;
-        if count_ac > 0 {
+        .unwrap_or(SubmissionId { id: -1 });
+
+        if submission_ac.id >= 0 {
             status = SolutionStatus::Accepted;
+            last_submission = submission_ac.id;
         } else {
-            let count = sqlx::query!(
-                "SELECT COUNT(*) as value FROM submissions WHERE problem_id=? AND author=? LIMIT 1",
+            let submission = sqlx::query_as!(
+                SubmissionId,
+                "SELECT id FROM submissions WHERE problem_id=? AND author=? LIMIT 1",
                 problem_id.to_string(),
                 username,
             )
             .fetch_one(&*pool)
             .await
-            .unwrap()
-            .value;
-            if count > 0 {
+            .unwrap_or(SubmissionId { id: -1 });
+            if submission.id >= 0 {
                 status = SolutionStatus::NotAccepted;
+                last_submission = submission.id;
             } else {
                 status = SolutionStatus::NotSubmitted;
             }
@@ -128,5 +138,6 @@ async fn get_problems_pid_handler(
         time_limit: problem.time_limit,
         memory_limit: problem.memory_limit,
         status: status,
+        last_submission: last_submission,
     })
 }
