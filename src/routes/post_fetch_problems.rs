@@ -1,7 +1,14 @@
 use std::{fs::File, io::Read, sync::Arc};
 
 use actix_identity::Identity;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{
+    post,
+    web::{self, Bytes},
+    HttpRequest, HttpResponse, Responder,
+};
+use hmac::{digest::MacError, Hmac, Mac};
+use sha1::Sha1;
+use sha2::Sha256;
 use sqlx::{query, query_as};
 use std::collections::HashMap;
 use tokio::sync::Mutex;
@@ -30,17 +37,55 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
     Ok(docs[0].to_owned())
 }
 
+type HmacSha256 = Hmac<Sha256>;
+type HmacSha1 = Hmac<Sha1>;
+use hex;
+
+pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
+    let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
+    hmac.update(message);
+    let expected = hex::encode(hmac.finalize().into_bytes());
+    println!("expected: {}", expected);
+    let got = String::from_utf8(signature.to_vec()).unwrap();
+    println!("got: {}", got);
+    return crypto::util::fixed_time_eq(expected.as_bytes(), got.as_bytes());
+}
+
 #[post("/fetch/problems")]
 async fn post_fetch_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
+    req: HttpRequest,
+    bytes: Bytes,
 ) -> impl Responder {
-    let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
-        return HttpResponse::Forbidden().body("not logged in".to_owned());
-    } else if username != "admin" {
-        return HttpResponse::Forbidden().body("not permitted".to_owned());
+    let sign_github = match req.headers().get("X-Hub-Signature-256") {
+        Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
+        None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    };
+    let sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
+        Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
+        None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    };
+
+    let message = String::from_utf8(bytes.to_vec()).unwrap();
+    // println!("message: {}", message);
+    let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
+
+    if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
+        println!("ok");
+    } else {
+        println!("ng");
+        return HttpResponse::Forbidden().body("verify failed");
     }
+
+    // {
+    //     let username = id.identity().unwrap_or("".to_owned());
+    //     if username == "" {
+    //         return HttpResponse::Forbidden().body("not logged in".to_owned());
+    //     } else if username != "admin" {
+    //         return HttpResponse::Forbidden().body("not permitted".to_owned());
+    //     }
+    // }
 
     let status = std::process::Command::new("git")
         .args(&[
@@ -230,4 +275,44 @@ async fn post_fetch_problems_handler(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+#[cfg(test)]
+mod test {
+    use hmac::{Hmac, Mac};
+    use sha1::Sha1;
+    use sha2::Sha256;
+
+    type HmacSha256 = Hmac<Sha256>;
+    type HmacSha1 = Hmac<Sha1>;
+
+    pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
+        let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
+        hmac.update(message);
+        hmac.verify_slice(signature).is_ok()
+    }
+
+    #[test]
+    fn it_returns_true_when_signature_and_message_match() {
+        let signature = &vec![
+            0x73, 0x6d, 0x7f, 0x93, 0x42, 0xf2, 0xa7, 0xd2, 0x39, 0xaf, 0xa5, 0x51, 0x3a, 0x4b,
+            0xb2, 0x28, 0x3e, 0x0e, 0x15, 0x88,
+        ];
+        let secret = b"some-secret";
+        let message = b"blah-blah-blah";
+
+        assert_eq!(validate(secret, signature, message), true);
+    }
+
+    #[test]
+    fn it_returns_false_when_signature_and_message_do_not_match() {
+        let signature = &vec![
+            0x31, 0x30, 0x2b, 0x00, 0xba, 0xd4, 0xd6, 0xd1, 0x10, 0xa1, 0x18, 0x82, 0x77, 0xc4,
+            0xd1, 0x06, 0x0c, 0xb2, 0xc3, 0x73,
+        ];
+        let secret = b"some-secret";
+        let message = b"blah-blah-blah?";
+
+        assert_eq!(validate(secret, signature, message), false);
+    }
 }
