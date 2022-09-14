@@ -38,6 +38,12 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
 
 type HmacSha256 = Hmac<Sha256>;
 
+fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
+    let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
+    hmac.update(message);
+    hmac.verify_slice(signature).is_ok()
+}
+
 #[post("/fetch/problems")]
 async fn post_fetch_problems_handler(
     id: Identity,
@@ -53,12 +59,11 @@ async fn post_fetch_problems_handler(
     let message = String::from_utf8(bytes.to_vec()).unwrap();
     let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("hmac error");
-    mac.update(message.as_bytes());
-    // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
-    match mac.verify_slice(sign_github) {
-        Ok(_k) => (),
-        Err(_e) => return HttpResponse::Forbidden().body("verify failed"),
+    if (validate(secret.as_bytes(), message.as_bytes(), sign_github)) {
+        println!("ok");
+    } else {
+        println!("ng");
+        return HttpResponse::Forbidden().body("verify failed");
     }
 
     // {
