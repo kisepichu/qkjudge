@@ -44,12 +44,11 @@ use hex;
 pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
     let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
     hmac.update(message);
-    println!(
-        "expected: {}",
-        hex::encode(hmac.clone().finalize().into_bytes())
-    );
-    println!("got: {}", String::from_utf8(signature.to_vec()).unwrap());
-    hmac.verify_slice(signature).is_ok()
+    let expected = hex::encode(hmac.finalize().into_bytes());
+    println!("expected: {}", expected);
+    let got = String::from_utf8(signature.to_vec()).unwrap();
+    println!("got: {}", got);
+    return crypto::util::fixed_time_eq(expected.as_bytes(), got.as_bytes());
 }
 
 #[post("/fetch/problems")]
