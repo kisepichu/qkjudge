@@ -53,14 +53,17 @@ async fn get_problems_handler(
 ) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
 
-    let pool = pool_data.lock().await;
-    let problems = sqlx::query_as!(
-        Problem,
-        "SELECT id, title, author, difficulty FROM problems WHERE visible=true ORDER BY difficulty, title;"
-    )
-    .fetch_all(&*pool)
-    .await
-    .unwrap_or(vec![]);
+    let problems: Vec<Problem>;
+    {
+        let pool = pool_data.lock().await;
+        problems = sqlx::query_as!(
+            Problem,
+            "SELECT id, title, author, difficulty FROM problems WHERE visible=true ORDER BY difficulty, title;"
+        )
+        .fetch_all(&*pool)
+        .await
+        .unwrap_or(vec![]);
+    }
 
     let mut res: Vec<ProblemInResponse> = vec![];
     for problem in problems {
