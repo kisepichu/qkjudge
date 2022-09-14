@@ -28,7 +28,7 @@ async fn get_problems_handler(
     let pool = pool_data.lock().await;
     let problems = sqlx::query_as!(
         Problem,
-        "SELECT id, title, author, difficulty FROM problems WHERE visible=true;"
+        "SELECT id, title, author, difficulty FROM problems WHERE visible=true ORDER BY difficulty, title;"
     )
     .fetch_all(&*pool)
     .await

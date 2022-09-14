@@ -198,14 +198,13 @@ async fn post_fetch_problems_handler(
         println!("problem_path: {}", problem_path_long);
         let pool = pool_data.lock().await;
         let count = query!(
-            "SELECT COUNT(*) AS value FROM problems WHERE path=?;",
+            "SELECT COUNT(*) AS value FROM problems WHERE path=? LIMIT 1;",
             problem_path.clone()
         )
         .fetch_one(&*pool)
         .await
         .unwrap()
         .value;
-        println!("count: {}", count);
         if 0 < count {
             if query!(
                 "UPDATE problems SET title=?, author=?, difficulty=?, time_limit=?, memory_limit=?, visible=? WHERE path=?;",
