@@ -21,7 +21,7 @@ async fn post_signup_handler(
     }
     let hashed_pass = hash(&req.password, DEFAULT_COST).unwrap();
     let count = sqlx::query!(
-        r#"SELECT COUNT(*) as value FROM users WHERE username=?"#,
+        r#"SELECT COUNT(*) as value FROM users WHERE username=? LIMIT 1;"#,
         req.username
     )
     .fetch_one(&*pool)

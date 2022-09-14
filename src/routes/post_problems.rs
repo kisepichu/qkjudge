@@ -29,7 +29,7 @@ async fn post_problems_handler(
 ) -> impl Responder {
     let pool = pool_data.lock().await;
     let count = sqlx::query!(
-        r#"SELECT COUNT(*) as value FROM problems WHERE path=?"#,
+        r#"SELECT COUNT(*) as value FROM problems WHERE path=? LIMIT 1;"#,
         req.path
     )
     .fetch_one(&*pool)
