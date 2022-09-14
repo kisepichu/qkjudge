@@ -1,7 +1,11 @@
 use std::{fs::File, io::Read, sync::Arc};
 
 use actix_identity::Identity;
-use actix_web::{post, web, HttpRequest, HttpResponse, Responder};
+use actix_web::{
+    post,
+    web::{self, Bytes},
+    HttpRequest, HttpResponse, Responder,
+};
 use hmac::{digest::MacError, Hmac, Mac};
 use sha2::Sha256;
 use sqlx::{query, query_as};
@@ -39,19 +43,20 @@ async fn post_fetch_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     req: HttpRequest,
+    bytes: Bytes,
 ) -> impl Responder {
     let sign_github = match req.headers().get("X-Hub-Signature-256") {
         Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
         None => return HttpResponse::Forbidden().body("signature is not set in header"),
     };
 
-    let random = std::env::var("HMAC_KEY").expect("env HMAC_KEY not set");
-    let expected = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
+    let message = bytes.to_vec();
+    let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-    let mut mac = HmacSha256::new_from_slice(random.as_bytes()).expect("hmac error");
-    mac.update(sign_github);
+    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("hmac error");
+    mac.update(&message);
     // `verify_slice` will return `Ok(())` if code is correct, `Err(MacError)` otherwise
-    match mac.verify_slice(expected.as_bytes()) {
+    match mac.verify_slice(sign_github) {
         Ok(_k) => (),
         Err(_e) => return HttpResponse::Forbidden().body("verify failed"),
     }
