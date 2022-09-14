@@ -186,8 +186,8 @@ async fn judge(
                     output_raw = "(OLE)".to_string();
                     will_continue = false;
                 } else if cpu_time == "-1" {
-                    result = "CE".to_string();
-                    whole_result = "CE".to_string();
+                    result = "UE 200".to_string(); // CE?
+                    whole_result = "UE 200".to_string();
                     will_continue = false;
                 } else if memory_limit < memory {
                     result = "MLE".to_string();
