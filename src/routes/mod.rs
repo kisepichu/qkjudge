@@ -16,6 +16,7 @@ mod post_logout;
 mod post_problems;
 mod post_signup;
 mod post_submit;
+mod put_submissions_sid;
 
 pub use self::get_execute::get_execute_handler;
 pub use self::get_hello::get_hello_handler;
@@ -37,3 +38,4 @@ pub use self::post_logout::post_logout_handler;
 pub use self::post_problems::post_problems_handler;
 pub use self::post_signup::post_signup_handler;
 pub use self::post_submit::post_submit_handler;
+pub use put_submissions_sid::put_submissions_sid_handler;
