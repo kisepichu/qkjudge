@@ -66,17 +66,20 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         .await;
     let res = match res_or_err {
         Ok(res) => res,
-        Err(err) => CompilerApiResponse {
-            output: "".to_string(),
-            statusCode: err
-                .status()
-                .unwrap_or(StatusCode::from_u16(400).unwrap())
-                .to_string()
-                .parse::<i32>()
-                .unwrap_or(400),
-            memory: Some("-1".to_string()),
-            cpuTime: Some("-1".to_string()),
-        },
+        Err(err) => {
+            println!("{}", err.status().unwrap());
+            CompilerApiResponse {
+                output: "".to_string(),
+                statusCode: err
+                    .status()
+                    .unwrap_or(StatusCode::from_u16(400).unwrap())
+                    .to_string()
+                    .parse::<i32>()
+                    .unwrap_or(400),
+                memory: Some("-1".to_string()),
+                cpuTime: Some("-1".to_string()),
+            }
+        }
     };
     let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
     let memory = res.memory.unwrap_or("-1".to_string());
