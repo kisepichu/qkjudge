@@ -281,10 +281,10 @@ async fn judge(
     .unwrap();
 }
 
-#[put("/submit")]
+#[put("/submissions/{submission_id}")]
 async fn put_submissions_sid_handler(
     id: Identity,
-    rejudge_req: web::Json<PutSubmissionsPidRequest>,
+    path: web::Path<PutSubmissionsPidRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     arbiter_data: web::Data<Arc<Mutex<Arbiter>>>,
 ) -> impl Responder {
@@ -302,7 +302,7 @@ async fn put_submissions_sid_handler(
         req = sqlx::query_as!(
             SubmitRequest,
             "SELECT problem_id, language_id, source, author FROM submissions WHERE id=?;",
-            rejudge_req.submission_id
+            path.submission_id
         )
         .fetch_one(&*pool)
         .await
@@ -321,7 +321,7 @@ async fn put_submissions_sid_handler(
         }
         sqlx::query!(
             "DELETE FROM tasks WHERE submission_id=?;",
-            rejudge_req.submission_id
+            path.submission_id
         )
         .execute(&*pool)
         .await
