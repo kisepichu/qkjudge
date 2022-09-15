@@ -17,7 +17,7 @@ struct ExecuteRequest {
 #[derive(Deserialize, Default)]
 #[allow(non_snake_case)]
 struct CompilerApiResponse {
-    output: String,
+    output: Option<String>,
     statusCode: i32,
     memory: Option<String>,
     cpuTime: Option<String>,
@@ -64,10 +64,11 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         .unwrap()
         .json::<CompilerApiResponse>()
         .await;
+
     let res = match res_or_err {
         Ok(res) => res,
         Err(err) => CompilerApiResponse {
-            output: "".to_string(),
+            output: Some("".to_string()),
             statusCode: err
                 .status()
                 .unwrap_or(StatusCode::from_u16(400).unwrap())
@@ -78,25 +79,26 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
             cpuTime: Some("-1".to_string()),
         },
     };
+    let res_output = res.output.unwrap_or("".to_string());
     let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
     let memory = res.memory.unwrap_or("-1".to_string());
     let mut result = "OK".to_string();
-    let mut output = res.output.clone();
+    let mut output = res_output.clone();
 
     if res.statusCode == 429 {
         result = "KK".to_string();
     } else if res.statusCode == 200 {
-        if res.output.starts_with("\n\n\n JDoodle - Timeout") {
+        if res_output.starts_with("\n\n\n JDoodle - Timeout") {
             result = "TLE".to_string();
             output = "(TLE)".to_string()
-        } else if res.output.ends_with("JDoodle - output Limit reached.\n") {
+        } else if res_output.ends_with("JDoodle - output Limit reached.\n") {
             result = "OLE".to_string();
             output = "(OLE)".to_string();
         } else if cpu_time == "-1" {
             result = "CE".to_string();
-        } else if res.output.find("Command terminated by signal").is_some() {
+        } else if res_output.find("Command terminated by signal").is_some() {
             result = "RE".to_string();
-            output = "RE:\n".to_string() + &res.output;
+            output = "RE:\n".to_string() + &res_output;
         } else {
             // result = "OK".to_string();
         }
