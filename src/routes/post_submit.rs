@@ -175,14 +175,6 @@ async fn judge(
                 let cpu_time_f = cpu_time.parse::<f64>().unwrap();
                 let time_limit = problem.time_limit.parse::<f64>().unwrap_or(2.0);
                 let memory_limit = problem.memory_limit * 1000;
-                println!(
-                    "{}, {}, {}",
-                    output_raw,
-                    output_raw.find("Command terminated by signal").is_some(),
-                    output_raw
-                        .find("Command terminated by signal")
-                        .unwrap_or(998244353)
-                );
                 if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
                     result = "TLE".to_string();
                     whole_result = "TLE".to_string();

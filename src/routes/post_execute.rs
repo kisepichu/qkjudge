@@ -94,6 +94,9 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
             output = "(OLE)".to_string();
         } else if cpu_time == "-1" {
             result = "CE".to_string();
+        } else if res.output.find("Command terminated by signal").is_some() {
+            result = "RE".to_string();
+            output = "RE:\n".to_string() + &res.output;
         } else {
             // result = "OK".to_string();
         }
