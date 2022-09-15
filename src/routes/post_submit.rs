@@ -199,6 +199,11 @@ async fn judge(
                     whole_result = "MLE".to_string();
                     output_raw = "(MLE)".to_string();
                     will_continue = false;
+                } else if output_raw.find("Command terminated by signal").is_some() {
+                    result = "RE".to_string();
+                    whole_result = "RE".to_string();
+                    output_raw = "RE:\n".to_string() + &output_raw;
+                    will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();
                     whole_result = "WA".to_string();
