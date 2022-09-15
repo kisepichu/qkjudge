@@ -28,11 +28,6 @@ struct SubmitRequest {
     author: String,
 }
 
-#[derive(Serialize)]
-struct SubmitResponse {
-    id: i32,
-}
-
 #[derive(Default, Deserialize)]
 struct ProblemLocation {
     id: i32,
@@ -320,6 +315,14 @@ async fn put_submissions_sid_handler(
                 .body("only submittion author or admin can trigger rejudge");
         }
         sqlx::query!(
+            "UPDATE submissions SET result='WJ' WHERE id=?;",
+            path.submission_id
+        )
+        .execute(&*pool)
+        .await
+        .unwrap();
+
+        sqlx::query!(
             "DELETE FROM tasks WHERE submission_id=?;",
             path.submission_id
         )
@@ -369,25 +372,6 @@ async fn put_submissions_sid_handler(
     }
 
     // println!("submit 3")
-    // submission を db に insert
-    let mut submission_id: i32 = 0;
-    {
-        let pool = pool_data.lock().await;
-        submission_id = sqlx::query!(
-            "INSERT INTO submissions (date, author, problem_id, testcase_num, result, language_id, source) VALUES (NOW(), ?, ?, ?, ?, ?, ?);",
-            username,
-            req.problem_id,
-            testcase_num,
-            "WJ".to_string(),
-            req.language_id,
-            req.source
-        )
-        .execute(&*pool)
-        .await
-        .unwrap()
-        .last_insert_id() as i32;
-    }
-    println!("submission id: {}", submission_id);
 
     arbiter.spawn(judge(
         pool_data.clone(),
@@ -396,11 +380,9 @@ async fn put_submissions_sid_handler(
         problems_root,
         problem,
         req,
-        submission_id as i32,
+        path.submission_id as i32,
     ));
 
     // println!("submit 5")
-    HttpResponse::Ok().json(SubmitResponse {
-        id: submission_id as i32,
-    })
+    HttpResponse::NoContent().finish()
 }
