@@ -51,7 +51,10 @@ async fn main() -> std::io::Result<()> {
                 middleware::DefaultHeaders::new()
                     .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
                     .add(("Access-Control-Allow-Credentials", "true"))
-                    .add(("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS"))
+                    .add((
+                        "Access-Control-Allow-Methods",
+                        "GET, POST, DELETE, PUT, OPTIONS",
+                    ))
                     .add(("Access-Control-Allow-Headers", "Content-Type")),
             )
             .wrap(IdentityService::new(
