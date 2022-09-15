@@ -49,7 +49,7 @@ struct Problem {
 #[derive(Deserialize, Default)]
 #[allow(non_snake_case)]
 struct CompilerApiResponse {
-    output: String,
+    output: Option<String>,
     statusCode: i32,
     memory: Option<String>,
     cpuTime: Option<String>,
@@ -146,7 +146,7 @@ async fn judge(
             let res = match res_or_err {
                 Ok(res) => res,
                 Err(err) => CompilerApiResponse {
-                    output: "".to_string(),
+                    output: Some("".to_string()),
                     statusCode: err
                         .status()
                         .unwrap_or(StatusCode::from_u16(400).unwrap())
@@ -158,7 +158,7 @@ async fn judge(
                 },
             };
 
-            let mut output_raw = res.output;
+            let mut output_raw = res.output.unwrap_or("".to_string());
             let output = format_output(output_raw.clone());
             let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
             let memory = res
