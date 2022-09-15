@@ -185,14 +185,24 @@ async fn judge(
                     whole_result = "OLE".to_string();
                     output_raw = "(OLE)".to_string();
                     will_continue = false;
-                } else if cpu_time == "-1" {
-                    result = "UE 200".to_string(); // CE?
+                } else if output_raw.starts_with("OCI runtime exec failed") {
+                    result = "UE 200".to_string();
                     whole_result = "UE 200".to_string();
+                    output_raw = "error in judge system:\n".to_string() + &output_raw;
+                    will_continue = false;
+                } else if cpu_time == "-1" {
+                    result = "CE".to_string();
+                    whole_result = "CE".to_string();
                     will_continue = false;
                 } else if memory_limit < memory {
                     result = "MLE".to_string();
                     whole_result = "MLE".to_string();
                     output_raw = "(MLE)".to_string();
+                    will_continue = false;
+                } else if output_raw.find("Command terminated by signal").is_some() {
+                    result = "RE".to_string();
+                    whole_result = "RE".to_string();
+                    output_raw = "RE:\n".to_string() + &output_raw;
                     will_continue = false;
                 } else if output != expected {
                     result = "WA".to_string();

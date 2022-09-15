@@ -58,34 +58,32 @@ async fn post_fetch_problems_handler(
     req: HttpRequest,
     bytes: Bytes,
 ) -> impl Responder {
-    let sign_github = match req.headers().get("X-Hub-Signature-256") {
-        Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
-        None => return HttpResponse::Forbidden().body("signature is not set in header"),
-    };
-    let sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
-        Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
-        None => return HttpResponse::Forbidden().body("signature is not set in header"),
-    };
+    let username = id.identity().unwrap_or("".to_owned());
 
-    let message = String::from_utf8(bytes.to_vec()).unwrap();
-    // println!("message: {}", message);
-    let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
-
-    if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
-        println!("ok");
+    if username == "tqk" {
+        println!("login")
     } else {
-        println!("ng");
-        return HttpResponse::Forbidden().body("verify failed");
-    }
+        let sign_github = match req.headers().get("X-Hub-Signature-256") {
+            Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
+            None => return HttpResponse::Forbidden().body("signature is not set in header"),
+        };
+        let sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
+            Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
+            None => return HttpResponse::Forbidden().body("signature is not set in header"),
+        };
 
-    // {
-    //     let username = id.identity().unwrap_or("".to_owned());
-    //     if username == "" {
-    //         return HttpResponse::Forbidden().body("not logged in".to_owned());
-    //     } else if username != "admin" {
-    //         return HttpResponse::Forbidden().body("not permitted".to_owned());
-    //     }
-    // }
+        let message = String::from_utf8(bytes.to_vec()).unwrap();
+        // println!("message: {}", message);
+        let secret =
+            std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
+
+        if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
+            println!("ok");
+        } else {
+            println!("ng");
+            return HttpResponse::Forbidden().body("verify failed");
+        }
+    }
 
     let status = std::process::Command::new("git")
         .args(&[
