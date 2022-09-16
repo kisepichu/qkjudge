@@ -26,6 +26,7 @@ struct SubmitRequest {
     language_id: i32,
     source: String,
     author: String,
+    result: String,
 }
 
 #[derive(Default, Deserialize)]
@@ -296,7 +297,7 @@ async fn put_submissions_sid_handler(
         let pool = pool_data.lock().await;
         req = sqlx::query_as!(
             SubmitRequest,
-            "SELECT problem_id, language_id, source, author FROM submissions WHERE id=?;",
+            "SELECT problem_id, language_id, source, author, result FROM submissions WHERE id=?;",
             path.submission_id
         )
         .fetch_one(&*pool)
@@ -306,9 +307,13 @@ async fn put_submissions_sid_handler(
             language_id: -1,
             source: "".to_string(),
             author: "".to_string(),
+            result: "".to_string(),
         });
         if req.problem_id == -1 {
             return HttpResponse::BadRequest().body("no submission for that id");
+        }
+        if req.result == "WJ" {
+            return HttpResponse::BadRequest().body("judging");
         }
         if req.author != username {
             return HttpResponse::Forbidden()
