@@ -315,7 +315,7 @@ async fn put_submissions_sid_handler(
         if req.result == "WJ" {
             return HttpResponse::BadRequest().body("judging");
         }
-        if req.author != username {
+        if req.author != username && username != "admin" {
             return HttpResponse::Forbidden()
                 .body("only submittion author or admin can trigger rejudge");
         }
