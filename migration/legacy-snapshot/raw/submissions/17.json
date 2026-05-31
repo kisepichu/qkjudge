@@ -1,0 +1,25 @@
+{
+  "id": 17,
+  "date": "2022-09-15 12:51:48.0",
+  "author": "yuyu5510",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 202,
+      "result": "AC"
+    },
+    {
+      "id": 203,
+      "result": "AC"
+    },
+    {
+      "id": 204,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include<bits/stdc++.h>\n\nusing namespace std;\n\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a+b << endl;\n}"
+}

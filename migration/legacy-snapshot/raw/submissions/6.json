@@ -1,0 +1,25 @@
+{
+  "id": 6,
+  "date": "2022-09-12 2:30:51.0",
+  "author": "tqk",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 11,
+      "result": "AC"
+    },
+    {
+      "id": 12,
+      "result": "AC"
+    },
+    {
+      "id": 13,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "import time\n\na,b=map(int,input().split())\ntime.sleep(1)\nprint(a+b)"
+}

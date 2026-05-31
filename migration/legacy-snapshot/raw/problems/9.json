@@ -1,0 +1,11 @@
+{
+  "id": 9,
+  "title": "FizzBuzz",
+  "author": "tqk",
+  "difficulty": 100,
+  "statement": "## 問題文\n\nFizzBuzz を知っていますか? ぼくは知っています\n\n## 制約\n\n- $1 \\le N \\le 100$\n- 入力は全て整数\n\n---\n\n## 入力\n\n入力は以下の形式で標準入力から与えられる。\n\n> $N$\n\n## 出力\n\n答えを $N$ 行に出力せよ。\n\n---\n\n## 入力例 1\n\n```\n16\n```\n\n## 出力例 1\n\n```\n1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n```\n",
+  "time_limit": "2.0",
+  "memory_limit": 1024,
+  "status": "NotLogged",
+  "last_submission": -1
+}

@@ -1,0 +1,25 @@
+{
+  "id": 16,
+  "date": "2022-09-15 12:43:18.0",
+  "author": "zer0-star",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 205,
+      "result": "AC"
+    },
+    {
+      "id": 206,
+      "result": "AC"
+    },
+    {
+      "id": 207,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include <bits/extc++.h>\n\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    std::cout << a + b << std::endl;\n}"
+}

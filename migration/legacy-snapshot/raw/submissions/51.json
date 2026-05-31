@@ -1,0 +1,17 @@
+{
+  "id": 51,
+  "date": "2024-10-06 5:17:53.0",
+  "author": "111",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 314,
+      "result": "CE"
+    }
+  ],
+  "result": "CE",
+  "language_id": 0,
+  "source": "a = int(input())\r\nb = int(input())\r\n\r\n# 入力された整数の二乗を計算する\r\nsquared = a+b\r\n\r\n# 結果を出力する\r\nprint(squared)\r\n"
+}

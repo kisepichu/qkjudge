@@ -1,0 +1,10 @@
+{
+  "id": 7,
+  "submission_id": 4,
+  "input": "2 3 4\n",
+  "output": "\nCommand terminated by signal 8",
+  "expected": "12\n",
+  "result": "WA",
+  "memory": "3152",
+  "cpu_time": "0.00"
+}

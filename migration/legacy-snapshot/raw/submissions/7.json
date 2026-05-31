@@ -1,0 +1,25 @@
+{
+  "id": 7,
+  "date": "2022-09-12 6:53:17.0",
+  "author": "testsetestt",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 146,
+      "result": "AC"
+    },
+    {
+      "id": 147,
+      "result": "AC"
+    },
+    {
+      "id": 148,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "a, b = map(int, input().split())\nprint(a+b)\n"
+}

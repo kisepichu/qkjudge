@@ -1,0 +1,25 @@
+{
+  "id": 10,
+  "date": "2022-09-15 11:25:09.0",
+  "author": "shobonvip",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 21,
+      "result": "AC"
+    },
+    {
+      "id": 22,
+      "result": "AC"
+    },
+    {
+      "id": 23,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 44,
+  "source": "print(sum(map(int,input().split())))"
+}

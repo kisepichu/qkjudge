@@ -1,0 +1,97 @@
+{
+  "id": 21,
+  "date": "2022-09-16 1:25:25.0",
+  "author": "cho",
+  "problem_id": 3,
+  "problem_title": "Nkuth's Plus Notation",
+  "testcase_num": 21,
+  "tasks": [
+    {
+      "id": 156,
+      "result": "AC"
+    },
+    {
+      "id": 157,
+      "result": "AC"
+    },
+    {
+      "id": 158,
+      "result": "AC"
+    },
+    {
+      "id": 159,
+      "result": "AC"
+    },
+    {
+      "id": 160,
+      "result": "AC"
+    },
+    {
+      "id": 161,
+      "result": "AC"
+    },
+    {
+      "id": 162,
+      "result": "AC"
+    },
+    {
+      "id": 163,
+      "result": "AC"
+    },
+    {
+      "id": 164,
+      "result": "AC"
+    },
+    {
+      "id": 165,
+      "result": "AC"
+    },
+    {
+      "id": 166,
+      "result": "AC"
+    },
+    {
+      "id": 167,
+      "result": "AC"
+    },
+    {
+      "id": 168,
+      "result": "AC"
+    },
+    {
+      "id": 169,
+      "result": "AC"
+    },
+    {
+      "id": 170,
+      "result": "AC"
+    },
+    {
+      "id": 171,
+      "result": "AC"
+    },
+    {
+      "id": 172,
+      "result": "AC"
+    },
+    {
+      "id": 173,
+      "result": "AC"
+    },
+    {
+      "id": 174,
+      "result": "AC"
+    },
+    {
+      "id": 175,
+      "result": "AC"
+    },
+    {
+      "id": 176,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\r\n\r\nint main(){\r\n    int n,a,b;\r\n\tcin>>n>>a>>b;\r\n    if(n==1) cout<<a+b<<endl;\r\n    if(n==2) cout<<a*b<<endl;\r\n    if(n==3) cout<<ll(pow(a,b))<<endl;\r\n}\r\n"
+}

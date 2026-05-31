@@ -1,0 +1,97 @@
+{
+  "id": 37,
+  "date": "2023-07-05 7:18:35.0",
+  "author": "hayatroid",
+  "problem_id": 3,
+  "problem_title": "Nkuth's Plus Notation",
+  "testcase_num": 21,
+  "tasks": [
+    {
+      "id": 242,
+      "result": "AC"
+    },
+    {
+      "id": 243,
+      "result": "AC"
+    },
+    {
+      "id": 244,
+      "result": "AC"
+    },
+    {
+      "id": 245,
+      "result": "AC"
+    },
+    {
+      "id": 246,
+      "result": "AC"
+    },
+    {
+      "id": 247,
+      "result": "AC"
+    },
+    {
+      "id": 248,
+      "result": "AC"
+    },
+    {
+      "id": 249,
+      "result": "AC"
+    },
+    {
+      "id": 250,
+      "result": "AC"
+    },
+    {
+      "id": 251,
+      "result": "AC"
+    },
+    {
+      "id": 252,
+      "result": "AC"
+    },
+    {
+      "id": 253,
+      "result": "AC"
+    },
+    {
+      "id": 254,
+      "result": "AC"
+    },
+    {
+      "id": 255,
+      "result": "AC"
+    },
+    {
+      "id": 256,
+      "result": "AC"
+    },
+    {
+      "id": 257,
+      "result": "AC"
+    },
+    {
+      "id": 258,
+      "result": "AC"
+    },
+    {
+      "id": 259,
+      "result": "AC"
+    },
+    {
+      "id": 260,
+      "result": "AC"
+    },
+    {
+      "id": 261,
+      "result": "AC"
+    },
+    {
+      "id": 262,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "N, A, B = map(int, input().split())\n\nif N == 1:\n    print(A + B)\nelif N == 2:\n    print(A * B)\nelif N == 3:\n    print(A ** B)\n"
+}

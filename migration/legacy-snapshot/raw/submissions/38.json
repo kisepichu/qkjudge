@@ -1,0 +1,17 @@
+{
+  "id": 38,
+  "date": "2023-07-05 7:49:56.0",
+  "author": "hayatroid",
+  "problem_id": 4,
+  "problem_title": "Sum of Max",
+  "testcase_num": 25,
+  "tasks": [
+    {
+      "id": 263,
+      "result": "CE"
+    }
+  ],
+  "result": "CE",
+  "language_id": 0,
+  "source": "MOD = 998244353\ndef comb(n, r):\n    nu = 1\n    de = 1\n    for i in range(r):\n        nu = nu * (n - i) % MOD\n        de = de * (i + 1) % MOD\n    return nu * pow(de, -1, MOD) % MOD\n\n\nN, K = map(int, input().split())\nA = list(map(int, input().split()))\n\nA.sort()\nans = 0\nfor i in range(K - 1, N):\n    ans = (ans + A[i] * comb(i, i - K + 1)) % MOD\n\nprint(ans)\n"
+}

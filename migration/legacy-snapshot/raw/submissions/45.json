@@ -1,0 +1,25 @@
+{
+  "id": 45,
+  "date": "2024-05-29 11:25:04.0",
+  "author": "daigokanda",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 302,
+      "result": "AC"
+    },
+    {
+      "id": 303,
+      "result": "AC"
+    },
+    {
+      "id": 304,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "A, B = input().split()\n\nprint(int(A) + int(B))"
+}

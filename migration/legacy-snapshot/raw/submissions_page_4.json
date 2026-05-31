@@ -1,0 +1,95 @@
+{
+  "pages_number": 6,
+  "submissions": [
+    {
+      "id": 28,
+      "date": "2022-10-16 15:46:36.0",
+      "author": "mehm8128",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "AC",
+      "language_id": 1
+    },
+    {
+      "id": 27,
+      "date": "2022-10-16 15:46:26.0",
+      "author": "mehm8128",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "CE",
+      "language_id": 0
+    },
+    {
+      "id": 26,
+      "date": "2022-10-16 15:46:03.0",
+      "author": "mehm8128",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "WA",
+      "language_id": 1
+    },
+    {
+      "id": 25,
+      "date": "2022-10-16 15:44:33.0",
+      "author": "mehm8128",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "WA",
+      "language_id": 1
+    },
+    {
+      "id": 24,
+      "date": "2022-09-25 15:15:29.0",
+      "author": "s9",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "AC",
+      "language_id": 0
+    },
+    {
+      "id": 23,
+      "date": "2022-09-25 15:14:34.0",
+      "author": "kyosu",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "AC",
+      "language_id": 1
+    },
+    {
+      "id": 22,
+      "date": "2022-09-16 2:06:54.0",
+      "author": "cho",
+      "problem_id": 4,
+      "problem_title": "Sum of Max",
+      "result": "AC",
+      "language_id": 0
+    },
+    {
+      "id": 21,
+      "date": "2022-09-16 1:25:25.0",
+      "author": "cho",
+      "problem_id": 3,
+      "problem_title": "Nkuth's Plus Notation",
+      "result": "AC",
+      "language_id": 0
+    },
+    {
+      "id": 20,
+      "date": "2022-09-16 1:21:21.0",
+      "author": "cho",
+      "problem_id": 9,
+      "problem_title": "FizzBuzz",
+      "result": "AC",
+      "language_id": 0
+    },
+    {
+      "id": 19,
+      "date": "2022-09-16 1:15:50.0",
+      "author": "cho",
+      "problem_id": 1,
+      "problem_title": "A+B",
+      "result": "AC",
+      "language_id": 0
+    }
+  ]
+}

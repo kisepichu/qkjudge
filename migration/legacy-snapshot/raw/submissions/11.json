@@ -1,0 +1,25 @@
+{
+  "id": 11,
+  "date": "2022-09-15 11:27:15.0",
+  "author": "shobonvip",
+  "problem_id": 9,
+  "problem_title": "FizzBuzz",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 24,
+      "result": "AC"
+    },
+    {
+      "id": 25,
+      "result": "AC"
+    },
+    {
+      "id": 26,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 44,
+  "source": "n=int(input())\r\nfor i in range(1,n+1):\r\n if i%15==0:print(\"FizzBuzz\")\r\n elif i%3==0:print(\"Fizz\")\r\n elif i%5==0:print(\"Buzz\")\r\n else:print(i)"
+}

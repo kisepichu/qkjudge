@@ -1,0 +1,12 @@
+{
+  "base_url": "https://tqk.trap.show/qkjudge",
+  "fetched_at_utc": "2026-05-31T17:29:14.575117+00:00",
+  "finished_at_utc": "2026-05-31T17:29:15.342533+00:00",
+  "counts": {
+    "problems": 5,
+    "submissions_pages_number": 6,
+    "submission_summaries": 58,
+    "submissions": 58,
+    "tasks": 275
+  }
+}
