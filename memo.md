@@ -51,7 +51,7 @@ $ cd migrations
 $ source migrate.sh v0.3.2
 current version: v0.3.1
 current version: v0.3.2
-$ 
+$
 ```
 
 をして、(showcase 側のバージョンが v0.3.1 なことを確認して、)<br>
