@@ -1,0 +1,51 @@
+# prek (pre-commit 互換) の設定。導入手順は readme.md「開発セットアップ」を参照。
+# - 軽量な汎用 / fmt / secret 検出フックは commit 時に走る。
+# - 重い clippy は push 時に回す予定だが、現状コンパイルに DATABASE_URL を要するため
+#   TASK-002 (sqlx offline 化) 完了まで無効化している (下部のコメント参照)。
+# secret 誤コミット防止 (gitleaks) が本タスク (TASK-000) の主目的。
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  # 汎用フック
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+      - id: check-yaml
+      - id: check-merge-conflict
+
+  # プロジェクト固有 (ローカル) フック。ツールは mise (mise.toml) が提供する。
+  - repo: local
+    hooks:
+      # Rust 整形: 差分があれば自動修正してファイルを書き換える。
+      # 書き換えが起きるとフックは失敗扱いになり、再 add を促す (= 自動修正してブロック)。
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all --
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      # secret 検出: ステージ済み差分のみを走査 (DB creds / JDoodle / tunnel token / kubeconfig)。
+      # mise 管理ツールは git フック環境に shim が無いため `mise exec --` 経由で叩く。
+      - id: gitleaks
+        name: gitleaks (detect hardcoded secrets)
+        entry: mise exec -- gitleaks git --pre-commit --redact --staged --verbose
+        language: system
+        pass_filenames: false
+
+      # 型/lint: 重いので push 時のみ。CI (TASK-004) でも同等を回す。
+      # TODO(TASK-002): sqlx offline 化が済むまで有効化しない。
+      #   このクレートは `sqlx::query!` マクロを使うため、コンパイルに live DB か
+      #   `.sqlx` オフラインキャッシュが必要。未整備の今これを有効化すると、TASK-002 完了まで
+      #   全 push がコンパイル不能でブロックされる。sqlx offline 導入後に下記を解除すること。
+      #   (なお `-D warnings` 適用前に既存 lint 約16件: redundant_field_names 等の解消も必要。)
+      # - id: cargo-clippy
+      #   name: cargo clippy -D warnings
+      #   entry: cargo clippy --all-targets --all-features -- -D warnings
+      #   language: system
+      #   types: [rust]
+      #   pass_filenames: false
+      #   stages: [pre-push]
