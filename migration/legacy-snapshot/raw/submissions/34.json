@@ -1,0 +1,25 @@
+{
+  "id": 34,
+  "date": "2023-06-19 3:06:16.0",
+  "author": "ikura-hamu",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 233,
+      "result": "AC"
+    },
+    {
+      "id": 234,
+      "result": "AC"
+    },
+    {
+      "id": 235,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "a,b = map(int, input().split())\nprint(a+b)"
+}

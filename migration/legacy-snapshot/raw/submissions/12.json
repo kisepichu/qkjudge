@@ -1,0 +1,97 @@
+{
+  "id": 12,
+  "date": "2022-09-15 11:29:43.0",
+  "author": "shobonvip",
+  "problem_id": 3,
+  "problem_title": "Nkuth's Plus Notation",
+  "testcase_num": 21,
+  "tasks": [
+    {
+      "id": 27,
+      "result": "AC"
+    },
+    {
+      "id": 28,
+      "result": "AC"
+    },
+    {
+      "id": 29,
+      "result": "AC"
+    },
+    {
+      "id": 30,
+      "result": "AC"
+    },
+    {
+      "id": 31,
+      "result": "AC"
+    },
+    {
+      "id": 32,
+      "result": "AC"
+    },
+    {
+      "id": 33,
+      "result": "AC"
+    },
+    {
+      "id": 34,
+      "result": "AC"
+    },
+    {
+      "id": 35,
+      "result": "AC"
+    },
+    {
+      "id": 36,
+      "result": "AC"
+    },
+    {
+      "id": 37,
+      "result": "AC"
+    },
+    {
+      "id": 38,
+      "result": "AC"
+    },
+    {
+      "id": 39,
+      "result": "AC"
+    },
+    {
+      "id": 40,
+      "result": "AC"
+    },
+    {
+      "id": 41,
+      "result": "AC"
+    },
+    {
+      "id": 42,
+      "result": "AC"
+    },
+    {
+      "id": 43,
+      "result": "AC"
+    },
+    {
+      "id": 44,
+      "result": "AC"
+    },
+    {
+      "id": 45,
+      "result": "AC"
+    },
+    {
+      "id": 46,
+      "result": "AC"
+    },
+    {
+      "id": 47,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 44,
+  "source": "n,a,b=map(int,input().split());print([1,a+b,a*b,a**b][n])"
+}

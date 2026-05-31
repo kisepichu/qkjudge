@@ -1,0 +1,113 @@
+{
+  "id": 22,
+  "date": "2022-09-16 2:06:54.0",
+  "author": "cho",
+  "problem_id": 4,
+  "problem_title": "Sum of Max",
+  "testcase_num": 25,
+  "tasks": [
+    {
+      "id": 177,
+      "result": "AC"
+    },
+    {
+      "id": 178,
+      "result": "AC"
+    },
+    {
+      "id": 179,
+      "result": "AC"
+    },
+    {
+      "id": 180,
+      "result": "AC"
+    },
+    {
+      "id": 181,
+      "result": "AC"
+    },
+    {
+      "id": 182,
+      "result": "AC"
+    },
+    {
+      "id": 183,
+      "result": "AC"
+    },
+    {
+      "id": 184,
+      "result": "AC"
+    },
+    {
+      "id": 185,
+      "result": "AC"
+    },
+    {
+      "id": 186,
+      "result": "AC"
+    },
+    {
+      "id": 187,
+      "result": "AC"
+    },
+    {
+      "id": 188,
+      "result": "AC"
+    },
+    {
+      "id": 189,
+      "result": "AC"
+    },
+    {
+      "id": 190,
+      "result": "AC"
+    },
+    {
+      "id": 191,
+      "result": "AC"
+    },
+    {
+      "id": 192,
+      "result": "AC"
+    },
+    {
+      "id": 193,
+      "result": "AC"
+    },
+    {
+      "id": 194,
+      "result": "AC"
+    },
+    {
+      "id": 195,
+      "result": "AC"
+    },
+    {
+      "id": 196,
+      "result": "AC"
+    },
+    {
+      "id": 197,
+      "result": "AC"
+    },
+    {
+      "id": 198,
+      "result": "AC"
+    },
+    {
+      "id": 199,
+      "result": "AC"
+    },
+    {
+      "id": 200,
+      "result": "AC"
+    },
+    {
+      "id": 201,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\r\n\r\n// combination MOD\r\nconst int MOD=998244353;\r\nconst int MAX_N=2e5;\r\nvector<ll> fac(MAX_N+1,1);\r\nvector<ll> finv(MAX_N+1,1);\r\nvector<ll> inv(MAX_N+1,1);\r\nvoid comb_setup(){\r\n  for(int i=2;i<=MAX_N;i++){\r\n    fac.at(i)=(fac.at(i-1)*i)%MOD;\r\n    inv.at(i)=MOD-(inv.at(MOD%i)*(MOD/i))%MOD;\r\n    finv.at(i)=(finv.at(i-1)*inv.at(i))%MOD;\r\n  }\r\n}\r\nll comb(int n,int k){\r\n  if(n<k) return 0;\r\n  return fac.at(n)*(finv.at(n-k)*finv.at(k)%MOD)%MOD;\r\n}\r\n\r\nint main(){\r\n  comb_setup();\r\n  int n,k;\r\n  cin>>n>>k;\r\n  vector<int> a(n);\r\n  rep(i,n) cin>>a.at(i);\r\n  sort(a.begin(),a.end());\r\n  ll ans=0;\r\n  rep(i,n){\r\n    if(i<k-1) continue;\r\n    ans+=(comb(i,k-1)*a.at(i))%MOD;\r\n    ans%=MOD;\r\n  }\r\n  cout<<ans<<endl;\r\n}\r\n"
+}

@@ -1,0 +1,25 @@
+{
+  "id": 36,
+  "date": "2023-07-05 7:01:53.0",
+  "author": "hayatroid",
+  "problem_id": 9,
+  "problem_title": "FizzBuzz",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 239,
+      "result": "AC"
+    },
+    {
+      "id": 240,
+      "result": "AC"
+    },
+    {
+      "id": 241,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "N = int(input())\n\nfor i in range(1, N + 1):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)\n"
+}

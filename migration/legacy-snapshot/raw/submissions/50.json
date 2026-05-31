@@ -1,0 +1,25 @@
+{
+  "id": 50,
+  "date": "2024-09-24 1:14:19.0",
+  "author": "むごっほ",
+  "problem_id": 9,
+  "problem_title": "FizzBuzz",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 311,
+      "result": "AC"
+    },
+    {
+      "id": 312,
+      "result": "AC"
+    },
+    {
+      "id": 313,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 117,
+  "source": "set n [gets stdin]\nfor {set i 1} {$i <= $n} {incr i} {\n    if {$i % 15 == 0} {\n        puts \"FizzBuzz\"\n    } elseif {$i % 3 == 0} {\n        puts \"Fizz\"\n    } elseif {$i % 5 == 0} {\n        puts \"Buzz\"\n    } else {\n        puts $i\n    }\n}"
+}

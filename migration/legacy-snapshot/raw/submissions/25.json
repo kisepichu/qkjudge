@@ -1,0 +1,17 @@
+{
+  "id": 25,
+  "date": "2022-10-16 15:44:33.0",
+  "author": "mehm8128",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 214,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 1,
+  "source": "A,B=map(int,input())\nprint(A+B)"
+}

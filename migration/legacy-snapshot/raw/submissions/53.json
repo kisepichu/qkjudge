@@ -1,0 +1,17 @@
+{
+  "id": 53,
+  "date": "2025-10-15 9:21:15.0",
+  "author": "s1owtype",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 316,
+      "result": "CE"
+    }
+  ],
+  "result": "CE",
+  "language_id": 18,
+  "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << \"\\\"\n    \n}"
+}

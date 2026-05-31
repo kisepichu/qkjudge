@@ -1,0 +1,10 @@
+{
+  "id": 218,
+  "submission_id": 28,
+  "input": "63 9\n",
+  "output": "72\n",
+  "expected": "72\n",
+  "result": "AC",
+  "memory": "7640",
+  "cpu_time": "0.02"
+}

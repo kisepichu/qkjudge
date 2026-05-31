@@ -1,0 +1,10 @@
+{
+  "id": 311,
+  "submission_id": 50,
+  "input": "16\n",
+  "output": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16",
+  "expected": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz\n16\n",
+  "result": "AC",
+  "memory": "4736",
+  "cpu_time": "0.00"
+}

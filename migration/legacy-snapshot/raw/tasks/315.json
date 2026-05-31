@@ -1,0 +1,10 @@
+{
+  "id": 315,
+  "submission_id": 52,
+  "input": "6 7\n",
+  "output": "\nTraceback (most recent call last):\n  File \"/home/jdoodle.py\", line 1, in <module>\n    a = int(input())\nValueError: invalid literal for int() with base 10: '6 7'",
+  "expected": "13\n",
+  "result": "WA",
+  "memory": "8064",
+  "cpu_time": "0.03"
+}

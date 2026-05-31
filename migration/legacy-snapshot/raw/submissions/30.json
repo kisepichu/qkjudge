@@ -1,0 +1,25 @@
+{
+  "id": 30,
+  "date": "2023-05-11 5:12:21.0",
+  "author": "bvv",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 223,
+      "result": "AC"
+    },
+    {
+      "id": 224,
+      "result": "AC"
+    },
+    {
+      "id": 225,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "print(sum(map(int,input().split())))"
+}

@@ -1,0 +1,1856 @@
+[
+  {
+    "id": 1,
+    "date": "2022-09-07 8:46:01.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 1,
+        "result": "AC"
+      },
+      {
+        "id": 2,
+        "result": "AC"
+      },
+      {
+        "id": 3,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "A, B = map(int, input().split())\nprint(A+B)"
+  },
+  {
+    "id": 2,
+    "date": "2022-09-11 5:30:54.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 4,
+        "result": "AC"
+      },
+      {
+        "id": 5,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "print(13)"
+  },
+  {
+    "id": 3,
+    "date": "2022-09-11 12:08:27.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 149,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "oisu-"
+  },
+  {
+    "id": 4,
+    "date": "2022-09-11 12:09:50.0",
+    "author": "tqk",
+    "problem_id": 3,
+    "problem_title": "Nkuth's Plus Notation",
+    "testcase_num": 21,
+    "tasks": [
+      {
+        "id": 7,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 0,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    vector<int>a(3);\n    \n    cin>>a[0]>>a[1];\n    cout<<a[1]/a[2]<<\"zero division ok!\"<<endl;\n    a[3]=1;\n    cout<<a[3]<<\"out of index okk!\"<<endl;\n}"
+  },
+  {
+    "id": 5,
+    "date": "2022-09-12 2:09:57.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 322,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    int a, b; cin>>a>>b;\n    cout<<a+b<<endl;\n}"
+  },
+  {
+    "id": 6,
+    "date": "2022-09-12 2:30:51.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 11,
+        "result": "AC"
+      },
+      {
+        "id": 12,
+        "result": "AC"
+      },
+      {
+        "id": 13,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "import time\n\na,b=map(int,input().split())\ntime.sleep(1)\nprint(a+b)"
+  },
+  {
+    "id": 7,
+    "date": "2022-09-12 6:53:17.0",
+    "author": "testsetestt",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 146,
+        "result": "AC"
+      },
+      {
+        "id": 147,
+        "result": "AC"
+      },
+      {
+        "id": 148,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "a, b = map(int, input().split())\nprint(a+b)\n"
+  },
+  {
+    "id": 8,
+    "date": "2022-09-13 5:03:15.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 128,
+        "result": "KK"
+      }
+    ],
+    "result": "KK",
+    "language_id": 0,
+    "source": "ぬ゛"
+  },
+  {
+    "id": 9,
+    "date": "2022-09-15 6:29:35.0",
+    "author": "kegra",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 18,
+        "result": "AC"
+      },
+      {
+        "id": 19,
+        "result": "AC"
+      },
+      {
+        "id": 20,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <iostream>\nusing namespace std;\nint main() {\n    int a,b;\n    cin>>a>>b;\n    cout << a+b << endl;\n}"
+  },
+  {
+    "id": 10,
+    "date": "2022-09-15 11:25:09.0",
+    "author": "shobonvip",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 21,
+        "result": "AC"
+      },
+      {
+        "id": 22,
+        "result": "AC"
+      },
+      {
+        "id": 23,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "print(sum(map(int,input().split())))"
+  },
+  {
+    "id": 11,
+    "date": "2022-09-15 11:27:15.0",
+    "author": "shobonvip",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 24,
+        "result": "AC"
+      },
+      {
+        "id": 25,
+        "result": "AC"
+      },
+      {
+        "id": 26,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "n=int(input())\r\nfor i in range(1,n+1):\r\n if i%15==0:print(\"FizzBuzz\")\r\n elif i%3==0:print(\"Fizz\")\r\n elif i%5==0:print(\"Buzz\")\r\n else:print(i)"
+  },
+  {
+    "id": 12,
+    "date": "2022-09-15 11:29:43.0",
+    "author": "shobonvip",
+    "problem_id": 3,
+    "problem_title": "Nkuth's Plus Notation",
+    "testcase_num": 21,
+    "tasks": [
+      {
+        "id": 27,
+        "result": "AC"
+      },
+      {
+        "id": 28,
+        "result": "AC"
+      },
+      {
+        "id": 29,
+        "result": "AC"
+      },
+      {
+        "id": 30,
+        "result": "AC"
+      },
+      {
+        "id": 31,
+        "result": "AC"
+      },
+      {
+        "id": 32,
+        "result": "AC"
+      },
+      {
+        "id": 33,
+        "result": "AC"
+      },
+      {
+        "id": 34,
+        "result": "AC"
+      },
+      {
+        "id": 35,
+        "result": "AC"
+      },
+      {
+        "id": 36,
+        "result": "AC"
+      },
+      {
+        "id": 37,
+        "result": "AC"
+      },
+      {
+        "id": 38,
+        "result": "AC"
+      },
+      {
+        "id": 39,
+        "result": "AC"
+      },
+      {
+        "id": 40,
+        "result": "AC"
+      },
+      {
+        "id": 41,
+        "result": "AC"
+      },
+      {
+        "id": 42,
+        "result": "AC"
+      },
+      {
+        "id": 43,
+        "result": "AC"
+      },
+      {
+        "id": 44,
+        "result": "AC"
+      },
+      {
+        "id": 45,
+        "result": "AC"
+      },
+      {
+        "id": 46,
+        "result": "AC"
+      },
+      {
+        "id": 47,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "n,a,b=map(int,input().split());print([1,a+b,a*b,a**b][n])"
+  },
+  {
+    "id": 13,
+    "date": "2022-09-15 11:34:33.0",
+    "author": "shobonvip",
+    "problem_id": 4,
+    "problem_title": "Sum of Max",
+    "testcase_num": 25,
+    "tasks": [
+      {
+        "id": 48,
+        "result": "AC"
+      },
+      {
+        "id": 49,
+        "result": "AC"
+      },
+      {
+        "id": 50,
+        "result": "AC"
+      },
+      {
+        "id": 51,
+        "result": "AC"
+      },
+      {
+        "id": 52,
+        "result": "AC"
+      },
+      {
+        "id": 53,
+        "result": "AC"
+      },
+      {
+        "id": 54,
+        "result": "AC"
+      },
+      {
+        "id": 55,
+        "result": "AC"
+      },
+      {
+        "id": 56,
+        "result": "AC"
+      },
+      {
+        "id": 57,
+        "result": "AC"
+      },
+      {
+        "id": 58,
+        "result": "AC"
+      },
+      {
+        "id": 59,
+        "result": "AC"
+      },
+      {
+        "id": 60,
+        "result": "AC"
+      },
+      {
+        "id": 61,
+        "result": "AC"
+      },
+      {
+        "id": 62,
+        "result": "AC"
+      },
+      {
+        "id": 63,
+        "result": "AC"
+      },
+      {
+        "id": 64,
+        "result": "AC"
+      },
+      {
+        "id": 65,
+        "result": "AC"
+      },
+      {
+        "id": 66,
+        "result": "AC"
+      },
+      {
+        "id": 67,
+        "result": "AC"
+      },
+      {
+        "id": 68,
+        "result": "AC"
+      },
+      {
+        "id": 69,
+        "result": "AC"
+      },
+      {
+        "id": 70,
+        "result": "AC"
+      },
+      {
+        "id": 71,
+        "result": "AC"
+      },
+      {
+        "id": 72,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "mod = 998244353\r\nN = 3 * 10**5 + 5\r\nfact = [1]*(N+1)\r\nfactinv = [1]*(N+1)\r\n\r\nfor i in range(2, N+1):\r\n\tfact[i] = fact[i-1] * i % mod\r\n\r\nfactinv[-1] = pow(fact[-1], mod-2, mod)\r\nfor i in range(N-1, 1, -1):\r\n\tfactinv[i] = factinv[i+1] * (i+1) % mod\r\n\r\ndef cmb(a, b):\r\n\tif (a < b) or (b < 0):\r\n\t\treturn 0\r\n\treturn fact[a] * factinv[b] % mod * factinv[a-b] % mod\r\n\r\nn,k = map(int,input().split())\r\na = list(map(int,input().split()))\r\na.sort()\r\n\r\nans = 0\r\nfor i in range(n):\r\n\tans += a[i] * cmb(i,k-1)\r\n\tans %= mod\r\n\r\nprint(ans)"
+  },
+  {
+    "id": 14,
+    "date": "2022-09-15 12:01:23.0",
+    "author": "shobonvip",
+    "problem_id": 7,
+    "problem_title": "Weirdo",
+    "testcase_num": 28,
+    "tasks": [
+      {
+        "id": 73,
+        "result": "AC"
+      },
+      {
+        "id": 74,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "class UnionFind:\r\n\tdef __init__(self, n):\r\n\t\tself.n = n\r\n\t\tself.parents = [-1] * n\r\n\t\r\n\tdef find(self, x):\r\n\t\tif self.parents[x] < 0:\r\n\t\t\treturn x\r\n\t\telse:\r\n\t\t\tself.parents[x] = self.find(self.parents[x])\r\n\t\t\treturn self.parents[x]\r\n\t\r\n\tdef union(self, x, y):\r\n\t\tx = self.find(x)\r\n\t\ty = self.find(y)\r\n\t\tif x == y:\r\n\t\t\treturn\r\n\t\tif self.parents[x] > self.parents[y]:\r\n\t\t\tx, y = y, x\r\n\t\tself.parents[x] += self.parents[y]\r\n\t\tself.parents[y] = x\r\n\r\nn = int(input())\r\nupDown = UnionFind(2*n)\r\nconnect = UnionFind(n)\r\n\r\nfor i in range(n):\r\n\ta, b = map(int,input().split())\r\n\t\r\n\tconnect.union(i, a)\r\n\r\n\tif b == 1:\r\n\t\tupDown.union(i, a)\r\n\t\tupDown.union(n+i, n+a)\r\n\telse:\r\n\t\tupDown.union(i, n+a)\r\n\t\tupDown.union(n+i, a)\r\n\r\nv = [0 for i in range(2*n)]\r\nfor i in range(n):\r\n\tv[upDown.find(i)] += 1\r\n\r\nans = 0\r\nfor i in range(n):\r\n\tif connect.parents[i] < 0:\r\n\t\ttarg = -connect.parents[i]\r\n\t\t\r\n\t\t# 矛盾判定\r\n\t\tif upDown.find(i) == upDown.find(i+n):\r\n\t\t\tcontinue\r\n\t\t\r\n\t\t# 個数求めるやつ\r\n\t\ttmp = v[upDown.find(i)]\r\n\t\tprint(i, targ, tmp)\r\n\t\tans += max(tmp, targ-tmp)\r\n\r\nprint(ans)"
+  },
+  {
+    "id": 15,
+    "date": "2022-09-15 12:01:55.0",
+    "author": "shobonvip",
+    "problem_id": 7,
+    "problem_title": "Weirdo",
+    "testcase_num": 28,
+    "tasks": [
+      {
+        "id": 75,
+        "result": "AC"
+      },
+      {
+        "id": 76,
+        "result": "AC"
+      },
+      {
+        "id": 77,
+        "result": "AC"
+      },
+      {
+        "id": 78,
+        "result": "AC"
+      },
+      {
+        "id": 79,
+        "result": "AC"
+      },
+      {
+        "id": 80,
+        "result": "AC"
+      },
+      {
+        "id": 81,
+        "result": "AC"
+      },
+      {
+        "id": 82,
+        "result": "AC"
+      },
+      {
+        "id": 83,
+        "result": "AC"
+      },
+      {
+        "id": 84,
+        "result": "AC"
+      },
+      {
+        "id": 85,
+        "result": "AC"
+      },
+      {
+        "id": 86,
+        "result": "AC"
+      },
+      {
+        "id": 87,
+        "result": "AC"
+      },
+      {
+        "id": 88,
+        "result": "AC"
+      },
+      {
+        "id": 89,
+        "result": "AC"
+      },
+      {
+        "id": 90,
+        "result": "AC"
+      },
+      {
+        "id": 91,
+        "result": "AC"
+      },
+      {
+        "id": 92,
+        "result": "AC"
+      },
+      {
+        "id": 93,
+        "result": "AC"
+      },
+      {
+        "id": 94,
+        "result": "AC"
+      },
+      {
+        "id": 95,
+        "result": "AC"
+      },
+      {
+        "id": 96,
+        "result": "AC"
+      },
+      {
+        "id": 97,
+        "result": "AC"
+      },
+      {
+        "id": 98,
+        "result": "AC"
+      },
+      {
+        "id": 99,
+        "result": "AC"
+      },
+      {
+        "id": 100,
+        "result": "AC"
+      },
+      {
+        "id": 101,
+        "result": "AC"
+      },
+      {
+        "id": 102,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "class UnionFind:\r\n\tdef __init__(self, n):\r\n\t\tself.n = n\r\n\t\tself.parents = [-1] * n\r\n\t\r\n\tdef find(self, x):\r\n\t\tif self.parents[x] < 0:\r\n\t\t\treturn x\r\n\t\telse:\r\n\t\t\tself.parents[x] = self.find(self.parents[x])\r\n\t\t\treturn self.parents[x]\r\n\t\r\n\tdef union(self, x, y):\r\n\t\tx = self.find(x)\r\n\t\ty = self.find(y)\r\n\t\tif x == y:\r\n\t\t\treturn\r\n\t\tif self.parents[x] > self.parents[y]:\r\n\t\t\tx, y = y, x\r\n\t\tself.parents[x] += self.parents[y]\r\n\t\tself.parents[y] = x\r\n\r\nn = int(input())\r\nupDown = UnionFind(2*n)\r\nconnect = UnionFind(n)\r\n\r\nfor i in range(n):\r\n\ta, b = map(int,input().split())\r\n\t\r\n\tconnect.union(i, a)\r\n\r\n\tif b == 1:\r\n\t\tupDown.union(i, a)\r\n\t\tupDown.union(n+i, n+a)\r\n\telse:\r\n\t\tupDown.union(i, n+a)\r\n\t\tupDown.union(n+i, a)\r\n\r\nv = [0 for i in range(2*n)]\r\nfor i in range(n):\r\n\tv[upDown.find(i)] += 1\r\n\r\nans = 0\r\nfor i in range(n):\r\n\tif connect.parents[i] < 0:\r\n\t\ttarg = -connect.parents[i]\r\n\t\t\r\n\t\t# 矛盾判定\r\n\t\tif upDown.find(i) == upDown.find(i+n):\r\n\t\t\tcontinue\r\n\t\t\r\n\t\t# 個数求めるやつ\r\n\t\ttmp = v[upDown.find(i)]\r\n\t\tans += max(tmp, targ-tmp)\r\n\r\nprint(ans)"
+  },
+  {
+    "id": 16,
+    "date": "2022-09-15 12:43:18.0",
+    "author": "zer0-star",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 205,
+        "result": "AC"
+      },
+      {
+        "id": 206,
+        "result": "AC"
+      },
+      {
+        "id": 207,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/extc++.h>\n\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    std::cout << a + b << std::endl;\n}"
+  },
+  {
+    "id": 17,
+    "date": "2022-09-15 12:51:48.0",
+    "author": "yuyu5510",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 202,
+        "result": "AC"
+      },
+      {
+        "id": 203,
+        "result": "AC"
+      },
+      {
+        "id": 204,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include<bits/stdc++.h>\n\nusing namespace std;\n\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a+b << endl;\n}"
+  },
+  {
+    "id": 18,
+    "date": "2022-09-15 13:27:55.0",
+    "author": "tqk",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 137,
+        "result": "AC"
+      },
+      {
+        "id": 138,
+        "result": "AC"
+      },
+      {
+        "id": 139,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/extc++.h>\n\nint main() {\n    int a, b;\n    std::cin >> a >> b;\n    std::cout << a + b << std::endl;\n}"
+  },
+  {
+    "id": 19,
+    "date": "2022-09-16 1:15:50.0",
+    "author": "cho",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 150,
+        "result": "AC"
+      },
+      {
+        "id": 151,
+        "result": "AC"
+      },
+      {
+        "id": 152,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\n\nint main(){\n    int a,b;\n    cin>>a>>b;\n    cout<<a+b<<endl;\n}\n"
+  },
+  {
+    "id": 20,
+    "date": "2022-09-16 1:21:21.0",
+    "author": "cho",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 153,
+        "result": "AC"
+      },
+      {
+        "id": 154,
+        "result": "AC"
+      },
+      {
+        "id": 155,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\r\n\r\nint main(){\r\n    int n;\r\n    cin>>n;\r\n    for(int i=1;i<=n;i++){\r\n        if(i%3==0){\r\n            cout<<\"Fizz\";\r\n            if(i%5==0) cout<<\"Buzz\";\r\n        }else if(i%5==0){\r\n            cout<<\"Buzz\";\r\n        }else{\r\n            cout<<i;\r\n        }\r\n        cout<<\"\\n\";\r\n    }\r\n}\r\n"
+  },
+  {
+    "id": 21,
+    "date": "2022-09-16 1:25:25.0",
+    "author": "cho",
+    "problem_id": 3,
+    "problem_title": "Nkuth's Plus Notation",
+    "testcase_num": 21,
+    "tasks": [
+      {
+        "id": 156,
+        "result": "AC"
+      },
+      {
+        "id": 157,
+        "result": "AC"
+      },
+      {
+        "id": 158,
+        "result": "AC"
+      },
+      {
+        "id": 159,
+        "result": "AC"
+      },
+      {
+        "id": 160,
+        "result": "AC"
+      },
+      {
+        "id": 161,
+        "result": "AC"
+      },
+      {
+        "id": 162,
+        "result": "AC"
+      },
+      {
+        "id": 163,
+        "result": "AC"
+      },
+      {
+        "id": 164,
+        "result": "AC"
+      },
+      {
+        "id": 165,
+        "result": "AC"
+      },
+      {
+        "id": 166,
+        "result": "AC"
+      },
+      {
+        "id": 167,
+        "result": "AC"
+      },
+      {
+        "id": 168,
+        "result": "AC"
+      },
+      {
+        "id": 169,
+        "result": "AC"
+      },
+      {
+        "id": 170,
+        "result": "AC"
+      },
+      {
+        "id": 171,
+        "result": "AC"
+      },
+      {
+        "id": 172,
+        "result": "AC"
+      },
+      {
+        "id": 173,
+        "result": "AC"
+      },
+      {
+        "id": 174,
+        "result": "AC"
+      },
+      {
+        "id": 175,
+        "result": "AC"
+      },
+      {
+        "id": 176,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\r\n\r\nint main(){\r\n    int n,a,b;\r\n\tcin>>n>>a>>b;\r\n    if(n==1) cout<<a+b<<endl;\r\n    if(n==2) cout<<a*b<<endl;\r\n    if(n==3) cout<<ll(pow(a,b))<<endl;\r\n}\r\n"
+  },
+  {
+    "id": 22,
+    "date": "2022-09-16 2:06:54.0",
+    "author": "cho",
+    "problem_id": 4,
+    "problem_title": "Sum of Max",
+    "testcase_num": 25,
+    "tasks": [
+      {
+        "id": 177,
+        "result": "AC"
+      },
+      {
+        "id": 178,
+        "result": "AC"
+      },
+      {
+        "id": 179,
+        "result": "AC"
+      },
+      {
+        "id": 180,
+        "result": "AC"
+      },
+      {
+        "id": 181,
+        "result": "AC"
+      },
+      {
+        "id": 182,
+        "result": "AC"
+      },
+      {
+        "id": 183,
+        "result": "AC"
+      },
+      {
+        "id": 184,
+        "result": "AC"
+      },
+      {
+        "id": 185,
+        "result": "AC"
+      },
+      {
+        "id": 186,
+        "result": "AC"
+      },
+      {
+        "id": 187,
+        "result": "AC"
+      },
+      {
+        "id": 188,
+        "result": "AC"
+      },
+      {
+        "id": 189,
+        "result": "AC"
+      },
+      {
+        "id": 190,
+        "result": "AC"
+      },
+      {
+        "id": 191,
+        "result": "AC"
+      },
+      {
+        "id": 192,
+        "result": "AC"
+      },
+      {
+        "id": 193,
+        "result": "AC"
+      },
+      {
+        "id": 194,
+        "result": "AC"
+      },
+      {
+        "id": 195,
+        "result": "AC"
+      },
+      {
+        "id": 196,
+        "result": "AC"
+      },
+      {
+        "id": 197,
+        "result": "AC"
+      },
+      {
+        "id": 198,
+        "result": "AC"
+      },
+      {
+        "id": 199,
+        "result": "AC"
+      },
+      {
+        "id": 200,
+        "result": "AC"
+      },
+      {
+        "id": 201,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\r\n\r\n// combination MOD\r\nconst int MOD=998244353;\r\nconst int MAX_N=2e5;\r\nvector<ll> fac(MAX_N+1,1);\r\nvector<ll> finv(MAX_N+1,1);\r\nvector<ll> inv(MAX_N+1,1);\r\nvoid comb_setup(){\r\n  for(int i=2;i<=MAX_N;i++){\r\n    fac.at(i)=(fac.at(i-1)*i)%MOD;\r\n    inv.at(i)=MOD-(inv.at(MOD%i)*(MOD/i))%MOD;\r\n    finv.at(i)=(finv.at(i-1)*inv.at(i))%MOD;\r\n  }\r\n}\r\nll comb(int n,int k){\r\n  if(n<k) return 0;\r\n  return fac.at(n)*(finv.at(n-k)*finv.at(k)%MOD)%MOD;\r\n}\r\n\r\nint main(){\r\n  comb_setup();\r\n  int n,k;\r\n  cin>>n>>k;\r\n  vector<int> a(n);\r\n  rep(i,n) cin>>a.at(i);\r\n  sort(a.begin(),a.end());\r\n  ll ans=0;\r\n  rep(i,n){\r\n    if(i<k-1) continue;\r\n    ans+=(comb(i,k-1)*a.at(i))%MOD;\r\n    ans%=MOD;\r\n  }\r\n  cout<<ans<<endl;\r\n}\r\n"
+  },
+  {
+    "id": 23,
+    "date": "2022-09-25 15:14:34.0",
+    "author": "kyosu",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 208,
+        "result": "AC"
+      },
+      {
+        "id": 209,
+        "result": "AC"
+      },
+      {
+        "id": 210,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "A, B = map(int,input().split())\nprint(A+B)"
+  },
+  {
+    "id": 24,
+    "date": "2022-09-25 15:15:29.0",
+    "author": "s9",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 211,
+        "result": "AC"
+      },
+      {
+        "id": 212,
+        "result": "AC"
+      },
+      {
+        "id": 213,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a,b; cin>>a>>b;\n    cout<<a+b<<endl;\n}"
+  },
+  {
+    "id": 25,
+    "date": "2022-10-16 15:44:33.0",
+    "author": "mehm8128",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 214,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "A,B=map(int,input())\nprint(A+B)"
+  },
+  {
+    "id": 26,
+    "date": "2022-10-16 15:46:03.0",
+    "author": "mehm8128",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 215,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "A,B=map(int(),input().split())\nprint(A+B)"
+  },
+  {
+    "id": 27,
+    "date": "2022-10-16 15:46:26.0",
+    "author": "mehm8128",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 216,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "A,B=map(int,input().split())\nprint(A+B)"
+  },
+  {
+    "id": 28,
+    "date": "2022-10-16 15:46:36.0",
+    "author": "mehm8128",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 217,
+        "result": "AC"
+      },
+      {
+        "id": 218,
+        "result": "AC"
+      },
+      {
+        "id": 219,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "A,B=map(int,input().split())\nprint(A+B)"
+  },
+  {
+    "id": 29,
+    "date": "2023-04-03 15:45:05.0",
+    "author": "itacha",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 220,
+        "result": "AC"
+      },
+      {
+        "id": 221,
+        "result": "AC"
+      },
+      {
+        "id": 222,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nint main() {\r\n   ll a,b;\r\n   cin >> a >> b;\r\n   cout << a + b << endl;\r\n}"
+  },
+  {
+    "id": 30,
+    "date": "2023-05-11 5:12:21.0",
+    "author": "bvv",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 223,
+        "result": "AC"
+      },
+      {
+        "id": 224,
+        "result": "AC"
+      },
+      {
+        "id": 225,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "print(sum(map(int,input().split())))"
+  },
+  {
+    "id": 31,
+    "date": "2023-05-11 5:14:48.0",
+    "author": "bvv",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 226,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "n = int(input())\nfor i in range(n):\n    if i%15==0:\n        print(\"FizzBuzz\")\n    elif i%3==0:\n        print(\"Fizz\")\n    elif i%5==0:\n        print(\"Buzz\")\n    else:\n        print(i)"
+  },
+  {
+    "id": 32,
+    "date": "2023-05-11 5:15:18.0",
+    "author": "bvv",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 227,
+        "result": "AC"
+      },
+      {
+        "id": 228,
+        "result": "AC"
+      },
+      {
+        "id": 229,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "n = int(input())\nfor i in range(1,n+1):\n    if i%15==0:\n        print(\"FizzBuzz\")\n    elif i%3==0:\n        print(\"Fizz\")\n    elif i%5==0:\n        print(\"Buzz\")\n    else:\n        print(i)"
+  },
+  {
+    "id": 33,
+    "date": "2023-06-15 11:35:15.0",
+    "author": "hiro1729",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 230,
+        "result": "AC"
+      },
+      {
+        "id": 231,
+        "result": "AC"
+      },
+      {
+        "id": 232,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "a, b = map(int, input().split())\nprint(a + b)"
+  },
+  {
+    "id": 34,
+    "date": "2023-06-19 3:06:16.0",
+    "author": "ikura-hamu",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 233,
+        "result": "AC"
+      },
+      {
+        "id": 234,
+        "result": "AC"
+      },
+      {
+        "id": 235,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "a,b = map(int, input().split())\nprint(a+b)"
+  },
+  {
+    "id": 35,
+    "date": "2023-07-05 6:55:34.0",
+    "author": "hayatroid",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 236,
+        "result": "AC"
+      },
+      {
+        "id": 237,
+        "result": "AC"
+      },
+      {
+        "id": 238,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "A, B = map(int, input().split())\nprint(A + B)\n"
+  },
+  {
+    "id": 36,
+    "date": "2023-07-05 7:01:53.0",
+    "author": "hayatroid",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 239,
+        "result": "AC"
+      },
+      {
+        "id": 240,
+        "result": "AC"
+      },
+      {
+        "id": 241,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "N = int(input())\n\nfor i in range(1, N + 1):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)\n"
+  },
+  {
+    "id": 37,
+    "date": "2023-07-05 7:18:35.0",
+    "author": "hayatroid",
+    "problem_id": 3,
+    "problem_title": "Nkuth's Plus Notation",
+    "testcase_num": 21,
+    "tasks": [
+      {
+        "id": 242,
+        "result": "AC"
+      },
+      {
+        "id": 243,
+        "result": "AC"
+      },
+      {
+        "id": 244,
+        "result": "AC"
+      },
+      {
+        "id": 245,
+        "result": "AC"
+      },
+      {
+        "id": 246,
+        "result": "AC"
+      },
+      {
+        "id": 247,
+        "result": "AC"
+      },
+      {
+        "id": 248,
+        "result": "AC"
+      },
+      {
+        "id": 249,
+        "result": "AC"
+      },
+      {
+        "id": 250,
+        "result": "AC"
+      },
+      {
+        "id": 251,
+        "result": "AC"
+      },
+      {
+        "id": 252,
+        "result": "AC"
+      },
+      {
+        "id": 253,
+        "result": "AC"
+      },
+      {
+        "id": 254,
+        "result": "AC"
+      },
+      {
+        "id": 255,
+        "result": "AC"
+      },
+      {
+        "id": 256,
+        "result": "AC"
+      },
+      {
+        "id": 257,
+        "result": "AC"
+      },
+      {
+        "id": 258,
+        "result": "AC"
+      },
+      {
+        "id": 259,
+        "result": "AC"
+      },
+      {
+        "id": 260,
+        "result": "AC"
+      },
+      {
+        "id": 261,
+        "result": "AC"
+      },
+      {
+        "id": 262,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "N, A, B = map(int, input().split())\n\nif N == 1:\n    print(A + B)\nelif N == 2:\n    print(A * B)\nelif N == 3:\n    print(A ** B)\n"
+  },
+  {
+    "id": 38,
+    "date": "2023-07-05 7:49:56.0",
+    "author": "hayatroid",
+    "problem_id": 4,
+    "problem_title": "Sum of Max",
+    "testcase_num": 25,
+    "tasks": [
+      {
+        "id": 263,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "MOD = 998244353\ndef comb(n, r):\n    nu = 1\n    de = 1\n    for i in range(r):\n        nu = nu * (n - i) % MOD\n        de = de * (i + 1) % MOD\n    return nu * pow(de, -1, MOD) % MOD\n\n\nN, K = map(int, input().split())\nA = list(map(int, input().split()))\n\nA.sort()\nans = 0\nfor i in range(K - 1, N):\n    ans = (ans + A[i] * comb(i, i - K + 1)) % MOD\n\nprint(ans)\n"
+  },
+  {
+    "id": 39,
+    "date": "2023-07-05 7:50:07.0",
+    "author": "hayatroid",
+    "problem_id": 4,
+    "problem_title": "Sum of Max",
+    "testcase_num": 25,
+    "tasks": [
+      {
+        "id": 264,
+        "result": "AC"
+      },
+      {
+        "id": 265,
+        "result": "AC"
+      },
+      {
+        "id": 266,
+        "result": "AC"
+      },
+      {
+        "id": 267,
+        "result": "AC"
+      },
+      {
+        "id": 268,
+        "result": "AC"
+      },
+      {
+        "id": 269,
+        "result": "AC"
+      },
+      {
+        "id": 270,
+        "result": "AC"
+      },
+      {
+        "id": 271,
+        "result": "AC"
+      },
+      {
+        "id": 272,
+        "result": "AC"
+      },
+      {
+        "id": 273,
+        "result": "AC"
+      },
+      {
+        "id": 274,
+        "result": "AC"
+      },
+      {
+        "id": 275,
+        "result": "AC"
+      },
+      {
+        "id": 276,
+        "result": "AC"
+      },
+      {
+        "id": 277,
+        "result": "AC"
+      },
+      {
+        "id": 278,
+        "result": "AC"
+      },
+      {
+        "id": 279,
+        "result": "AC"
+      },
+      {
+        "id": 280,
+        "result": "AC"
+      },
+      {
+        "id": 281,
+        "result": "AC"
+      },
+      {
+        "id": 282,
+        "result": "AC"
+      },
+      {
+        "id": 283,
+        "result": "AC"
+      },
+      {
+        "id": 284,
+        "result": "AC"
+      },
+      {
+        "id": 285,
+        "result": "AC"
+      },
+      {
+        "id": 286,
+        "result": "AC"
+      },
+      {
+        "id": 287,
+        "result": "AC"
+      },
+      {
+        "id": 288,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "MOD = 998244353\ndef comb(n, r):\n    nu = 1\n    de = 1\n    for i in range(r):\n        nu = nu * (n - i) % MOD\n        de = de * (i + 1) % MOD\n    return nu * pow(de, -1, MOD) % MOD\n\n\nN, K = map(int, input().split())\nA = list(map(int, input().split()))\n\nA.sort()\nans = 0\nfor i in range(K - 1, N):\n    ans = (ans + A[i] * comb(i, i - K + 1)) % MOD\n\nprint(ans)\n"
+  },
+  {
+    "id": 40,
+    "date": "2023-08-19 12:53:11.0",
+    "author": "pirosiki",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 289,
+        "result": "AC"
+      },
+      {
+        "id": 290,
+        "result": "AC"
+      },
+      {
+        "id": 291,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "a, b = map(int, input().split())\nprint(a + b)"
+  },
+  {
+    "id": 41,
+    "date": "2023-10-30 0:07:27.0",
+    "author": "hiro1729",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 292,
+        "result": "AC"
+      },
+      {
+        "id": 293,
+        "result": "AC"
+      },
+      {
+        "id": 294,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "for i in range(1, int(input()) + 1):\n    s = \"\"\n    if i % 3 == 0:\n        s += \"Fizz\"\n    if i % 5 == 0:\n        s += \"Buzz\"\n    print(s if s else i)"
+  },
+  {
+    "id": 42,
+    "date": "2023-12-16 7:55:14.0",
+    "author": "kangping",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 295,
+        "result": "AC"
+      },
+      {
+        "id": 296,
+        "result": "AC"
+      },
+      {
+        "id": 297,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "A,B = map(int,input().split())\nprint(A+B)"
+  },
+  {
+    "id": 43,
+    "date": "2024-04-15 17:20:57.0",
+    "author": "kobaryo222",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 298,
+        "result": "AC"
+      },
+      {
+        "id": 299,
+        "result": "AC"
+      },
+      {
+        "id": 300,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 44,
+    "source": "A, B = map(int, input().split())\nprint(A + B)"
+  },
+  {
+    "id": 44,
+    "date": "2024-05-29 11:23:25.0",
+    "author": "daigokanda",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 301,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "A, B = input().split()\n\nprint(A+B)"
+  },
+  {
+    "id": 45,
+    "date": "2024-05-29 11:25:04.0",
+    "author": "daigokanda",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 302,
+        "result": "AC"
+      },
+      {
+        "id": 303,
+        "result": "AC"
+      },
+      {
+        "id": 304,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 1,
+    "source": "A, B = input().split()\n\nprint(int(A) + int(B))"
+  },
+  {
+    "id": 46,
+    "date": "2024-08-16 12:33:15.0",
+    "author": "む",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 305,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include <iostream>\nusing namespace std;\n\nint main{\n    int a,b;\n    cin >> a >> b;\n    cout << a + b << endl;\n}"
+  },
+  {
+    "id": 47,
+    "date": "2024-09-14 8:31:09.0",
+    "author": "a",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 306,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "A = input()\nB = input()\nprint(A + B)"
+  },
+  {
+    "id": 48,
+    "date": "2024-09-14 8:31:56.0",
+    "author": "a",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 307,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "A = int(input())\nB = int(input())\nprint(A + B)"
+  },
+  {
+    "id": 49,
+    "date": "2024-09-24 1:05:55.0",
+    "author": "むごっほ",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 308,
+        "result": "AC"
+      },
+      {
+        "id": 309,
+        "result": "AC"
+      },
+      {
+        "id": 310,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 117,
+    "source": "set buf [split [gets stdin]]\nputs [expr [lindex $buf 0] + [lindex $buf 1]]"
+  },
+  {
+    "id": 50,
+    "date": "2024-09-24 1:14:19.0",
+    "author": "むごっほ",
+    "problem_id": 9,
+    "problem_title": "FizzBuzz",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 311,
+        "result": "AC"
+      },
+      {
+        "id": 312,
+        "result": "AC"
+      },
+      {
+        "id": 313,
+        "result": "AC"
+      }
+    ],
+    "result": "AC",
+    "language_id": 117,
+    "source": "set n [gets stdin]\nfor {set i 1} {$i <= $n} {incr i} {\n    if {$i % 15 == 0} {\n        puts \"FizzBuzz\"\n    } elseif {$i % 3 == 0} {\n        puts \"Fizz\"\n    } elseif {$i % 5 == 0} {\n        puts \"Buzz\"\n    } else {\n        puts $i\n    }\n}"
+  },
+  {
+    "id": 51,
+    "date": "2024-10-06 5:17:53.0",
+    "author": "111",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 314,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "a = int(input())\r\nb = int(input())\r\n\r\n# 入力された整数の二乗を計算する\r\nsquared = a+b\r\n\r\n# 結果を出力する\r\nprint(squared)\r\n"
+  },
+  {
+    "id": 52,
+    "date": "2024-10-06 5:18:27.0",
+    "author": "111",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 315,
+        "result": "WA"
+      }
+    ],
+    "result": "WA",
+    "language_id": 1,
+    "source": "a = int(input())\r\nb= int(input())\r\n\r\n# 入力された整数の二乗を計算する\r\nsquared = a+b\r\n\r\n# 結果を出力する\r\nprint(squared)\r\n"
+  },
+  {
+    "id": 53,
+    "date": "2025-10-15 9:21:15.0",
+    "author": "s1owtype",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 316,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 18,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << \"\\\"\n    \n}"
+  },
+  {
+    "id": 54,
+    "date": "2025-12-26 6:24:47.0",
+    "author": "jiyujin816",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 317,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    int a,b;\n    cin>>a>>b;\n    cout<<a+b;\n}"
+  },
+  {
+    "id": 55,
+    "date": "2025-12-26 6:26:55.0",
+    "author": "jiyujin816",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 318,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include <iostream>\nusing namespace std;\n\nint main(){\n    int a,b;\n    cin>>a>>b;\n    cout<<a+b<<\"\\n\";\n    return 0;\n}"
+  },
+  {
+    "id": 56,
+    "date": "2026-03-04 6:45:38.0",
+    "author": "keni____",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 319,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    long long a, b;\n    cin >> a >> b;\n    cout << a + b << \" \";\n}"
+  },
+  {
+    "id": 57,
+    "date": "2026-03-04 6:47:28.0",
+    "author": "keni____",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 320,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << \"\\n\";\n    return 0;\n}"
+  },
+  {
+    "id": 58,
+    "date": "2026-03-04 6:49:11.0",
+    "author": "keni____",
+    "problem_id": 1,
+    "problem_title": "A+B",
+    "testcase_num": 3,
+    "tasks": [
+      {
+        "id": 321,
+        "result": "CE"
+      }
+    ],
+    "result": "CE",
+    "language_id": 0,
+    "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n}"
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "id": 29,
+  "date": "2023-04-03 15:45:05.0",
+  "author": "itacha",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 220,
+      "result": "AC"
+    },
+    {
+      "id": 221,
+      "result": "AC"
+    },
+    {
+      "id": 222,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include <bits/stdc++.h>\r\nusing namespace std;\r\nusing ll = long long;\r\n\r\nint main() {\r\n   ll a,b;\r\n   cin >> a >> b;\r\n   cout << a + b << endl;\r\n}"
+}

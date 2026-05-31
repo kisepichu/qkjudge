@@ -30,17 +30,18 @@
 
 ## チェックリスト
 
-- [ ] `migration/legacy-snapshot/scrape.py` を作成 (上記取得・保存・リトライ・再開)
-- [ ] `migration/legacy-snapshot/README.md` に実行方法と取得日時・件数を記録
-- [ ] 実行して `problems / submissions / tasks` を全件取得
-- [ ] 件数の妥当性を確認 (submissions の `pages_number` × ~10 と一致、tasks が submission に紐づく)
-- [ ] スナップショット JSON をコミット
+- [x] `migration/legacy-snapshot/scrape.py` を作成 (上記取得・保存・リトライ・再開)
+- [x] `migration/legacy-snapshot/README.md` に実行方法と取得日時・件数を記録
+- [x] 実行して `problems / submissions / tasks` を全件取得
+- [x] 件数の妥当性を確認 (submissions の `pages_number` × ~10 と一致、tasks が submission に紐づく)
+- [x] スナップショット JSON をコミット
 
 ## 完了条件
 
-- [ ] 旧サーバーが停止しても、全 submission の source と全 task の入出力/結果が手元 JSON に残っている
-- [ ] スクリプトは再実行で安全 (再開可能・公開 API のみ)
+- [x] 旧サーバーが停止しても、全 submission の source と全 task の入出力/結果が手元 JSON に残っている
+- [x] スクリプトは再実行で安全 (再開可能・公開 API のみ)
 
 ## 作業ログ
 
 - 2026-05-31: タスク生成。旧 API の応答形状を確認済 (例: task 321 = output "13"/cpu_time "-1"/CE、task 308 = cpu_time "0.00"/AC)。submissions は `pages_number:6`。
+- 2026-06-01: `scrape.py` (stdlib のみ・リトライ/バックオフ・`raw/` キャッシュによる冪等再開) を実装し全巡回。取得件数 problems=5 / submissions=58 (`pages_number`=6, 5 ページ×10 + 最終 8 件) / tasks=275。検証: 全 submission 詳細が宣言する task id (275, 重複なし) と取得 tasks が完全一致、`submission_id` が snapshot 外を指す孤児 task=0、source 空の submission=0。再実行は全件キャッシュヒットで ~0.06s・追加 fetch なし (冪等性確認)。`migration/legacy-snapshot/` 一式 (scrape.py / README.md / problems.json / submissions.json / tasks.json / meta.json / raw/) をコミット。公開 API のみで秘密情報なし。

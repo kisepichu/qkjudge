@@ -1,0 +1,25 @@
+{
+  "id": 19,
+  "date": "2022-09-16 1:15:50.0",
+  "author": "cho",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 150,
+      "result": "AC"
+    },
+    {
+      "id": 151,
+      "result": "AC"
+    },
+    {
+      "id": 152,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 0,
+  "source": "#include <bits/stdc++.h>\nusing namespace std;\nusing ll = long long;\n#define rep(i,n) for (int i=0;i<(int)(n);i++)\n\nint main(){\n    int a,b;\n    cin>>a>>b;\n    cout<<a+b<<endl;\n}\n"
+}

@@ -1,0 +1,17 @@
+{
+  "id": 4,
+  "date": "2022-09-11 12:09:50.0",
+  "author": "tqk",
+  "problem_id": 3,
+  "problem_title": "Nkuth's Plus Notation",
+  "testcase_num": 21,
+  "tasks": [
+    {
+      "id": 7,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 0,
+  "source": "#include<bits/stdc++.h>\nusing namespace std;\nint main(){\n    vector<int>a(3);\n    \n    cin>>a[0]>>a[1];\n    cout<<a[1]/a[2]<<\"zero division ok!\"<<endl;\n    a[3]=1;\n    cout<<a[3]<<\"out of index okk!\"<<endl;\n}"
+}

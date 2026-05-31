@@ -1,0 +1,113 @@
+{
+  "id": 13,
+  "date": "2022-09-15 11:34:33.0",
+  "author": "shobonvip",
+  "problem_id": 4,
+  "problem_title": "Sum of Max",
+  "testcase_num": 25,
+  "tasks": [
+    {
+      "id": 48,
+      "result": "AC"
+    },
+    {
+      "id": 49,
+      "result": "AC"
+    },
+    {
+      "id": 50,
+      "result": "AC"
+    },
+    {
+      "id": 51,
+      "result": "AC"
+    },
+    {
+      "id": 52,
+      "result": "AC"
+    },
+    {
+      "id": 53,
+      "result": "AC"
+    },
+    {
+      "id": 54,
+      "result": "AC"
+    },
+    {
+      "id": 55,
+      "result": "AC"
+    },
+    {
+      "id": 56,
+      "result": "AC"
+    },
+    {
+      "id": 57,
+      "result": "AC"
+    },
+    {
+      "id": 58,
+      "result": "AC"
+    },
+    {
+      "id": 59,
+      "result": "AC"
+    },
+    {
+      "id": 60,
+      "result": "AC"
+    },
+    {
+      "id": 61,
+      "result": "AC"
+    },
+    {
+      "id": 62,
+      "result": "AC"
+    },
+    {
+      "id": 63,
+      "result": "AC"
+    },
+    {
+      "id": 64,
+      "result": "AC"
+    },
+    {
+      "id": 65,
+      "result": "AC"
+    },
+    {
+      "id": 66,
+      "result": "AC"
+    },
+    {
+      "id": 67,
+      "result": "AC"
+    },
+    {
+      "id": 68,
+      "result": "AC"
+    },
+    {
+      "id": 69,
+      "result": "AC"
+    },
+    {
+      "id": 70,
+      "result": "AC"
+    },
+    {
+      "id": 71,
+      "result": "AC"
+    },
+    {
+      "id": 72,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 44,
+  "source": "mod = 998244353\r\nN = 3 * 10**5 + 5\r\nfact = [1]*(N+1)\r\nfactinv = [1]*(N+1)\r\n\r\nfor i in range(2, N+1):\r\n\tfact[i] = fact[i-1] * i % mod\r\n\r\nfactinv[-1] = pow(fact[-1], mod-2, mod)\r\nfor i in range(N-1, 1, -1):\r\n\tfactinv[i] = factinv[i+1] * (i+1) % mod\r\n\r\ndef cmb(a, b):\r\n\tif (a < b) or (b < 0):\r\n\t\treturn 0\r\n\treturn fact[a] * factinv[b] % mod * factinv[a-b] % mod\r\n\r\nn,k = map(int,input().split())\r\na = list(map(int,input().split()))\r\na.sort()\r\n\r\nans = 0\r\nfor i in range(n):\r\n\tans += a[i] * cmb(i,k-1)\r\n\tans %= mod\r\n\r\nprint(ans)"
+}

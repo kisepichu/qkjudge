@@ -1,0 +1,10 @@
+{
+  "id": 316,
+  "submission_id": 53,
+  "input": "6 7\n",
+  "output": "\njdoodle.cpp:6:22: warning: missing terminating \" character\n    6 |     cout << a + b << \"\\\"\n      |                      ^\njdoodle.cpp:6:22: error: missing terminating \" character\n    6 |     cout << a + b << \"\\\"\n      |                      ^~~\njdoodle.cpp: In function ‘int main()’:\njdoodle.cpp:8:1: error: expected primary-expression before ‘}’ token\n    8 | }\n      | ^\n\n\n JDoodle - Timeout \nIf your program reads input, please enter the inputs in the STDIN box above or try to enable the \"Interactive\" mode option above.\nPlease check your program does not contain an infinite loop. \nContact JDoodle support at hello@jdoodle.com for more information.",
+  "expected": "13\n",
+  "result": "CE",
+  "memory": "1024",
+  "cpu_time": "-1"
+}
