@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 環境共通リソース。環境差分 (namespace / Ingress host / image tag / CORS origin) は
+# overlays/{prod,staging} で吸収する。base 単体では namespace を持たない (overlay が設定)。
+resources:
+  - mariadb-service.yaml
+  - mariadb-statefulset.yaml
+  - app-service.yaml
+  - app-deployment.yaml
+  - ingress.yaml
+  - backup-cronjob.yaml
+  - backup-pvc.yaml
+
+# 非 secret な共通 env。overlay 側で CORS_ALLOW_ORIGIN を behavior: merge で足す。
+# secret (DB/SESSION_KEY/webhook/JDoodle) は qkjudge-secrets を namespace に手動投入する
+# (README 参照。平文をコミットしないため secretGenerator は使わない)。
+configMapGenerator:
+  - name: qkjudge-config
+    literals:
+      - QKJUDGE_ADDRESS=0.0.0.0
+      - MARIADB_HOSTNAME=qkjudge-mariadb
+      - DB_PORT=3306
+      - MARIADB_DATABASE=qkjudge
+      # DB イメージは MARIADB_USER を、アプリは MARIADB_USERNAME を読む (名前は違うが同値)。
+      - MARIADB_USER=qkjudge
+      - MARIADB_USERNAME=qkjudge
+      # prod / staging とも https 公開なので Secure cookie を有効化。
+      - COOKIE_SECURE=true
+
+# image tag は overlay の images: で差す (prod=master / staging=dev)。
+images:
+  - name: ghcr.io/kisepichu/qkjudge
+    newTag: latest

@@ -1,0 +1,11 @@
+# mariadb-dump CronJob の保存先 (local-path)。将来 R2/B2 等オフサイトへ拡張余地。
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: qkjudge-backup
+spec:
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 5Gi

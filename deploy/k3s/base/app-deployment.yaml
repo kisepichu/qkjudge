@@ -1,0 +1,116 @@
+# qkjudge アプリ (ghcr.io/kisepichu/qkjudge)。image tag は overlay の images: で差す。
+# env: 非 secret は qkjudge-config (configMap) を envFrom で、secret はアプリが必要なキーだけ
+#   secretKeyRef で個別に注入する (最小権限。qkjudge-secrets 全体を envFrom すると未使用の
+#   MARIADB_ROOT_PASSWORD まで持ってしまうため避ける)。
+# problems: emptyDir。entrypoint (docker-entrypoint.sh) が起動時に dist を shallow clone し、
+#   実行時は POST /fetch/problems で pull する。中身は git から完全再現できるので永続化しない。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qkjudge-app
+  labels:
+    app: qkjudge-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qkjudge-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: qkjudge-app
+    spec:
+      # アプリは起動時に DB へ接続し、失敗すると panic で終了する (src/main.rs の connect().unwrap())。
+      # MariaDB 未起動のタイミングで CrashLoopBackOff になるのを避けるため、DB が応答するまで待つ。
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.36
+          # 認証情報に依存しない TCP 疎通で待つ (mariadb-admin ping は root パスワード設定時に
+          # access denied で抜けられないことがあるため避ける)。MariaDB は initdb 完了後に
+          # TCP 3306 を開けるので、ポート open = 接続受付可能の良い指標になる。
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z qkjudge-mariadb 3306; do
+                echo "[wait-for-db] waiting for qkjudge-mariadb:3306 ..."
+                sleep 2
+              done
+              echo "[wait-for-db] db is up"
+      containers:
+        - name: qkjudge
+          image: ghcr.io/kisepichu/qkjudge:latest
+          # overlay の可変タグ (:master / :dev) を再デプロイ時に確実に pull する
+          # (default IfNotPresent だと更新イメージが反映されないため)。
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: qkjudge-config
+          env:
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: MARIADB_PASSWORD
+            - name: SESSION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: SESSION_KEY
+            - name: GITHUB_WEBHOOK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: GITHUB_WEBHOOK_TOKEN
+            - name: COMPILER_API_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: COMPILER_API_CLIENT_ID
+            - name: COMPILER_API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: COMPILER_API_CLIENT_SECRET
+          volumeMounts:
+            - name: problems
+              mountPath: /data/problems
+          # entrypoint が problems を clone してから exec するため cold start が伸びうる。
+          # startupProbe で起動完了まで liveness/readiness を評価させず、遅い clone での
+          # 再起動ループを防ぐ (最大 5s*60=300s 待つ)。
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 20
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: problems
+          emptyDir: {}

@@ -1,0 +1,23 @@
+# k3s 同梱 Traefik で受ける Ingress。host は overlay の ingress-patch.yaml で差し替える
+# (prod=api.qkjudge.kisen.one / staging=api.dev.qkjudge.kisen.one)。
+# 経路: Cloudflare tunnel → cloudflared → Traefik(web:80) → この Ingress → qkjudge-app:8080。
+# TLS 終端は Cloudflare edge。クラスタ内は平文 http (web entrypoint) で受ける。
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qkjudge
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: api.qkjudge.kisen.one
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qkjudge-app
+                port:
+                  number: 8080

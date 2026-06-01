@@ -1,0 +1,90 @@
+# MariaDB 11.4 (TASK-002 の compose と同一バージョン)。PVC は local-path (k3s 同梱)。
+# 初期スキーマは ConfigMap `mariadb-initdb` (= migrations/v1.2.3.sql) を initdb.d にマウントして
+# 空 DB のみ自動投入する (StatefulSet 初回起動時 = PVC が空のときだけ docker-entrypoint が実行)。
+# `mariadb-initdb` は平文スキーマだが secret ではないので README の手順で namespace に手動作成する
+# (migrations/ を単一ソースに保つため。kustomize の load-restrictor を避ける狙いもある)。
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qkjudge-mariadb
+  labels:
+    app: qkjudge-mariadb
+spec:
+  serviceName: qkjudge-mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qkjudge-mariadb
+  template:
+    metadata:
+      labels:
+        app: qkjudge-mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:11.4
+          ports:
+            - name: mysql
+              containerPort: 3306
+          env:
+            - name: MARIADB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: qkjudge-config
+                  key: MARIADB_DATABASE
+            - name: MARIADB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: qkjudge-config
+                  key: MARIADB_USER
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: MARIADB_ROOT_PASSWORD
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: MARIADB_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          readinessProbe:
+            exec:
+              command: ["healthcheck.sh", "--connect", "--innodb_initialized"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["healthcheck.sh", "--connect", "--innodb_initialized"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: initdb
+          configMap:
+            name: mariadb-initdb
+            # 初回 (PVC 空) のみ使う。初期化後に ConfigMap を削除しても再スケジュール可能なよう
+            # 必須依存にしない (未投入での起動不能を避ける。投入漏れは README で担保)。
+            optional: true
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 5Gi
