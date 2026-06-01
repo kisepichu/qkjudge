@@ -1,6 +1,5 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
 use std::fs::File;
 
 use std::sync::*;
@@ -8,12 +7,6 @@ use tokio::sync::Mutex;
 
 #[derive(Deserialize)]
 struct ProblemNewRequest {
-    path: String,
-}
-
-#[derive(Deserialize, Default)]
-struct Problem {
-    id: i32,
     path: String,
 }
 

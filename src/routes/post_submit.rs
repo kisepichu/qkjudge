@@ -27,6 +27,9 @@ struct SubmitResponse {
     id: i32,
 }
 
+// Populated from `SELECT *` via `query_as!`, so every column must have a field;
+// `id`, `title`, `author`, `difficulty` are mapped but not read at runtime.
+#[allow(dead_code)]
 #[derive(Default, Deserialize)]
 struct ProblemLocation {
     id: i32,
@@ -38,14 +41,6 @@ struct ProblemLocation {
     path: String,
     visible: i8,
 }
-#[derive(Serialize)]
-struct Problem {
-    problem_id: i32,
-    title: String,
-    author: String,
-    difficulty: i64,
-}
-
 #[derive(Deserialize, Default)]
 #[allow(non_snake_case)]
 struct CompilerApiResponse {
@@ -284,12 +279,12 @@ async fn post_submit_handler(
 ) -> impl Responder {
     // ログインしていなかったら弾く
     let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
+    if username.is_empty() {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
     // let username = "tqk";
 
-    if req.source == "" {
+    if req.source.is_empty() {
         return HttpResponse::BadRequest().json(SubmitResponse { id: -1 });
     }
 
@@ -335,7 +330,7 @@ async fn post_submit_handler(
 
     // println!("submit 3")
     // submission を db に insert
-    let mut submission_id: i32 = 0;
+    let submission_id: i32;
     {
         let pool = pool_data.lock().await;
         submission_id = sqlx::query!(
@@ -361,11 +356,9 @@ async fn post_submit_handler(
         problems_root,
         problem,
         req,
-        submission_id as i32,
+        submission_id,
     ));
 
     // println!("submit 5")
-    HttpResponse::Ok().json(SubmitResponse {
-        id: submission_id as i32,
-    })
+    HttpResponse::Ok().json(SubmitResponse { id: submission_id })
 }

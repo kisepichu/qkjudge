@@ -1,38 +1,12 @@
 use actix_identity::Identity;
 use actix_web::{get, HttpResponse, Responder};
 
-use serde::{Deserialize, Serialize};
 use serde_json::json;
-
-#[derive(Deserialize)]
-struct ExecuteRequest {
-    language: String,
-    language_version: String,
-    source: String,
-    input: String,
-}
-
-#[derive(Deserialize, Default)]
-#[allow(non_snake_case)]
-struct CompilerApiResponse {
-    output: String,
-    statusCode: i32,
-    memory: String,
-    cpuTime: String,
-}
-
-#[derive(Serialize)]
-struct ExecuteResponse {
-    output: String,
-    status_code: i32,
-    memory: String,
-    cpu_time: String,
-}
 
 #[get("/execute")]
 async fn get_execute_handler(id: Identity) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
+    if username.is_empty() {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
     let client = reqwest::Client::new();

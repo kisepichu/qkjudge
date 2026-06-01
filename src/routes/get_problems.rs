@@ -14,8 +14,6 @@ enum SolutionStatus {
     NotSubmitted,
     NotAccepted,
     Accepted,
-
-    SolutionStatusNum,
 }
 
 #[derive(Deserialize)]
@@ -69,7 +67,7 @@ async fn get_problems_handler(
     for problem in problems {
         let mut status = SolutionStatus::NotLogged;
         let mut last_submission = -1;
-        if username != "" {
+        if !username.is_empty() {
             let pool = pool_data.lock().await;
             let submission_ac = sqlx::query_as!(
                 SubmissionId,
@@ -108,8 +106,8 @@ async fn get_problems_handler(
             title: problem.title.clone(),
             author: problem.author,
             difficulty: problem.difficulty,
-            status: status,
-            last_submission: last_submission,
+            status,
+            last_submission,
         });
     }
 

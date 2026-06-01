@@ -15,8 +15,6 @@ enum SolutionStatus {
     NotSubmitted,
     NotAccepted,
     Accepted,
-
-    SolutionStatusNum,
 }
 
 #[derive(Deserialize)]
@@ -26,6 +24,8 @@ struct SubmissionId {
 
 #[derive(Default, Deserialize)]
 struct Problem {
+    // selected by the `query_as!` query below but not read at runtime
+    #[allow(dead_code)]
     id: i32,
     title: String,
     author: String,
@@ -74,7 +74,7 @@ async fn get_problems_pid_handler(
         return HttpResponse::Forbidden().body("hidden");
     }
 
-    if problem.path == "" {
+    if problem.path.is_empty() {
         return HttpResponse::NotFound().finish();
     }
 
@@ -95,7 +95,7 @@ async fn get_problems_pid_handler(
 
     let mut status = SolutionStatus::NotLogged;
     let mut last_submission = -1;
-    if username != "" {
+    if !username.is_empty() {
         let pool = pool_data.lock().await;
         let submission_ac = sqlx::query_as!(
             SubmissionId,
@@ -137,7 +137,7 @@ async fn get_problems_pid_handler(
         statement: statement_raw,
         time_limit: problem.time_limit,
         memory_limit: problem.memory_limit,
-        status: status,
-        last_submission: last_submission,
+        status,
+        last_submission,
     })
 }

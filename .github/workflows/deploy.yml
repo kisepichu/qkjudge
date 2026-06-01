@@ -1,0 +1,100 @@
+# Deploy: master→prod / dev→staging を「push したら自動反映」する。
+#
+# 設計 (TASK-004):
+#   build  : GitHub-hosted runner でイメージをビルドし GHCR に push (:{branch} と :{sha})。
+#   deploy : leafeon のセルフホスト Runner で、対象 namespace の Deployment image を
+#            イミュータブルな :{sha} に差し替えて rollout する。
+#
+# セキュリティ堅牢化 (TASK-004 必須要件):
+#   - トリガは push: [master, dev] のみ。fork PR (pull_request) では起動しないので、
+#     untrusted コードがセルフホスト Runner に載らず、secret も露出しない。
+#   - GitHub Environment (prod/staging) でデプロイ用 kubeconfig を分離注入する。
+#     各 kubeconfig は namespace-scoped な ServiceAccount トークン (Deployment 更新権限のみ。
+#     deploy/k3s/base/deployer-rbac.yaml の Role 参照) なので、staging のデプロイ経路から
+#     prod namespace を触れない。cluster-admin kubeconfig は Runner に置かない。
+#   - deploy ジョブは self-hosted ラベルに固定し、build は GitHub-hosted に置く。
+name: deploy
+
+on:
+  push:
+    branches: [master, dev]
+
+# 同一ブランチのデプロイが重ならないようにする (古い push は新しい push に置き換え)。
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/kisepichu/qkjudge
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # GHCR へ push するため
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # :{branch} (k3s overlay が参照する可変タグ) と :{sha} (デプロイ固定用イミュータブルタグ) を push。
+      # SQLX_OFFLINE は Dockerfile 内で設定済みなので build-arg 不要。
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.ref_name }}
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, leafeon]
+    # master→prod / dev→staging。Environment ごとに kubeconfig secret を分離し、保護ルールも付けられる。
+    environment: ${{ github.ref_name == 'master' && 'prod' || 'staging' }}
+    steps:
+      - name: Resolve target namespace
+        id: target
+        run: |
+          if [ "${{ github.ref_name }}" = "master" ]; then
+            echo "namespace=qkjudge-prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "namespace=qkjudge-staging" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Environment-scoped secret の kubeconfig (namespace-scoped SA トークン) を一時ファイルに展開。
+      # $RUNNER_TEMP はジョブ終了時に消える。念のため明示的にも消す (下の cleanup)。
+      - name: Write kubeconfig
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DATA }}
+        run: |
+          umask 077
+          printf '%s' "$KUBECONFIG_DATA" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      # イミュータブルな :{sha} に差し替える。SA Role は当該 namespace の Deployment 更新権限のみ。
+      - name: Set image and roll out
+        run: |
+          NS='${{ steps.target.outputs.namespace }}'
+          kubectl -n "$NS" set image deployment/qkjudge-app \
+            qkjudge="${IMAGE}:${{ github.sha }}"
+          kubectl -n "$NS" rollout status deployment/qkjudge-app --timeout=300s
+
+      - name: Cleanup kubeconfig
+        if: always()
+        run: rm -f "$RUNNER_TEMP/kubeconfig"

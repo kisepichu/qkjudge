@@ -109,8 +109,8 @@ async fn get_submissions_sid_handler(
         problem_id: submission.problem_id,
         problem_title: submission.problem_title,
         testcase_num: submission.testcase_num,
-        tasks: tasks,
-        result: result,
+        tasks,
+        result,
         language_id: submission.language_id,
         source: submission.source,
     })

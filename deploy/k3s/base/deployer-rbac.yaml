@@ -1,0 +1,52 @@
+# セルフホスト Runner (TASK-004 deploy ジョブ) 用の namespace-scoped デプロイ権限。
+# base に置くので overlay の namespace (qkjudge-prod / qkjudge-staging) ごとに別個に作られ、
+# 各 namespace の Deployment 更新権限しか持たない (cluster-admin は渡さない)。
+# これにより staging のデプロイ経路から prod namespace を触れない。
+#
+# Runner は「イメージ差し替え + rollout 監視」だけ行う (kubectl set image / rollout status)。
+# インフラ (StatefulSet/Ingress/Service/CronJob/Secret 等) の apply は手動運用 (README 参照) のままにし、
+# Runner には付与しない (権限最小化)。
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: qkjudge-deployer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: qkjudge-deployer
+rules:
+  # `kubectl set image deployment/qkjudge-app` に必要。
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+  # `kubectl rollout status deployment/...` はロールアウト中の ReplicaSet / Pod を読む。
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: qkjudge-deployer
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: qkjudge-deployer
+subjects:
+  - kind: ServiceAccount
+    name: qkjudge-deployer
+---
+# SA の長期トークンを格納する Secret (k8s 1.24+ は SA に自動でトークンを発行しないため明示的に作る)。
+# このトークンから Runner 用 kubeconfig を組み立てて GitHub Environment secret (KUBECONFIG_DATA) に入れる
+# (README「セルフホスト Runner」参照)。トークン値自体はコミットしない (k8s が起動時に populate する)。
+apiVersion: v1
+kind: Secret
+metadata:
+  name: qkjudge-deployer-token
+  annotations:
+    kubernetes.io/service-account.name: qkjudge-deployer
+type: kubernetes.io/service-account-token

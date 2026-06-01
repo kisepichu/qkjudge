@@ -29,6 +29,9 @@ struct SubmitRequest {
     result: String,
 }
 
+// Populated from `SELECT *` via `query_as!`, so every column must have a field;
+// `id`, `title`, `author`, `difficulty` are mapped but not read at runtime.
+#[allow(dead_code)]
 #[derive(Default, Deserialize)]
 struct ProblemLocation {
     id: i32,
@@ -40,14 +43,6 @@ struct ProblemLocation {
     path: String,
     visible: i8,
 }
-#[derive(Serialize)]
-struct Problem {
-    problem_id: i32,
-    title: String,
-    author: String,
-    difficulty: i64,
-}
-
 #[derive(Deserialize, Default)]
 #[allow(non_snake_case)]
 struct CompilerApiResponse {
@@ -286,7 +281,7 @@ async fn put_submissions_sid_handler(
 ) -> impl Responder {
     // ログインしていなかったら弾く
     let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
+    if username.is_empty() {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
     // let username = "tqk";
@@ -385,7 +380,7 @@ async fn put_submissions_sid_handler(
         problems_root,
         problem,
         req,
-        path.submission_id as i32,
+        path.submission_id,
     ));
 
     // println!("submit 5")
