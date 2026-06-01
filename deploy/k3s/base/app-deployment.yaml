@@ -66,18 +66,25 @@ spec:
           volumeMounts:
             - name: problems
               mountPath: /data/problems
+          # entrypoint が problems を clone してから exec するため cold start が伸びうる。
+          # startupProbe で起動完了まで liveness/readiness を評価させず、遅い clone での
+          # 再起動ループを防ぐ (最大 5s*60=300s 待つ)。
+          startupProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 60
           readinessProbe:
             httpGet:
               path: /ping
               port: 8080
-            initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 5
           livenessProbe:
             httpGet:
               path: /ping
               port: 8080
-            initialDelaySeconds: 40
             periodSeconds: 20
             timeoutSeconds: 5
           resources:
