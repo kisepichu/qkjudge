@@ -61,7 +61,7 @@ docker compose up --build
 - `mariadb` は手元の別 DB との衝突を避けるため host `3307` に publish している (`mysql -h127.0.0.1 -P3307`)。
 - 起動時に `kisepichu/qkjudge-problems` の `dist` を `/data/problems` へ clone (既存なら pull) する。
 - 主な環境変数: `CORS_ALLOW_ORIGIN` (1 環境 1 オリジン)、`SESSION_KEY` (64 hex。未設定だと再起動で
-  ログアウト)、`COMPILER_API_CLIENT_ID`/`_SECRET` (JDoodle。提出のジャッジに必須)。詳細は `.env.example`。
+  ログアウト)、`COMPILER_API_CLIENT_ID` / `COMPILER_API_CLIENT_SECRET` (JDoodle。提出のジャッジに必須)。詳細は `.env.example`。
 
 > DB 無しでもイメージはビルドできる (sqlx offline)。`sqlx::query!` の検証メタデータは
 > `sqlx-data.json` にキャッシュ済みで、ビルドは `SQLX_OFFLINE=true` で走る。スキーマやクエリを
