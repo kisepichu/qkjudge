@@ -163,17 +163,17 @@ kubectl -n qkjudge-prod run dump-ls --rm -it --image=busybox --restart=Never \
   --overrides='{"spec":{"containers":[{"name":"dump-ls","image":"busybox","command":["ls","-lh","/backup"],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
 ```
 
-リストア (`<dump>` を選んで MariaDB に流し込む):
+リストア (`<dump>` を上の `dump-ls` で選び、backup PVC 上の `/backup/` から DB Service へ流し込む)。
+backup PVC をマウントした一時 pod を立て、root パスワードは secret から参照する:
 
 ```sh
-POD=$(kubectl -n qkjudge-prod get pod -l app=qkjudge-mariadb -o name)
-# backup PVC 上の dump を pod から読みつつ復元する例 (root パスワードは secret 参照)
-kubectl -n qkjudge-prod exec -i "$POD" -- sh -c \
-  'gunzip < /restore/<dump>.sql.gz | mariadb -u root -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE"'
+kubectl -n qkjudge-prod run mariadb-restore --rm -it --image=mariadb:11.4 --restart=Never \
+  --overrides='{"spec":{"containers":[{"name":"mariadb-restore","image":"mariadb:11.4","stdin":true,"tty":true,"command":["sh","-c","gunzip < /backup/<dump>.sql.gz | mariadb -h qkjudge-mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\" \"$MARIADB_DATABASE\""],"env":[{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"name":"qkjudge-secrets","key":"MARIADB_ROOT_PASSWORD"}}},{"name":"MARIADB_DATABASE","valueFrom":{"configMapKeyRef":{"name":"qkjudge-config","key":"MARIADB_DATABASE"}}}],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
 ```
 
-> 注: 上記は backup PVC を MariaDB pod にマウントしている前提の概略。実運用では
-> dump をローカルへ取り出し (`kubectl cp`)、検証してから流すのが安全。
+> 注: `qkjudge-config` は kustomize で hash 付き名になる (`qkjudge-config-xxxx`)。実際の名前は
+> `kubectl -n qkjudge-prod get configmap` で確認して置き換えること。実運用では dump をローカルへ
+> 取り出し (`kubectl cp`)、検証してから流すのが安全。
 
 ## secret ローテーション
 

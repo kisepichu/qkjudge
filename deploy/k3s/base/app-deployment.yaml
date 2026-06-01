@@ -1,6 +1,7 @@
 # qkjudge アプリ (ghcr.io/kisepichu/qkjudge)。image tag は overlay の images: で差す。
-# env: 非 secret は qkjudge-config (configMap)、secret は qkjudge-secrets から envFrom で注入。
-#   - qkjudge-secrets は MARIADB_ROOT_PASSWORD も含むが、アプリは未使用なので注入されても無害。
+# env: 非 secret は qkjudge-config (configMap) を envFrom で、secret はアプリが必要なキーだけ
+#   secretKeyRef で個別に注入する (最小権限。qkjudge-secrets 全体を envFrom すると未使用の
+#   MARIADB_ROOT_PASSWORD まで持ってしまうため避ける)。
 # problems: emptyDir。entrypoint (docker-entrypoint.sh) が起動時に dist を shallow clone し、
 #   実行時は POST /fetch/problems で pull する。中身は git から完全再現できるので永続化しない。
 apiVersion: apps/v1
@@ -33,8 +34,32 @@ spec:
           envFrom:
             - configMapRef:
                 name: qkjudge-config
-            - secretRef:
-                name: qkjudge-secrets
+          env:
+            - name: MARIADB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: MARIADB_PASSWORD
+            - name: SESSION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: SESSION_KEY
+            - name: GITHUB_WEBHOOK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: GITHUB_WEBHOOK_TOKEN
+            - name: COMPILER_API_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: COMPILER_API_CLIENT_ID
+            - name: COMPILER_API_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: qkjudge-secrets
+                  key: COMPILER_API_CLIENT_SECRET
           volumeMounts:
             - name: problems
               mountPath: /data/problems

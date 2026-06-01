@@ -41,11 +41,13 @@ spec:
                 - |
                   set -eu
                   ts="$(date +%Y%m%d-%H%M%S)"
-                  out="/backup/qkjudge-${ts}.sql.gz"
-                  echo "[backup] dumping ${MARIADB_DATABASE} from ${MARIADB_HOSTNAME} -> ${out}"
+                  sql="/backup/qkjudge-${ts}.sql"
+                  echo "[backup] dumping ${MARIADB_DATABASE} from ${MARIADB_HOSTNAME} -> ${sql}.gz"
+                  # パイプ (dump | gzip) だと dash に pipefail が無く dump 失敗を取りこぼすため、
+                  # 一旦ファイルに書き出してから gzip する (set -e で dump 失敗を確実に検知)。
                   mariadb-dump -h "${MARIADB_HOSTNAME}" -u root -p"${MARIADB_ROOT_PASSWORD}" \
-                    --single-transaction --routines --triggers "${MARIADB_DATABASE}" \
-                    | gzip > "${out}"
+                    --single-transaction --routines --triggers "${MARIADB_DATABASE}" > "${sql}"
+                  gzip "${sql}"
                   echo "[backup] pruning dumps older than 14 days"
                   find /backup -name 'qkjudge-*.sql.gz' -mtime +14 -delete
                   echo "[backup] done"
