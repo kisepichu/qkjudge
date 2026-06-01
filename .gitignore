@@ -1,9 +1,14 @@
 *.ignore
 .claude/settings.local.json
 
-/target/*
-!/target/release/qkjudge
+# ビルド成果物はコミットしない (Docker マルチステージビルドへ移行)。
+/target
 /routes
+
+# secret を含む環境ファイル。テンプレートのみ追跡する。
+.env
+.env.*
+!.env.example
 
 env.sh
 env.showcase.json

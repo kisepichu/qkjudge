@@ -84,3 +84,19 @@ frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
 | TASK-007 | JDoodle CE 誤判定の修正 (本命)                                                  | qkjudge    | 6     |
 
 進行は `tasks/todo` → `tasks/doing` → `tasks/done`。
+
+## 付録: 旧 NeoShowcase 設定 (`showcase.yaml`) の対応付け
+
+旧デプロイは `showcase.yaml` で定義していたが、コンテナ化 (TASK-002) で役割を移したため削除した。
+内容と移行先は以下の通り (歴史的経緯としてここに記録):
+
+| 旧 `showcase.yaml`                                                 | 移行先                                                          |
+| ------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `startup`: `chmod` 済みバイナリ実行 + `git clone -b dist … problems` | `docker-entrypoint.sh` (起動時に problems を clone/pull → 実行) |
+| `entrypoint: ./target/release/qkjudge`                             | Dockerfile `ENTRYPOINT` (マルチステージビルドの成果物)         |
+| `http_proxy: 8080`                                                 | Dockerfile `EXPOSE 8080` / Service (TASK-003)                  |
+| `https: on`                                                        | cloudflared + Ingress (TASK-003)                               |
+| `use_mariadb: true`                                                | compose の `mariadb` サービス / k3s StatefulSet (TASK-003)     |
+| `branch.dev.cname: dev_tqk_qkjudge.trap.games`                     | `dev`→`dev.qkjudge.kisen.one` (上記「決定事項」)               |
+
+problems リポジトリの取得元は旧 `tqkoh/qkjudge-problems` から `kisepichu/qkjudge-problems` に更新した。

@@ -37,14 +37,13 @@ repos:
         pass_filenames: false
 
       # 型/lint: 重いので push 時のみ。CI (TASK-004) でも同等を回す。
-      # TODO(TASK-002): sqlx offline 化が済むまで有効化しない。
-      #   このクレートは `sqlx::query!` マクロを使うため、コンパイルに live DB か
-      #   `.sqlx` オフラインキャッシュが必要。未整備の今これを有効化すると、TASK-002 完了まで
-      #   全 push がコンパイル不能でブロックされる。sqlx offline 導入後に下記を解除すること。
-      #   (なお `-D warnings` 適用前に既存 lint 約16件: redundant_field_names 等の解消も必要。)
+      # 状況(TASK-002 完了): sqlx offline 化済み。sqlx-data.json をコミットしてあるので
+      #   `SQLX_OFFLINE=true` で DB 無しにコンパイルできる (entry に環境変数を付与してある)。
+      # TODO: `-D warnings` で有効化する前に既存 lint 約20件 (redundant_field_names /
+      #   noop_method_call / unused_parens 等) の解消が必要。CI (TASK-004) 整備時にまとめて対応する。
       # - id: cargo-clippy
       #   name: cargo clippy -D warnings
-      #   entry: cargo clippy --all-targets --all-features -- -D warnings
+      #   entry: env SQLX_OFFLINE=true cargo clippy --all-targets --all-features -- -D warnings
       #   language: system
       #   types: [rust]
       #   pass_filenames: false

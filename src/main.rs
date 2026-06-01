@@ -42,14 +42,38 @@ async fn main() -> std::io::Result<()> {
 
     let arbiter = Arbiter::new();
     let arbiter_data = Arc::new(Mutex::new(arbiter));
-    let private_key = rand::thread_rng().gen::<[u8; 32]>();
+
+    // CORS 許可オリジン: Access-Control-Allow-Credentials: true 併用のためワイルドカード不可・単一値のみ。
+    // 1 環境 1 オリジンで割り切り、prod/staging は env で分離する (未設定時はローカル開発用フロント)。
+    let cors_allow_origin =
+        env::var("CORS_ALLOW_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".to_string());
+
+    // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
+    // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。
+    let private_key: Vec<u8> = match env::var("SESSION_KEY") {
+        Ok(hex_key) => {
+            let key = hex::decode(hex_key.trim()).expect("SESSION_KEY must be valid hex");
+            assert!(
+                key.len() >= 32,
+                "SESSION_KEY must decode to at least 32 bytes (64 hex chars)"
+            );
+            key
+        }
+        Err(_) => {
+            log::warn!(
+                "SESSION_KEY not set; generating a random cookie key (sessions reset on restart)"
+            );
+            rand::thread_rng().gen::<[u8; 32]>().to_vec()
+        }
+    };
+
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool_data.clone()))
             .app_data(Data::new(arbiter_data.clone()))
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
+                    .add(("Access-Control-Allow-Origin", cors_allow_origin.clone()))
                     .add(("Access-Control-Allow-Credentials", "true"))
                     .add((
                         "Access-Control-Allow-Methods",
@@ -60,7 +84,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
                     .name("auth")
-                    .same_site(SameSite::None)
+                    .same_site(SameSite::Lax)
                     .secure(true),
             ))
             .wrap(middleware::Logger::default())
