@@ -1,0 +1,58 @@
+# 手元開発用 compose。現状パリティ (signup/login/problems/submit→judge/submissions) を再現する。
+# secret は .env (gitignore) から注入する。MariaDB は本番想定の 11.4 LTS に固定。
+#   起動: cp .env.example .env && 値を埋める → docker compose up --build
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+    ports:
+      # 手元の `cargo sqlx prepare` / デバッグ用。host 3306 が別 DB と衝突しうるため 3307 に publish。
+      # LAN へ DB を晒さないよう loopback のみにバインドする。
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      # 初回起動時に「望ましい状態」の全テーブルを投入する (空 DB のみ実行される)。
+      - ./migrations/v1.2.3.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      # ローカル開発用途なので loopback のみにバインドし LAN へ晒さない。
+      - "127.0.0.1:8080:8080"
+    environment:
+      QKJUDGE_ADDRESS: "0.0.0.0"
+      MARIADB_HOSTNAME: mariadb
+      DB_PORT: "3306"
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      # アプリは MARIADB_USERNAME を読む (DB イメージの MARIADB_USER と名前が異なる)。
+      MARIADB_USERNAME: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
+      SESSION_KEY: ${SESSION_KEY}
+      # 手元は http なので Secure cookie を無効化 (本番は未設定=true)。
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      GITHUB_WEBHOOK_TOKEN: ${GITHUB_WEBHOOK_TOKEN}
+      COMPILER_API_CLIENT_ID: ${COMPILER_API_CLIENT_ID}
+      COMPILER_API_CLIENT_SECRET: ${COMPILER_API_CLIENT_SECRET}
+    volumes:
+      # problems を再起動間で永続化 (毎回 clone を避ける)。
+      - problems-data:/data/problems
+
+volumes:
+  mariadb-data:
+  problems-data:

@@ -42,14 +42,67 @@ async fn main() -> std::io::Result<()> {
 
     let arbiter = Arbiter::new();
     let arbiter_data = Arc::new(Mutex::new(arbiter));
-    let private_key = rand::thread_rng().gen::<[u8; 32]>();
+
+    // CORS 許可オリジン: Access-Control-Allow-Credentials: true 併用のためワイルドカード不可・単一値のみ。
+    // 1 環境 1 オリジンで割り切り、prod/staging は env で分離する (未設定時はローカル開発用フロント)。
+    // trim して空なら開発用デフォルトへ。前後の空白や改行が header 値に混ざると
+    // DefaultHeaders::add が panic しうるため、ここで正規化しておく。
+    let cors_allow_origin = env::var("CORS_ALLOW_ORIGIN")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "http://localhost:3000".to_string());
+    // 起動時に検証して設定ミスを早期に分かりやすく落とす:
+    // - `*` は Access-Control-Allow-Credentials: true と両立しないので拒否。
+    // - 無効な header 文字を含むと実行時に DefaultHeaders::add が panic するので、ここで弾く。
+    assert!(
+        cors_allow_origin != "*",
+        "CORS_ALLOW_ORIGIN must be a single concrete origin, not '*' \
+         (wildcard is incompatible with Access-Control-Allow-Credentials: true)"
+    );
+    actix_web::http::header::HeaderValue::from_str(&cors_allow_origin)
+        .expect("CORS_ALLOW_ORIGIN must be a valid HTTP header value");
+
+    // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
+    // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。
+    let private_key: Vec<u8> = match env::var("SESSION_KEY") {
+        // 空文字 (`.env` に `SESSION_KEY=` のまま等) も「未設定」とみなしフォールバックする
+        // (空のまま hex decode → 長さ assert で起動時 panic するのを避ける)。
+        Ok(hex_key) if !hex_key.trim().is_empty() => {
+            let key = hex::decode(hex_key.trim()).expect("SESSION_KEY must be valid hex");
+            assert!(
+                key.len() >= 32,
+                "SESSION_KEY must decode to at least 32 bytes (64 hex chars)"
+            );
+            key
+        }
+        _ => {
+            log::warn!(
+                "SESSION_KEY not set; generating a random cookie key (sessions reset on restart)"
+            );
+            rand::thread_rng().gen::<[u8; 32]>().to_vec()
+        }
+    };
+
+    // Secure cookie はブラウザが plain HTTP では送受信しないため、http の手元 compose では
+    // ログインできない。COOKIE_SECURE で切替可能にする (未設定/空はデフォルト true)。
+    // 許可値は true/1/false/0 のみ。typo 等の想定外値は黙って true 扱いにせず起動時に落とす。
+    let cookie_secure = match env::var("COOKIE_SECURE") {
+        Ok(v) if !v.trim().is_empty() => match v.trim().to_ascii_lowercase().as_str() {
+            "true" | "1" => true,
+            "false" | "0" => false,
+            other => panic!("COOKIE_SECURE must be one of true/1/false/0 (got {other:?})"),
+        },
+        _ => true,
+    };
+
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool_data.clone()))
             .app_data(Data::new(arbiter_data.clone()))
             .wrap(
                 middleware::DefaultHeaders::new()
-                    .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
+                    .add(("Access-Control-Allow-Origin", cors_allow_origin.clone()))
                     .add(("Access-Control-Allow-Credentials", "true"))
                     .add((
                         "Access-Control-Allow-Methods",
@@ -60,8 +113,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
                     .name("auth")
-                    .same_site(SameSite::None)
-                    .secure(true),
+                    .same_site(SameSite::Lax)
+                    .secure(cookie_secure),
             ))
             .wrap(middleware::Logger::default())
             .service(routes::options_0_handler)
