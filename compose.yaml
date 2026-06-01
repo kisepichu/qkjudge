@@ -32,7 +32,8 @@ services:
       mariadb:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      # ローカル開発用途なので loopback のみにバインドし LAN へ晒さない。
+      - "127.0.0.1:8080:8080"
     environment:
       QKJUDGE_ADDRESS: "0.0.0.0"
       MARIADB_HOSTNAME: mariadb

@@ -17,6 +17,8 @@ if [ -d "${PROBLEMS_REPO_ROOT}/.git" ]; then
     git -C "${PROBLEMS_REPO_ROOT}" fetch --prune --depth 1 origin "${PROBLEMS_REPO_BRANCH}"
     git -C "${PROBLEMS_REPO_ROOT}" checkout -B "${PROBLEMS_REPO_BRANCH}" "origin/${PROBLEMS_REPO_BRANCH}"
     git -C "${PROBLEMS_REPO_ROOT}" reset --hard "origin/${PROBLEMS_REPO_BRANCH}"
+    # reset --hard は untracked を消さないので、削除/移動された配信物を残さないよう clean も行う。
+    git -C "${PROBLEMS_REPO_ROOT}" clean -fdx
 else
     # .git は無いが中身がある (古いマウント残骸等) と git clone が分かりにくく失敗するので明示チェック。
     if [ -d "${PROBLEMS_REPO_ROOT}" ] && [ -n "$(ls -A "${PROBLEMS_REPO_ROOT}" 2>/dev/null)" ]; then

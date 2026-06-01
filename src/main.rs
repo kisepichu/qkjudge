@@ -52,6 +52,16 @@ async fn main() -> std::io::Result<()> {
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "http://localhost:3000".to_string());
+    // 起動時に検証して設定ミスを早期に分かりやすく落とす:
+    // - `*` は Access-Control-Allow-Credentials: true と両立しないので拒否。
+    // - 無効な header 文字を含むと実行時に DefaultHeaders::add が panic するので、ここで弾く。
+    assert!(
+        cors_allow_origin != "*",
+        "CORS_ALLOW_ORIGIN must be a single concrete origin, not '*' \
+         (wildcard is incompatible with Access-Control-Allow-Credentials: true)"
+    );
+    actix_web::http::header::HeaderValue::from_str(&cors_allow_origin)
+        .expect("CORS_ALLOW_ORIGIN must be a valid HTTP header value");
 
     // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
     // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。
