@@ -29,13 +29,16 @@ spec:
       # MariaDB 未起動のタイミングで CrashLoopBackOff になるのを避けるため、DB が応答するまで待つ。
       initContainers:
         - name: wait-for-db
-          image: mariadb:11.4
+          image: busybox:1.36
+          # 認証情報に依存しない TCP 疎通で待つ (mariadb-admin ping は root パスワード設定時に
+          # access denied で抜けられないことがあるため避ける)。MariaDB は initdb 完了後に
+          # TCP 3306 を開けるので、ポート open = 接続受付可能の良い指標になる。
           command:
             - sh
             - -c
             - |
-              until mariadb-admin ping -h qkjudge-mariadb --silent; do
-                echo "[wait-for-db] waiting for qkjudge-mariadb ..."
+              until nc -z qkjudge-mariadb 3306; do
+                echo "[wait-for-db] waiting for qkjudge-mariadb:3306 ..."
                 sleep 2
               done
               echo "[wait-for-db] db is up"

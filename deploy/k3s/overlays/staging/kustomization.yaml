@@ -20,8 +20,12 @@ images:
   - name: ghcr.io/kisepichu/qkjudge
     newTag: dev
 
+# host だけを JSON6902 で確実に差し替える (rules リスト全体の置換/追加の曖昧さを避ける)。
 patches:
-  - path: ingress-patch.yaml
-    target:
+  - target:
       kind: Ingress
       name: qkjudge
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: api.dev.qkjudge.kisen.one
