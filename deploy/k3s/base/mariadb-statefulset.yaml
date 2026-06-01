@@ -76,6 +76,9 @@ spec:
         - name: initdb
           configMap:
             name: mariadb-initdb
+            # 初回 (PVC 空) のみ使う。初期化後に ConfigMap を削除しても再スケジュール可能なよう
+            # 必須依存にしない (未投入での起動不能を避ける。投入漏れは README で担保)。
+            optional: true
   volumeClaimTemplates:
     - metadata:
         name: data

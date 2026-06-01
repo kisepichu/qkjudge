@@ -49,11 +49,12 @@ deploy/k3s/
 
 ### 1. namespace を先に作る
 
-Secret / ConfigMap は namespace が無いと作れないので先に作る (kustomize の Namespace と冪等)。
+Secret / ConfigMap は namespace が無いと作れないので先に作る。既存でも失敗しないよう冪等な
+`--dry-run=client | apply` 形式にする (kustomize 適用時の Namespace とも冪等)。
 
 ```sh
-kubectl create namespace qkjudge-prod
-kubectl create namespace qkjudge-staging
+kubectl create namespace qkjudge-prod --dry-run=client -o yaml | kubectl apply -f -
+kubectl create namespace qkjudge-staging --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ### 2. アプリ secret (`qkjudge-secrets`)
@@ -99,8 +100,10 @@ kubectl -n cloudflared create secret generic cloudflared-credentials \
   --from-file=credentials.json="$HOME/.cloudflared/${TUNNEL_ID}.json"
 ```
 
-`cloudflared/config.yaml` の `tunnel: REPLACE_WITH_TUNNEL_ID` を上記 `TUNNEL_ID` に書き換える
-(UUID は secret ではないので編集してコミットしても可。ただし手元差し替えのみで運用してもよい)。
+`cloudflared/config.yaml` の `tunnel: REPLACE_WITH_TUNNEL_ID` を上記 `TUNNEL_ID` に**書き換えてから**
+`cloudflared` を apply する (placeholder のままだと apply 自体は通るが、cloudflared が実行時に起動失敗する)。
+UUID は secret ではないので、tunnel 作成後に確定値をコミットして固定するのを推奨 (環境ごとに一意)。
+tunnel 発行〜この書き換え〜apply は live follow-up (本 PR のスコープ外) で行う。
 
 ## デプロイ
 

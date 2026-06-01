@@ -27,13 +27,21 @@ spec:
             - --config
             - /etc/cloudflared/config/config.yaml
             - run
-          livenessProbe:
+          # readiness: /ready は edge への接続が確立しているかを表す (tunnel が張れているか)。
+          readinessProbe:
             httpGet:
-              # config.yaml の metrics で 2000 を開けている。
               path: /ready
               port: 2000
             initialDelaySeconds: 10
             periodSeconds: 10
+          # liveness: edge 断で再起動ループに陥らないよう、プロセス生存 (metrics server) だけを見る。
+          # 一時的なネットワーク断や Cloudflare 側障害は readiness 失格 (= LB から外れる) で十分。
+          livenessProbe:
+            tcpSocket:
+              port: 2000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
           volumeMounts:
             - name: config
               mountPath: /etc/cloudflared/config
