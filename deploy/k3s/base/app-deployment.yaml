@@ -25,6 +25,20 @@ spec:
       labels:
         app: qkjudge-app
     spec:
+      # アプリは起動時に DB へ接続し、失敗すると panic で終了する (src/main.rs の connect().unwrap())。
+      # MariaDB 未起動のタイミングで CrashLoopBackOff になるのを避けるため、DB が応答するまで待つ。
+      initContainers:
+        - name: wait-for-db
+          image: mariadb:11.4
+          command:
+            - sh
+            - -c
+            - |
+              until mariadb-admin ping -h qkjudge-mariadb --silent; do
+                echo "[wait-for-db] waiting for qkjudge-mariadb ..."
+                sleep 2
+              done
+              echo "[wait-for-db] db is up"
       containers:
         - name: qkjudge
           image: ghcr.io/kisepichu/qkjudge:latest
