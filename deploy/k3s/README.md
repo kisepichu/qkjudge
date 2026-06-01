@@ -176,12 +176,11 @@ backup PVC をマウントした一時 pod を立て、root パスワードは s
 
 ```sh
 kubectl -n qkjudge-prod run mariadb-restore --rm -it --image=mariadb:11.4 --restart=Never \
-  --overrides='{"spec":{"containers":[{"name":"mariadb-restore","image":"mariadb:11.4","stdin":true,"tty":true,"command":["sh","-c","gunzip < /backup/<dump>.sql.gz | mariadb -h qkjudge-mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\" \"$MARIADB_DATABASE\""],"env":[{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"name":"qkjudge-secrets","key":"MARIADB_ROOT_PASSWORD"}}},{"name":"MARIADB_DATABASE","valueFrom":{"configMapKeyRef":{"name":"qkjudge-config","key":"MARIADB_DATABASE"}}}],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
+  --overrides='{"spec":{"containers":[{"name":"mariadb-restore","image":"mariadb:11.4","stdin":true,"tty":true,"command":["sh","-c","gunzip < /backup/<dump>.sql.gz | mariadb -h qkjudge-mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\" qkjudge"],"env":[{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"name":"qkjudge-secrets","key":"MARIADB_ROOT_PASSWORD"}}}],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
 ```
 
-> 注: `qkjudge-config` は kustomize で hash 付き名になる (`qkjudge-config-xxxx`)。実際の名前は
-> `kubectl -n qkjudge-prod get configmap` で確認して置き換えること。実運用では dump をローカルへ
-> 取り出し (`kubectl cp`)、検証してから流すのが安全。
+> 注: DB 名は現状 `qkjudge` 固定なのでコマンドに直書きしている (staging も同名)。root パスワードのみ
+> secret から参照する。実運用では dump をローカルへ取り出し (`kubectl cp`)、検証してから流すのが安全。
 
 ## secret ローテーション
 
