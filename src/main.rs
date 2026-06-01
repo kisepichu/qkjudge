@@ -51,7 +51,9 @@ async fn main() -> std::io::Result<()> {
     // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
     // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。
     let private_key: Vec<u8> = match env::var("SESSION_KEY") {
-        Ok(hex_key) => {
+        // 空文字 (`.env` に `SESSION_KEY=` のまま等) も「未設定」とみなしフォールバックする
+        // (空のまま hex decode → 長さ assert で起動時 panic するのを避ける)。
+        Ok(hex_key) if !hex_key.trim().is_empty() => {
             let key = hex::decode(hex_key.trim()).expect("SESSION_KEY must be valid hex");
             assert!(
                 key.len() >= 32,
@@ -59,7 +61,7 @@ async fn main() -> std::io::Result<()> {
             );
             key
         }
-        Err(_) => {
+        _ => {
             log::warn!(
                 "SESSION_KEY not set; generating a random cookie key (sessions reset on restart)"
             );
