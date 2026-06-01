@@ -85,13 +85,16 @@ async fn main() -> std::io::Result<()> {
     };
 
     // Secure cookie はブラウザが plain HTTP では送受信しないため、http の手元 compose では
-    // ログインできない。COOKIE_SECURE で切替可能にする (本番デフォルト true。"false"/"0" で無効)。
-    let cookie_secure = env::var("COOKIE_SECURE")
-        .map(|v| {
-            let v = v.trim().to_ascii_lowercase();
-            v != "false" && v != "0"
-        })
-        .unwrap_or(true);
+    // ログインできない。COOKIE_SECURE で切替可能にする (未設定/空はデフォルト true)。
+    // 許可値は true/1/false/0 のみ。typo 等の想定外値は黙って true 扱いにせず起動時に落とす。
+    let cookie_secure = match env::var("COOKIE_SECURE") {
+        Ok(v) if !v.trim().is_empty() => match v.trim().to_ascii_lowercase().as_str() {
+            "true" | "1" => true,
+            "false" | "0" => false,
+            other => panic!("COOKIE_SECURE must be one of true/1/false/0 (got {other:?})"),
+        },
+        _ => true,
+    };
 
     HttpServer::new(move || {
         App::new()
