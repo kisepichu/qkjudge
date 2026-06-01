@@ -1,0 +1,16 @@
+# StatefulSet 用の headless service。アプリは `qkjudge-mariadb:3306` で接続する
+# (同一 namespace 内で名前解決。namespace が prod/staging で分かれるので名前は共通でよい)。
+apiVersion: v1
+kind: Service
+metadata:
+  name: qkjudge-mariadb
+  labels:
+    app: qkjudge-mariadb
+spec:
+  clusterIP: None
+  selector:
+    app: qkjudge-mariadb
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306

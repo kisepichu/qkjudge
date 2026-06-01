@@ -1,0 +1,17 @@
+# prod host。strategic-merge で rules を丸ごと差し替える (rule は 1 件)。
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: qkjudge
+spec:
+  rules:
+    - host: api.qkjudge.kisen.one
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qkjudge-app
+                port:
+                  number: 8080

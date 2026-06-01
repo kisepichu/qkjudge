@@ -1,0 +1,57 @@
+# cloudflared をクラスタ内 Deployment として動かす (鯖機を直接設定しない)。
+# 設定 (ingress) は cloudflared-config (= config.yaml)、認証情報は cloudflared-credentials
+# (= `cloudflared tunnel create` が出力する credentials.json) を secret から別マウントする。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  labels:
+    app: cloudflared
+spec:
+  # tunnel コネクタは冗長化推奨。home server で絞るなら 1 でも可。
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          # 最新リリースに更新すること: https://github.com/cloudflare/cloudflared/releases
+          image: cloudflare/cloudflared:2025.2.1
+          args:
+            - tunnel
+            - --config
+            - /etc/cloudflared/config/config.yaml
+            - run
+          livenessProbe:
+            httpGet:
+              # config.yaml の metrics で 2000 を開けている。
+              path: /ready
+              port: 2000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/cloudflared/config
+              readOnly: true
+            - name: creds
+              mountPath: /etc/cloudflared/creds
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: config
+          configMap:
+            name: cloudflared-config
+        - name: creds
+          secret:
+            secretName: cloudflared-credentials

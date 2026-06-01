@@ -1,0 +1,14 @@
+# app の ClusterIP service。Traefik(Ingress) から 8080 を受ける。
+apiVersion: v1
+kind: Service
+metadata:
+  name: qkjudge-app
+  labels:
+    app: qkjudge-app
+spec:
+  selector:
+    app: qkjudge-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
