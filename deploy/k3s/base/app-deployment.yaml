@@ -28,6 +28,9 @@ spec:
       containers:
         - name: qkjudge
           image: ghcr.io/kisepichu/qkjudge:latest
+          # overlay の可変タグ (:master / :dev) を再デプロイ時に確実に pull する
+          # (default IfNotPresent だと更新イメージが反映されないため)。
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
