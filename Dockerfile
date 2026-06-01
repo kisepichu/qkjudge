@@ -10,14 +10,14 @@ WORKDIR /app
 # 依存だけ先にビルドしてレイヤキャッシュを効かせる。
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo 'fn main() {}' > src/main.rs \
-    && cargo build --release \
+    && cargo build --release --locked \
     && rm -rf src
 
 # 本体ビルド。sqlx-data.json があるため実 DB 不要 (SQLX_OFFLINE=true)。
 COPY src ./src
 COPY sqlx-data.json ./sqlx-data.json
 ENV SQLX_OFFLINE=true
-RUN touch src/main.rs && cargo build --release
+RUN touch src/main.rs && cargo build --release --locked
 
 FROM debian:bookworm-slim AS runtime
 # git: problems リポジトリの clone/pull に必要。libssl3: HTTPS。

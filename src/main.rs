@@ -45,8 +45,13 @@ async fn main() -> std::io::Result<()> {
 
     // CORS 許可オリジン: Access-Control-Allow-Credentials: true 併用のためワイルドカード不可・単一値のみ。
     // 1 環境 1 オリジンで割り切り、prod/staging は env で分離する (未設定時はローカル開発用フロント)。
-    let cors_allow_origin =
-        env::var("CORS_ALLOW_ORIGIN").unwrap_or_else(|_| "http://localhost:3000".to_string());
+    // trim して空なら開発用デフォルトへ。前後の空白や改行が header 値に混ざると
+    // DefaultHeaders::add が panic しうるため、ここで正規化しておく。
+    let cors_allow_origin = env::var("CORS_ALLOW_ORIGIN")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "http://localhost:3000".to_string());
 
     // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
     // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。

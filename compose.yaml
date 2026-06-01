@@ -12,7 +12,8 @@ services:
       MARIADB_PASSWORD: ${MARIADB_PASSWORD}
     ports:
       # 手元の `cargo sqlx prepare` / デバッグ用。host 3306 が別 DB と衝突しうるため 3307 に publish。
-      - "3307:3306"
+      # LAN へ DB を晒さないよう loopback のみにバインドする。
+      - "127.0.0.1:3307:3306"
     volumes:
       - mariadb-data:/var/lib/mysql
       # 初回起動時に「望ましい状態」の全テーブルを投入する (空 DB のみ実行される)。
