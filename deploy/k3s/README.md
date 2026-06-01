@@ -38,8 +38,10 @@ deploy/k3s/
   `nixos-config-private` 経由 (`services.k3s` 等) で宣言的に**行う (鯖機では pull + 反映のみ)。
 - k3s 同梱の Traefik (Ingress) と local-path (StorageClass) を利用する (追加導入不要)。
 - image は GHCR (`ghcr.io/kisepichu/qkjudge:{master,dev}`)。push は TASK-004 (CI/CD) で行う。
-  本タスク時点では tag が存在しないため、手元で `docker build` したイメージを
-  `k3s ctr images import` する等で暫定的に投入してもよい。
+  本タスク時点では tag が存在しない。app の `imagePullPolicy` は可変タグ運用のため `Always`
+  なので、**GHCR に push してから** apply するのが基本。手元 `docker build` したイメージを
+  `k3s ctr images import` で暫定投入する場合は `Always` だと pull 失敗で使われないため、
+  app の `imagePullPolicy` を一時的に `IfNotPresent` / `Never` に落とすこと。
 - `kubectl` が leafeon の k3s に対して設定済みであること。
 
 ## 投入が必要な secret / 設定 (リポジトリにコミットしない)
@@ -176,7 +178,7 @@ backup PVC をマウントした一時 pod を立て、root パスワードは s
 
 ```sh
 kubectl -n qkjudge-prod run mariadb-restore --rm -it --image=mariadb:11.4 --restart=Never \
-  --overrides='{"spec":{"containers":[{"name":"mariadb-restore","image":"mariadb:11.4","stdin":true,"tty":true,"command":["sh","-c","gunzip < /backup/<dump>.sql.gz | mariadb -h qkjudge-mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\" qkjudge"],"env":[{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"name":"qkjudge-secrets","key":"MARIADB_ROOT_PASSWORD"}}}],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
+  --overrides='{"spec":{"containers":[{"name":"mariadb-restore","image":"mariadb:11.4","stdin":true,"tty":true,"command":["sh","-c","set -e; gunzip -c /backup/<dump>.sql.gz > /tmp/restore.sql; mariadb -h qkjudge-mariadb -u root -p\"$MARIADB_ROOT_PASSWORD\" qkjudge < /tmp/restore.sql"],"env":[{"name":"MARIADB_ROOT_PASSWORD","valueFrom":{"secretKeyRef":{"name":"qkjudge-secrets","key":"MARIADB_ROOT_PASSWORD"}}}],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}],"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"qkjudge-backup"}}]}}'
 ```
 
 > 注: DB 名は現状 `qkjudge` 固定なのでコマンドに直書きしている (staging も同名)。root パスワードのみ
