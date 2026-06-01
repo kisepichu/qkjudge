@@ -7,6 +7,18 @@ PROBLEMS_REPO_ROOT="${PROBLEMS_REPO_ROOT:-/data/problems}"
 PROBLEMS_REPO_URL="${PROBLEMS_REPO_URL:-https://github.com/kisepichu/qkjudge-problems.git}"
 PROBLEMS_REPO_BRANCH="${PROBLEMS_REPO_BRANCH:-dist}"
 
+# この配下で破壊的コマンド (reset --hard / clean -fdx) を走らせるため、危険な値を早期に弾く。
+# 空 / ルート / 相対パスは誤って意図しない場所を消しうるので拒否する。
+case "${PROBLEMS_REPO_ROOT}" in
+    "" | "/")
+        echo "[entrypoint] ERROR: PROBLEMS_REPO_ROOT が不正です (空または '/'): '${PROBLEMS_REPO_ROOT}'" >&2
+        exit 1 ;;
+    /*) : ;; # 絶対パス OK
+    *)
+        echo "[entrypoint] ERROR: PROBLEMS_REPO_ROOT は絶対パスで指定してください (got '${PROBLEMS_REPO_ROOT}')" >&2
+        exit 1 ;;
+esac
+
 if [ -d "${PROBLEMS_REPO_ROOT}/.git" ]; then
     # 既存チェックアウトを env で指定した remote/branch に揃える (URL/branch を変えても一貫させる)。
     # problems は read-only な配信内容なので reset --hard でリモートに合わせる。
