@@ -84,6 +84,15 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    // Secure cookie はブラウザが plain HTTP では送受信しないため、http の手元 compose では
+    // ログインできない。COOKIE_SECURE で切替可能にする (本番デフォルト true。"false"/"0" で無効)。
+    let cookie_secure = env::var("COOKIE_SECURE")
+        .map(|v| {
+            let v = v.trim().to_ascii_lowercase();
+            v != "false" && v != "0"
+        })
+        .unwrap_or(true);
+
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool_data.clone()))
@@ -102,7 +111,7 @@ async fn main() -> std::io::Result<()> {
                 CookieIdentityPolicy::new(&private_key)
                     .name("auth")
                     .same_site(SameSite::Lax)
-                    .secure(true),
+                    .secure(cookie_secure),
             ))
             .wrap(middleware::Logger::default())
             .service(routes::options_0_handler)
