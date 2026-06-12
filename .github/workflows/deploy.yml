@@ -13,6 +13,9 @@
 #     deploy/k3s/base/deployer-rbac.yaml の Role 参照) なので、staging のデプロイ経路から
 #     prod namespace を触れない。cluster-admin kubeconfig は Runner に置かない。
 #   - deploy ジョブは self-hosted ラベルに固定し、build は GitHub-hosted に置く。
+#   - build/deploy の前に _rust-checks.yml (fmt/clippy/test) をゲートとして実行する。
+#     ci.yml と同じチェックを必須化することで、CI 失敗中の commit が直接デプロイされるのを防ぐ
+#     (branch protection 設定漏れに対する保険)。
 name: deploy
 
 on:
@@ -32,7 +35,12 @@ env:
   IMAGE: ghcr.io/kisepichu/qkjudge
 
 jobs:
+  # ci.yml と同じ fmt/clippy/test。失敗したらビルド・デプロイは走らない。
+  checks:
+    uses: ./.github/workflows/_rust-checks.yml
+
   build:
+    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
