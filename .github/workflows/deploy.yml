@@ -20,9 +20,10 @@ on:
     branches: [master, dev]
 
 # 同一ブランチのデプロイが重ならないようにする (古い push は新しい push に置き換え)。
+# 途中キャンセルされても kubectl set image は冪等、rollout は k8s 側で継続するため副作用は小さい。
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
