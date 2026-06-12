@@ -266,38 +266,41 @@ async fn post_fetch_problems_handler(
 
 #[cfg(test)]
 mod test {
+    use super::validate;
     use hmac::{Hmac, Mac};
-    use sha1::Sha1;
+    use sha2::Sha256;
 
-    type HmacSha1 = Hmac<Sha1>;
+    type HmacSha256 = Hmac<Sha256>;
 
-    pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
-        let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
+    fn sign_hex(secret: &[u8], message: &[u8]) -> String {
+        let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
         hmac.update(message);
-        hmac.verify_slice(signature).is_ok()
+        hex::encode(hmac.finalize().into_bytes())
     }
 
     #[test]
     fn it_returns_true_when_signature_and_message_match() {
-        let signature = &[
-            0x73, 0x6d, 0x7f, 0x93, 0x42, 0xf2, 0xa7, 0xd2, 0x39, 0xaf, 0xa5, 0x51, 0x3a, 0x4b,
-            0xb2, 0x28, 0x3e, 0x0e, 0x15, 0x88,
-        ];
         let secret = b"some-secret";
         let message = b"blah-blah-blah";
-
-        assert!(validate(secret, signature, message));
+        let sig = sign_hex(secret, message);
+        assert!(validate(secret, sig.as_bytes(), message));
     }
 
     #[test]
     fn it_returns_false_when_signature_and_message_do_not_match() {
-        let signature = &[
-            0x31, 0x30, 0x2b, 0x00, 0xba, 0xd4, 0xd6, 0xd1, 0x10, 0xa1, 0x18, 0x82, 0x77, 0xc4,
-            0xd1, 0x06, 0x0c, 0xb2, 0xc3, 0x73,
-        ];
         let secret = b"some-secret";
-        let message = b"blah-blah-blah?";
+        let message = b"blah-blah-blah";
+        let bad_message = b"blah-blah-blah?";
+        let sig = sign_hex(secret, message);
+        assert!(!validate(secret, sig.as_bytes(), bad_message));
+    }
 
-        assert!(!validate(secret, signature, message));
+    #[test]
+    fn it_returns_false_when_signature_length_differs() {
+        // fixed_time_eq は長さ違いを false で返す。truncate された署名で誤って通らないことを確認。
+        let secret = b"some-secret";
+        let message = b"blah-blah-blah";
+        let sig = sign_hex(secret, message);
+        assert!(!validate(secret, &sig.as_bytes()[..sig.len() - 1], message));
     }
 }
