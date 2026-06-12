@@ -1,6 +1,5 @@
 use std::{fs::File, io::Read, sync::Arc};
 
-use actix_identity::Identity;
 use actix_web::{
     post,
     web::{self, Bytes},
@@ -44,48 +43,38 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
 
 type HmacSha256 = Hmac<Sha256>;
 
+// `signature` は X-Hub-Signature-256 から "sha256=" を剥がした hex 文字列のバイト列を期待する。
+// 期待 hex とバイト単位の固定時間比較を行う (長さが違えば fixed_time_eq は false を返す)。
+// 署名値は機密相当なのでログには出さない。
 pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
     let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
     hmac.update(message);
     let expected = hex::encode(hmac.finalize().into_bytes());
-    println!("expected: {}", expected);
-    let got = String::from_utf8(signature.to_vec()).unwrap();
-    println!("got: {}", got);
-    crypto::util::fixed_time_eq(expected.as_bytes(), got.as_bytes())
+    crypto::util::fixed_time_eq(expected.as_bytes(), signature)
 }
 
 #[post("/fetch/problems")]
 async fn post_fetch_problems_handler(
-    id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     req: HttpRequest,
     bytes: Bytes,
 ) -> impl Responder {
-    let username = id.identity().unwrap_or("".to_owned());
+    // 署名検証は常に必須。GitHub Webhook 専用エンドポイントなので Identity は使わない。
+    // ヘッダ欠落 / 非 ASCII / プレフィクス不一致のいずれでも 403 を返し panic させない。
+    let sign_github = match req
+        .headers()
+        .get("X-Hub-Signature-256")
+        .and_then(|s| s.to_str().ok())
+        .and_then(|s| s.strip_prefix("sha256="))
+    {
+        Some(s) => s.as_bytes(),
+        None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    };
 
-    if username == "tqk" {
-        println!("login")
-    } else {
-        let sign_github = match req.headers().get("X-Hub-Signature-256") {
-            Some(s) => &s.to_str().expect("to_str failed").as_bytes()[7..],
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
-        };
-        let _sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
-            Some(s) => &s.to_str().expect("to_str failed").as_bytes()[5..],
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
-        };
+    let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-        let message = String::from_utf8(bytes.to_vec()).unwrap();
-        // println!("message: {}", message);
-        let secret =
-            std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
-
-        if validate(secret.as_bytes(), sign_github, message.as_bytes()) {
-            println!("ok");
-        } else {
-            println!("ng");
-            return HttpResponse::Forbidden().body("verify failed");
-        }
+    if !validate(secret.as_bytes(), sign_github, &bytes) {
+        return HttpResponse::Forbidden().body("verify failed");
     }
 
     let status = std::process::Command::new("git")
