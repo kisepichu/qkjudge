@@ -16,10 +16,11 @@ kind: Role
 metadata:
   name: qkjudge-deployer
 rules:
-  # `kubectl set image deployment/qkjudge-app` に必要。
+  # `kubectl set image deployment/qkjudge-app` は内部的に PATCH リクエストを送るので patch だけで十分。
+  # update は意図せず Deployment 全体差し替えを許してしまうので付与しない (権限最小化)。
   - apiGroups: ["apps"]
     resources: ["deployments"]
-    verbs: ["get", "list", "watch", "patch", "update"]
+    verbs: ["get", "list", "watch", "patch"]
   # `kubectl rollout status deployment/...` はロールアウト中の ReplicaSet / Pod を読む。
   - apiGroups: ["apps"]
     resources: ["replicasets"]
