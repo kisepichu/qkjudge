@@ -61,9 +61,9 @@ kubectl create namespace qkjudge-staging --dry-run=client -o yaml | kubectl appl
 
 ### 2. アプリ secret (`qkjudge-secrets`)
 
-各 namespace に投入する。`.env.k8s.example` をテンプレートにして `.env.k8s.{prod,staging}`
-を作り、`--from-env-file` で流し込む方式が一番楽 (値の生成コマンド・key 一覧・運用メモも
-`.env.k8s.example` のコメントに集約)。
+各 namespace に投入する。`.env.k8s.example` をテンプレートにして
+`.env.k8s.prod` / `.env.k8s.staging` を作り、`--from-env-file` で流し込む方式が
+一番楽 (値の生成コマンド・key 一覧・運用メモも `.env.k8s.example` のコメントに集約)。
 
 ```sh
 # -n は既存ファイルを上書きしない (再実行で値を消さないため)。
@@ -95,8 +95,9 @@ kubectl -n qkjudge-prod create secret generic qkjudge-secrets \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-`.env.k8s.{prod,staging}` は `.gitignore` の `.env.*` パターンで自動的に追跡対象外。
-長期保管はパスワードマネージャ等で別途行う (将来 Sealed Secrets / sops 移行を想定)。
+`.env.k8s.prod` / `.env.k8s.staging` は `.gitignore` の `.env.*` パターンで
+自動的に追跡対象外。長期保管はパスワードマネージャ等で別途行う
+(将来 Sealed Secrets / sops 移行を想定)。
 
 > キー名は `src/main.rs` / MariaDB イメージが読む env 名と一致させること
 > (`MARIADB_PASSWORD` はアプリと DB で共有、`MARIADB_ROOT_PASSWORD` は DB と backup CronJob が使う)。
