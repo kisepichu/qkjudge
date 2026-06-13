@@ -61,9 +61,28 @@ kubectl create namespace qkjudge-staging --dry-run=client -o yaml | kubectl appl
 
 ### 2. アプリ secret (`qkjudge-secrets`)
 
-各 namespace に投入する。`SESSION_KEY` は 64 hex (32 byte)。
+各 namespace に投入する。`.env.k8s.example` をテンプレートにして
+`.env.k8s.prod` / `.env.k8s.staging` を作り、`--from-env-file` で流し込む方式が
+一番楽 (値の生成コマンド・key 一覧・運用メモも `.env.k8s.example` のコメントに集約)。
 
-同名 Secret が既にあっても再実行できるよう、冪等な `--dry-run=client | apply` 形式にする。
+```sh
+# -n は既存ファイルを上書きしない (再実行で値を消さないため)。
+cp -n .env.k8s.example .env.k8s.prod
+cp -n .env.k8s.example .env.k8s.staging
+chmod 600 .env.k8s.prod .env.k8s.staging
+# .env.k8s.prod / .env.k8s.staging を編集して値を埋める (生成コマンドはテンプレ参照)。
+# prod / staging で値は別 (JDoodle 以外)。
+
+kubectl -n qkjudge-prod create secret generic qkjudge-secrets \
+  --from-env-file=.env.k8s.prod \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+kubectl -n qkjudge-staging create secret generic qkjudge-secrets \
+  --from-env-file=.env.k8s.staging \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+`--from-literal` 版 (ad-hoc にその場で投入したい場合):
 
 ```sh
 kubectl -n qkjudge-prod create secret generic qkjudge-secrets \
@@ -76,7 +95,9 @@ kubectl -n qkjudge-prod create secret generic qkjudge-secrets \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-staging も同様 (`-n qkjudge-staging`、値は別に発番推奨)。
+`.env.k8s.prod` / `.env.k8s.staging` は `.gitignore` の `.env.*` パターンで
+自動的に追跡対象外。長期保管はパスワードマネージャ等で別途行う
+(将来 Sealed Secrets / sops 移行を想定)。
 
 > キー名は `src/main.rs` / MariaDB イメージが読む env 名と一致させること
 > (`MARIADB_PASSWORD` はアプリと DB で共有、`MARIADB_ROOT_PASSWORD` は DB と backup CronJob が使う)。

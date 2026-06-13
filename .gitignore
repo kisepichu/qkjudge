@@ -9,6 +9,7 @@
 .env
 .env.*
 !.env.example
+!.env.k8s.example
 
 env.sh
 env.showcase.json
