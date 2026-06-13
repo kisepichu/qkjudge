@@ -67,8 +67,10 @@ kubectl create namespace qkjudge-staging --dry-run=client -o yaml | kubectl appl
 
 ```sh
 cp .env.k8s.example .env.k8s.prod
-chmod 600 .env.k8s.prod
-# .env.k8s.prod を編集して値を埋める (生成コマンドはテンプレ参照)。staging も同様 (値は別)。
+cp .env.k8s.example .env.k8s.staging
+chmod 600 .env.k8s.prod .env.k8s.staging
+# .env.k8s.prod / .env.k8s.staging を編集して値を埋める (生成コマンドはテンプレ参照)。
+# prod / staging で値は別 (JDoodle 以外)。
 
 kubectl -n qkjudge-prod create secret generic qkjudge-secrets \
   --from-env-file=.env.k8s.prod \
