@@ -38,7 +38,7 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
     // if username == "" {
     //     return HttpResponse::Forbidden().body("not logged in".to_owned());
     // }
-    if req.source == "" {
+    if req.source.is_empty() {
         return HttpResponse::BadRequest().json(ExecuteResponse {
             output: "".to_string(),
             status_code: 400,
@@ -106,10 +106,10 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         result = format!("UE {}", res.statusCode);
     }
     HttpResponse::Ok().json(ExecuteResponse {
-        output: output,
+        output,
         status_code: res.statusCode,
-        result: result,
-        memory: memory,
-        cpu_time: cpu_time,
+        result,
+        memory,
+        cpu_time,
     })
 }

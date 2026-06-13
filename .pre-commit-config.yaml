@@ -14,6 +14,8 @@ repos:
       - id: end-of-file-fixer
       - id: check-added-large-files
       - id: check-yaml
+        # k8s マニフェスト (RBAC 等) は `---` 区切りの複数ドキュメントを含むため許可する。
+        args: [--allow-multiple-documents]
       - id: check-merge-conflict
 
   # プロジェクト固有 (ローカル) フック。ツールは mise (mise.toml) が提供する。
@@ -36,15 +38,14 @@ repos:
         language: system
         pass_filenames: false
 
-      # 型/lint: 重いので push 時のみ。CI (TASK-004) でも同等を回す。
+      # 型/lint: 重いので push 時のみ。CI (TASK-004 .github/workflows/ci.yml) でも同等を回す。
       # 状況(TASK-002 完了): sqlx offline 化済み。sqlx-data.json をコミットしてあるので
       #   `SQLX_OFFLINE=true` で DB 無しにコンパイルできる (entry に環境変数を付与してある)。
-      # TODO: `-D warnings` で有効化する前に既存 lint 約20件 (redundant_field_names /
-      #   noop_method_call / unused_parens 等) の解消が必要。CI (TASK-004) 整備時にまとめて対応する。
-      # - id: cargo-clippy
-      #   name: cargo clippy -D warnings
-      #   entry: env SQLX_OFFLINE=true cargo clippy --all-targets --all-features -- -D warnings
-      #   language: system
-      #   types: [rust]
-      #   pass_filenames: false
-      #   stages: [pre-push]
+      # 状況(TASK-004 完了): 既存 lint (clippy + dead_code 等) を解消し `-D warnings` で有効化した。
+      - id: cargo-clippy
+        name: cargo clippy -D warnings
+        entry: env SQLX_OFFLINE=true cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        types: [rust]
+        pass_filenames: false
+        stages: [pre-push]

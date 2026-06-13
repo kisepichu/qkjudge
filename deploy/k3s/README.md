@@ -196,8 +196,15 @@ kubectl -n qkjudge-prod rollout restart deploy/qkjudge-app
 
 `SESSION_KEY` を変えると全ユーザーがログアウトされる点に注意。
 
+## デプロイ反映 (CI/CD)
+
+push 起点の自動反映は GitHub Actions + セルフホスト Runner で行う (TASK-004)。Runner 用の
+namespace-scoped デプロイ権限はこの kustomize に含まれる (`base/deployer-rbac.yaml` の
+ServiceAccount `qkjudge-deployer`)。ワークフロー構成・Runner 登録・kubeconfig 発行手順・
+セキュリティ堅牢化は [`.github/workflows/README.md`](../../.github/workflows/README.md) を参照。
+
 ## 将来
 
 - Secret 管理: Sealed Secrets / sops-age へ移行し宣言的にコミット可能にする。
-- デプロイ反映: セルフホスト Actions Runner からの `kubectl apply` (TASK-004)。GitOps (Argo/Flux) は将来。
+- デプロイ反映: 命令的 `kubectl set image` から GitOps (Argo/Flux) へ移行。
 - バックアップ: PVC ローカルから R2/B2 等オフサイトへ拡張。

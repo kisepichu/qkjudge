@@ -1,0 +1,41 @@
+# Rust の fmt / clippy / test を行う再利用可能ワークフロー。
+# ci.yml (PR・push 時) と deploy.yml (push→deploy 経路のゲート) の両方から呼び出して
+# 同じチェックを重複定義せず共通化する。
+#
+# Dockerfile builder (rust:1.96-bookworm) と同じ toolchain に固定して
+# CI / デプロイゲート / 本番ビルドの lint・型結果を一致させる。
+# DB 無しでビルドするため SQLX_OFFLINE=true + コミット済み sqlx-data.json を使う (TASK-002)。
+name: rust-checks
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  SQLX_OFFLINE: "true"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (1.96.0)
+        uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: cargo test
+        run: cargo test --all-targets --all-features

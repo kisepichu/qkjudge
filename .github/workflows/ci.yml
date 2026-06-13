@@ -1,0 +1,21 @@
+# CI: fmt / clippy / test。GitHub-hosted runner で実行し secret を一切使わない。
+# pull_request (fork 含む) でも安全に回せる (untrusted コードはセルフホスト Runner に載せない)。
+# 中身は _rust-checks.yml に集約し、deploy.yml のデプロイゲートと共通化する (TASK-004)。
+name: ci
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+
+# 同一 ref の古い実行はキャンセルして無駄なビルドを避ける。
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/_rust-checks.yml

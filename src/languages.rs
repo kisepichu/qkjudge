@@ -1,3 +1,6 @@
+// Descriptive metadata table; `language_code` and `version_index` are the only
+// fields read at runtime, the rest document each entry and are kept intentionally.
+#[allow(dead_code)]
 pub struct Language {
     pub id: i32,
     pub label: &'static str,

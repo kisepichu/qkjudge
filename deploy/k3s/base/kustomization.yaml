@@ -11,6 +11,7 @@ resources:
   - ingress.yaml
   - backup-cronjob.yaml
   - backup-pvc.yaml
+  - deployer-rbac.yaml
 
 # 非 secret な共通 env。overlay 側で CORS_ALLOW_ORIGIN を behavior: merge で足す。
 # secret (DB/SESSION_KEY/webhook/JDoodle) は qkjudge-secrets を namespace に手動投入する
