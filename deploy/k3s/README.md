@@ -66,8 +66,9 @@ kubectl create namespace qkjudge-staging --dry-run=client -o yaml | kubectl appl
 `.env.k8s.example` のコメントに集約)。
 
 ```sh
-cp .env.k8s.example .env.k8s.prod
-cp .env.k8s.example .env.k8s.staging
+# -n は既存ファイルを上書きしない (再実行で値を消さないため)。
+cp -n .env.k8s.example .env.k8s.prod
+cp -n .env.k8s.example .env.k8s.staging
 chmod 600 .env.k8s.prod .env.k8s.staging
 # .env.k8s.prod / .env.k8s.staging を編集して値を埋める (生成コマンドはテンプレ参照)。
 # prod / staging で値は別 (JDoodle 以外)。
