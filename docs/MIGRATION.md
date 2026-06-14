@@ -57,7 +57,7 @@ prod namespace                         staging namespace
   mariadb (statefulset + PVC)            mariadb (statefulset + PVC)
   secret (JDoodle/DB/webhook/cookie)     secret (...)
   ingress qkjudge-api.kisen.one          ingress qkjudge-api-stg.kisen.one
-cloudflared (deploy) ── tunnel ── Cloudflare ── qkjudge-api*.kisen.one
+cloudflared (deploy) ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
 frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
 ```
 

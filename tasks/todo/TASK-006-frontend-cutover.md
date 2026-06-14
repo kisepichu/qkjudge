@@ -16,10 +16,10 @@
 
 ## 設計メモ
 
-- **API URL**: prod `.env` → `https://qkjudge-api.kisen.one`、staging 用に `dev.` 系も用意。
+- **API URL**: prod `.env` → `https://qkjudge-api.kisen.one`、staging `.env` → `https://qkjudge-api-stg.kisen.one`。
 - **Cookie**: フロント `qkjudge.kisen.one` と API `qkjudge-api.kisen.one` は **same-site**(同一 registrable domain `kisen.one`)
-  なので `SameSite=Lax; Secure` + `withCredentials` で問題なく動く。Cookie は **API ドメイン(`api.*`)上で完結**し
-  (host-only、Domain 属性で親に広げない)、**HTTPS / `Secure` 前提**。これらが満たされることを確認する。
+  なので `SameSite=Lax; Secure` + `withCredentials` で問題なく動く。Cookie は **API ホスト上で host-only に完結**し
+  (Domain 属性で親に広げない)、**HTTPS / `Secure` 前提**。これらが満たされることを確認する。
 - **ドメイン/公開**: GitHub Pages の独自ドメインを `qkjudge.kisen.one` に (CNAME ファイル + Cloudflare DNS)。
   staging フロントは `dev.qkjudge.kisen.one` (別 Pages か k3s 配信かは TASK-003/004 と整合)。
 - **再登録告知**: トップページに「旧 judge.tqk.blue のアカウントは移行されていません。再登録してください」を表示。

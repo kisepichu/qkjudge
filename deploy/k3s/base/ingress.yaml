@@ -1,4 +1,5 @@
-# k3s 同梱 Traefik で受ける Ingress。host は overlay の ingress-patch.yaml で差し替える
+# k3s 同梱 Traefik で受ける Ingress。host は overlay の kustomization.yaml の
+# JSON6902 patches で差し替える
 # (prod=qkjudge-api.kisen.one / staging=qkjudge-api-stg.kisen.one)。
 # 1 階層 wildcard *.kisen.one (Cloudflare Universal SSL) でカバーするため、
 # 2 階層深い api.qkjudge.kisen.one 系は使わない (旧名)。
