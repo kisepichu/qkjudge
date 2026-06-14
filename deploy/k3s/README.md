@@ -13,7 +13,7 @@ Cloudflare tunnel ──► cloudflared (Deployment, ns: cloudflared)
                           │  host で振り分け (Ingress)
             ┌─────────────┴─────────────┐
             ▼                           ▼
-  api.qkjudge.kisen.one        api.dev.qkjudge.kisen.one
+  qkjudge-api.kisen.one        qkjudge-api-stg.kisen.one
   ns: qkjudge-prod             ns: qkjudge-staging
     qkjudge-app (Deploy)         qkjudge-app (Deploy)
     qkjudge-mariadb (STS+PVC)    qkjudge-mariadb (STS+PVC)
@@ -27,8 +27,8 @@ Cloudflare tunnel ──► cloudflared (Deployment, ns: cloudflared)
 ```
 deploy/k3s/
   base/                 # 環境共通 (MariaDB STS / app Deploy+Svc / Ingress / backup CronJob / 共通 env)
-  overlays/prod/        # namespace=qkjudge-prod, image :master, host api.qkjudge.kisen.one
-  overlays/staging/     # namespace=qkjudge-staging, image :dev,  host api.dev.qkjudge.kisen.one
+  overlays/prod/        # namespace=qkjudge-prod, image :master, host qkjudge-api.kisen.one
+  overlays/staging/     # namespace=qkjudge-staging, image :dev,  host qkjudge-api-stg.kisen.one
   cloudflared/          # クラスタ singleton tunnel (両環境共有)
 ```
 
@@ -159,8 +159,8 @@ tunnel をホスト名に紐付ける。`route dns` が Cloudflare DNS に `CNAM
 (proxied) を自動作成する。
 
 ```sh
-cloudflared tunnel route dns qkjudge api.qkjudge.kisen.one
-cloudflared tunnel route dns qkjudge api.dev.qkjudge.kisen.one
+cloudflared tunnel route dns qkjudge qkjudge-api.kisen.one
+cloudflared tunnel route dns qkjudge qkjudge-api-stg.kisen.one
 ```
 
 ダッシュボードで手動作成する場合は、`kisen.one` ゾーンに以下を **Proxied** で追加:
@@ -173,8 +173,8 @@ cloudflared tunnel route dns qkjudge api.dev.qkjudge.kisen.one
 ## 疎通確認
 
 ```sh
-curl -i https://api.qkjudge.kisen.one/ping        # → 200
-curl -i https://api.dev.qkjudge.kisen.one/ping    # → 200
+curl -i https://qkjudge-api.kisen.one/ping        # → 200
+curl -i https://qkjudge-api-stg.kisen.one/ping    # → 200
 ```
 
 主要フロー (signup/login/problems/submit→judge/submissions) を確認する。problems は

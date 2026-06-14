@@ -16,8 +16,8 @@
 
 ## 設計メモ
 
-- **API URL**: prod `.env` → `https://api.qkjudge.kisen.one`、staging 用に `dev.` 系も用意。
-- **Cookie**: フロント `qkjudge.kisen.one` と API `api.qkjudge.kisen.one` は **same-site**(同一 registrable domain `kisen.one`)
+- **API URL**: prod `.env` → `https://qkjudge-api.kisen.one`、staging 用に `dev.` 系も用意。
+- **Cookie**: フロント `qkjudge.kisen.one` と API `qkjudge-api.kisen.one` は **same-site**(同一 registrable domain `kisen.one`)
   なので `SameSite=Lax; Secure` + `withCredentials` で問題なく動く。Cookie は **API ドメイン(`api.*`)上で完結**し
   (host-only、Domain 属性で親に広げない)、**HTTPS / `Secure` 前提**。これらが満たされることを確認する。
 - **ドメイン/公開**: GitHub Pages の独自ドメインを `qkjudge.kisen.one` に (CNAME ファイル + Cloudflare DNS)。

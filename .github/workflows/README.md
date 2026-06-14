@@ -10,7 +10,7 @@
 | `ci.yml`     | `pull_request` / push master,dev | GitHub-hosted  | `cargo fmt --check` / `clippy -D warnings` / `cargo test`。secret 不使用 |
 | `deploy.yml` | push master,dev のみ             | build=hosted, deploy=self-hosted | build→GHCR push (`:{branch}`/`:{sha}`)、deploy=対象 ns の image 差し替え |
 
-- `master` → prod (`qkjudge-prod`, `api.qkjudge.kisen.one`)、`dev` → staging (`qkjudge-staging`, `api.dev.qkjudge.kisen.one`)。
+- `master` → prod (`qkjudge-prod`, `qkjudge-api.kisen.one`)、`dev` → staging (`qkjudge-staging`, `qkjudge-api-stg.kisen.one`)。
 - deploy は GitHub-hosted で GHCR に push 後、self-hosted Runner が `kubectl set image` で
   イミュータブルな `:{sha}` タグへ差し替え `rollout status` で完了を待つ。
 
