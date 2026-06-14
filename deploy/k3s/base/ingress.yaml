@@ -1,7 +1,15 @@
-# k3s 同梱 Traefik で受ける Ingress。host は overlay の ingress-patch.yaml で差し替える
-# (prod=api.qkjudge.kisen.one / staging=api.dev.qkjudge.kisen.one)。
+# k3s 同梱 Traefik で受ける Ingress。host は overlay の kustomization.yaml の
+# JSON6902 patches で必ず差し替える
+# (prod=qkjudge-api.kisen.one / staging=qkjudge-api-stg.kisen.one)。
+# 1 階層 wildcard *.kisen.one (Cloudflare Universal SSL) でカバーするため、
+# 2 階層深い api.qkjudge.kisen.one 系は使わない (旧名)。
 # 経路: Cloudflare tunnel → cloudflared → Traefik(web:80) → この Ingress → qkjudge-app:8080。
 # TLS 終端は Cloudflare edge。クラスタ内は平文 http (web entrypoint) で受ける。
+#
+# 注: base 単体で `kubectl apply -k deploy/k3s/base` した場合に prod 実ホスト向け
+# Ingress が誤って作られないよう、base の host は RFC 2606 の reserved TLD .invalid
+# (DNS で絶対に解決されない) にしている。overlay の JSON6902 op: replace で常に
+# 実ホストに差し替える前提。
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -11,7 +19,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: api.qkjudge.kisen.one
+    - host: override-in-overlay.invalid
       http:
         paths:
           - path: /

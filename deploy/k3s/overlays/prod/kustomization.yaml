@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# prod 環境。master ブランチ相当の image を api.qkjudge.kisen.one で公開する。
+# prod 環境。master ブランチ相当の image を qkjudge-api.kisen.one で公開する。
 namespace: qkjudge-prod
 
 resources:
@@ -27,4 +27,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: api.qkjudge.kisen.one
+        value: qkjudge-api.kisen.one

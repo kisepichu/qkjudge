@@ -10,8 +10,8 @@ credentials-file: /etc/cloudflared/creds/credentials.json
 no-autoupdate: true
 metrics: 0.0.0.0:2000
 ingress:
-  - hostname: api.qkjudge.kisen.one
+  - hostname: qkjudge-api.kisen.one
     service: http://traefik.kube-system.svc.cluster.local:80
-  - hostname: api.dev.qkjudge.kisen.one
+  - hostname: qkjudge-api-stg.kisen.one
     service: http://traefik.kube-system.svc.cluster.local:80
   - service: http_status:404

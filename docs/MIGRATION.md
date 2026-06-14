@@ -39,7 +39,7 @@ qkjudge サーバーは traP の NeoShowcase 上で、gitea `git.trap.jp/tqk/qkj
 | 項目                 | 決定                                                                                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | オーケストレーション | k3s on leafeon。最初から prod / staging のマルチ環境 (旧 Showcase のブランチ別デプロイを踏襲)                                                                                  |
-| 環境マッピング       | `master`→prod (`qkjudge.kisen.one` / API `api.qkjudge.kisen.one`)、`dev`→staging (`dev.qkjudge.kisen.one` / `api.dev.qkjudge.kisen.one`)                                       |
+| 環境マッピング       | `master`→prod (`qkjudge.kisen.one` / API `qkjudge-api.kisen.one`)、`dev`→staging (`dev.qkjudge.kisen.one` / `qkjudge-api-stg.kisen.one`)                                       |
 | コンテナレジストリ   | GHCR (`ghcr.io/kisepichu/qkjudge`)                                                                                                                                             |
 | デプロイ反映         | leafeon 上のセルフホスト GitHub Actions Runner が `kubectl` 適用 (k3s API を外部公開しない)。**セキュリティ堅牢化必須**。GitOps(Argo/Flux) は将来移行                          |
 | 公開                 | cloudflared を k3s 内 Deployment として動かし、tunnel ingress 設定も k3s マニフェストで管理する (鯖機を直接設定せず pull+反映で完結)。DNS は Cloudflare に CNAME               |
@@ -56,8 +56,8 @@ prod namespace                         staging namespace
   qkjudge (deploy, image :master)        qkjudge (deploy, image :dev)
   mariadb (statefulset + PVC)            mariadb (statefulset + PVC)
   secret (JDoodle/DB/webhook/cookie)     secret (...)
-  ingress api.qkjudge.kisen.one          ingress api.dev.qkjudge.kisen.one
-cloudflared (deploy) ── tunnel ── Cloudflare ── *.qkjudge.kisen.one
+  ingress qkjudge-api.kisen.one          ingress qkjudge-api-stg.kisen.one
+cloudflared (deploy) ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
 frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
 ```
 
