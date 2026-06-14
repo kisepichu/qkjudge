@@ -167,8 +167,8 @@ cloudflared tunnel route dns qkjudge qkjudge-api-stg.kisen.one
 
 | Type  | Name             | Target                          |
 | ----- | ---------------- | ------------------------------- |
-| CNAME | api.qkjudge      | `<TUNNEL_ID>.cfargotunnel.com`  |
-| CNAME | api.dev.qkjudge  | `<TUNNEL_ID>.cfargotunnel.com`  |
+| CNAME | qkjudge-api      | `<TUNNEL_ID>.cfargotunnel.com`  |
+| CNAME | qkjudge-api-stg  | `<TUNNEL_ID>.cfargotunnel.com`  |
 
 ## 疎通確認
 
