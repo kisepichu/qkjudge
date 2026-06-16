@@ -1,0 +1,21 @@
+{
+  "id": 14,
+  "date": "2022-09-15 12:01:23.0",
+  "author": "shobonvip",
+  "problem_id": 7,
+  "problem_title": "Weirdo",
+  "testcase_num": 28,
+  "tasks": [
+    {
+      "id": 73,
+      "result": "AC"
+    },
+    {
+      "id": 74,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 1,
+  "source": "class UnionFind:\r\n\tdef __init__(self, n):\r\n\t\tself.n = n\r\n\t\tself.parents = [-1] * n\r\n\t\r\n\tdef find(self, x):\r\n\t\tif self.parents[x] < 0:\r\n\t\t\treturn x\r\n\t\telse:\r\n\t\t\tself.parents[x] = self.find(self.parents[x])\r\n\t\t\treturn self.parents[x]\r\n\t\r\n\tdef union(self, x, y):\r\n\t\tx = self.find(x)\r\n\t\ty = self.find(y)\r\n\t\tif x == y:\r\n\t\t\treturn\r\n\t\tif self.parents[x] > self.parents[y]:\r\n\t\t\tx, y = y, x\r\n\t\tself.parents[x] += self.parents[y]\r\n\t\tself.parents[y] = x\r\n\r\nn = int(input())\r\nupDown = UnionFind(2*n)\r\nconnect = UnionFind(n)\r\n\r\nfor i in range(n):\r\n\ta, b = map(int,input().split())\r\n\t\r\n\tconnect.union(i, a)\r\n\r\n\tif b == 1:\r\n\t\tupDown.union(i, a)\r\n\t\tupDown.union(n+i, n+a)\r\n\telse:\r\n\t\tupDown.union(i, n+a)\r\n\t\tupDown.union(n+i, a)\r\n\r\nv = [0 for i in range(2*n)]\r\nfor i in range(n):\r\n\tv[upDown.find(i)] += 1\r\n\r\nans = 0\r\nfor i in range(n):\r\n\tif connect.parents[i] < 0:\r\n\t\ttarg = -connect.parents[i]\r\n\t\t\r\n\t\t# 矛盾判定\r\n\t\tif upDown.find(i) == upDown.find(i+n):\r\n\t\t\tcontinue\r\n\t\t\r\n\t\t# 個数求めるやつ\r\n\t\ttmp = v[upDown.find(i)]\r\n\t\tprint(i, targ, tmp)\r\n\t\tans += max(tmp, targ-tmp)\r\n\r\nprint(ans)"
+}

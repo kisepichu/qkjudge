@@ -1,0 +1,17 @@
+{
+  "id": 44,
+  "date": "2024-05-29 11:23:25.0",
+  "author": "daigokanda",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 301,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 1,
+  "source": "A, B = input().split()\n\nprint(A+B)"
+}

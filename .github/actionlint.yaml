@@ -1,0 +1,5 @@
+# actionlint 設定。leafeon のセルフホスト Runner に付けるカスタムラベルを宣言する
+# (deploy.yml の `runs-on: [self-hosted, leafeon]`)。これが無いと未知ラベル扱いで警告になる。
+self-hosted-runner:
+  labels:
+    - leafeon

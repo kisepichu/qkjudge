@@ -10,8 +10,8 @@ struct WhoamiResponse {
 #[get("/user/whoami")]
 async fn get_whoami_handler(id: Identity) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
-    if username == "" {
+    if username.is_empty() {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
-    HttpResponse::Ok().json(WhoamiResponse { username: username })
+    HttpResponse::Ok().json(WhoamiResponse { username })
 }

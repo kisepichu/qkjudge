@@ -1,0 +1,19 @@
+# Docker ビルドコンテキストから除外する。ビルドに不要なもの・ホスト固有物・secret。
+/target
+/world-db
+/problems
+.git
+.github
+.claude
+docs
+tasks
+migrations/out
+*.md
+env.sh
+.env
+.env.*
+!.env.example
+env.showcase.json
+env.dev.showcase.json
+init_db.sh
+showcase.yaml

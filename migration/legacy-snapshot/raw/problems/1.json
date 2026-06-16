@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "title": "A+B",
+  "author": "tqk",
+  "difficulty": 100,
+  "statement": "## 問題文\n\n$A+B$ を求めてください。\n\n## 制約\n\n- $1 \\le A, B \\le 100$\n- 入力は全て整数\n\n---\n\n## 入力\n\n入力は以下の形式で標準入力から与えられる。\n\n> $A$ $B$\n\n## 出力\n\n答えを出力せよ。\n\n---\n\n## 入力例 1\n\n```\n6 7\n```\n\n## 出力例 1\n\n```\n13\n```\n",
+  "time_limit": "2.0",
+  "memory_limit": 1024,
+  "status": "NotLogged",
+  "last_submission": -1
+}

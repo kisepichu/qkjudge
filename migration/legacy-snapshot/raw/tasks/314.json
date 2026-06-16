@@ -1,0 +1,10 @@
+{
+  "id": 314,
+  "submission_id": 51,
+  "input": "6 7\n",
+  "output": "\njdoodle.cpp:4:3: error: invalid preprocessing directive #\\U00005165\\U0000529b\\U00003055\\U0000308c\\U0000305f\\U00006574\\U00006570\\U0000306e\\U00004e8c\\U00004e57\\U00003092\\U00008a08\\U00007b97\\U00003059\\U0000308b\n    4 | # 入力された整数の二乗を計算する\n      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\njdoodle.cpp:7:3: error: invalid preprocessing directive #\\U00007d50\\U0000679c\\U00003092\\U000051fa\\U0000529b\\U00003059\\U0000308b\n    7 | # 結果を出力する\n      |   ^~~~~~~~~~~~~~\njdoodle.cpp:1:1: error: ‘a’ does not name a type\n    1 | a = int(input())\n      | ^",
+  "expected": "13\n",
+  "result": "CE",
+  "memory": "1024",
+  "cpu_time": "-1"
+}

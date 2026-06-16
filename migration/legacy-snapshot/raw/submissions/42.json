@@ -1,0 +1,25 @@
+{
+  "id": 42,
+  "date": "2023-12-16 7:55:14.0",
+  "author": "kangping",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 295,
+      "result": "AC"
+    },
+    {
+      "id": 296,
+      "result": "AC"
+    },
+    {
+      "id": 297,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 44,
+  "source": "A,B = map(int,input().split())\nprint(A+B)"
+}

@@ -1,25 +1,29 @@
 use std::{fs::File, io::Read, sync::Arc};
 
-use actix_identity::Identity;
 use actix_web::{
     post,
     web::{self, Bytes},
     HttpRequest, HttpResponse, Responder,
 };
-use hmac::{digest::MacError, Hmac, Mac};
-use sha1::Sha1;
+use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use sqlx::{query, query_as};
 use std::collections::HashMap;
 use tokio::sync::Mutex;
 use yaml_rust::{Yaml, YamlLoader};
 
+// `id` and `visible` are not read but must exist to match the columns
+// selected by the `query_as!` macro below.
+#[allow(dead_code)]
 struct ProblemSummary {
     id: i32,
     path: String,
     visible: i8,
 }
 
+// `HttpResponse` is the error type these handlers pass around directly;
+// boxing it would only shuffle the size to the call sites without benefit.
+#[allow(clippy::result_large_err)]
 fn yaml(path: String) -> Result<Yaml, HttpResponse> {
     println!("{:?}", path);
     let mut info_file = match File::open(path.clone()) {
@@ -38,55 +42,43 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
 }
 
 type HmacSha256 = Hmac<Sha256>;
-type HmacSha1 = Hmac<Sha1>;
-use hex;
 
+// `signature` は X-Hub-Signature-256 から "sha256=" を剥がした hex 文字列のバイト列を期待する。
+// 期待 hex とバイト単位の固定時間比較を行う (長さが違えば fixed_time_eq は false を返す)。
+// 署名値は機密相当なのでログには出さない。
 pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
     let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
     hmac.update(message);
     let expected = hex::encode(hmac.finalize().into_bytes());
-    println!("expected: {}", expected);
-    let got = String::from_utf8(signature.to_vec()).unwrap();
-    println!("got: {}", got);
-    return crypto::util::fixed_time_eq(expected.as_bytes(), got.as_bytes());
+    crypto::util::fixed_time_eq(expected.as_bytes(), signature)
 }
 
 #[post("/fetch/problems")]
 async fn post_fetch_problems_handler(
-    id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     req: HttpRequest,
     bytes: Bytes,
 ) -> impl Responder {
-    let username = id.identity().unwrap_or("".to_owned());
+    // 署名検証は常に必須。GitHub Webhook 専用エンドポイントなので Identity は使わない。
+    // ヘッダ欠落 / 非 ASCII / プレフィクス不一致のいずれでも 403 を返し panic させない。
+    let sign_github = match req
+        .headers()
+        .get("X-Hub-Signature-256")
+        .and_then(|s| s.to_str().ok())
+        .and_then(|s| s.strip_prefix("sha256="))
+    {
+        Some(s) => s.as_bytes(),
+        None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    };
 
-    if username == "tqk" {
-        println!("login")
-    } else {
-        let sign_github = match req.headers().get("X-Hub-Signature-256") {
-            Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
-        };
-        let sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
-            Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
-        };
+    let secret = std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
 
-        let message = String::from_utf8(bytes.to_vec()).unwrap();
-        // println!("message: {}", message);
-        let secret =
-            std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
-
-        if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
-            println!("ok");
-        } else {
-            println!("ng");
-            return HttpResponse::Forbidden().body("verify failed");
-        }
+    if !validate(secret.as_bytes(), sign_github, &bytes) {
+        return HttpResponse::Forbidden().body("verify failed");
     }
 
     let status = std::process::Command::new("git")
-        .args(&[
+        .args([
             "-C",
             &std::env::var("PROBLEMS_REPO_ROOT").unwrap_or("problems".to_string()),
             "pull",
@@ -141,7 +133,7 @@ async fn post_fetch_problems_handler(
         let problem_path_long = std::env::var("PROBLEMS_ROOT")
             .expect("PROBLEMS_ROOT not set")
             .replace("\r", "")
-            + problem_path.clone()
+            + problem_path
             + "/problem.yaml";
         let probleminfo = match yaml(problem_path_long.clone()) {
             Ok(p) => p,
@@ -197,7 +189,7 @@ async fn post_fetch_problems_handler(
         let pool = pool_data.lock().await;
         let count = query!(
             "SELECT COUNT(*) AS value FROM problems WHERE path=? LIMIT 1;",
-            problem_path.clone()
+            problem_path
         )
         .fetch_one(&*pool)
         .await
@@ -253,8 +245,8 @@ async fn post_fetch_problems_handler(
         let pool = pool_data.lock().await;
         for (hidden_path, visible) in &m {
             println!("{}, {}", hidden_path, visible);
-            if !visible {
-                if query!(
+            if !visible
+                && query!(
                     "UPDATE problems SET visible=? WHERE path=?;",
                     false,
                     hidden_path
@@ -262,11 +254,9 @@ async fn post_fetch_problems_handler(
                 .execute(&*pool)
                 .await
                 .is_err()
-                {
-                    println!("hide error");
-                    return HttpResponse::InternalServerError()
-                        .body("post_fetch_problems_handler: 6");
-                }
+            {
+                println!("hide error");
+                return HttpResponse::InternalServerError().body("post_fetch_problems_handler: 6");
             }
         }
     }
@@ -276,40 +266,41 @@ async fn post_fetch_problems_handler(
 
 #[cfg(test)]
 mod test {
+    use super::validate;
     use hmac::{Hmac, Mac};
-    use sha1::Sha1;
     use sha2::Sha256;
 
     type HmacSha256 = Hmac<Sha256>;
-    type HmacSha1 = Hmac<Sha1>;
 
-    pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
-        let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
+    fn sign_hex(secret: &[u8], message: &[u8]) -> String {
+        let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
         hmac.update(message);
-        hmac.verify_slice(signature).is_ok()
+        hex::encode(hmac.finalize().into_bytes())
     }
 
     #[test]
     fn it_returns_true_when_signature_and_message_match() {
-        let signature = &vec![
-            0x73, 0x6d, 0x7f, 0x93, 0x42, 0xf2, 0xa7, 0xd2, 0x39, 0xaf, 0xa5, 0x51, 0x3a, 0x4b,
-            0xb2, 0x28, 0x3e, 0x0e, 0x15, 0x88,
-        ];
         let secret = b"some-secret";
         let message = b"blah-blah-blah";
-
-        assert_eq!(validate(secret, signature, message), true);
+        let sig = sign_hex(secret, message);
+        assert!(validate(secret, sig.as_bytes(), message));
     }
 
     #[test]
     fn it_returns_false_when_signature_and_message_do_not_match() {
-        let signature = &vec![
-            0x31, 0x30, 0x2b, 0x00, 0xba, 0xd4, 0xd6, 0xd1, 0x10, 0xa1, 0x18, 0x82, 0x77, 0xc4,
-            0xd1, 0x06, 0x0c, 0xb2, 0xc3, 0x73,
-        ];
         let secret = b"some-secret";
-        let message = b"blah-blah-blah?";
+        let message = b"blah-blah-blah";
+        let bad_message = b"blah-blah-blah?";
+        let sig = sign_hex(secret, message);
+        assert!(!validate(secret, sig.as_bytes(), bad_message));
+    }
 
-        assert_eq!(validate(secret, signature, message), false);
+    #[test]
+    fn it_returns_false_when_signature_length_differs() {
+        // fixed_time_eq は長さ違いを false で返す。truncate された署名で誤って通らないことを確認。
+        let secret = b"some-secret";
+        let message = b"blah-blah-blah";
+        let sig = sign_hex(secret, message);
+        assert!(!validate(secret, &sig.as_bytes()[..sig.len() - 1], message));
     }
 }

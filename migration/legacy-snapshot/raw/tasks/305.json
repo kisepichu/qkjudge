@@ -1,0 +1,10 @@
+{
+  "id": 305,
+  "submission_id": 46,
+  "input": "6 7\n",
+  "output": "\njdoodle.cpp:4:5: error: cannot declare ‘::main’ to be a global variable\n    4 | int main{\n      |     ^~~~\njdoodle.cpp:5:5: error: expected primary-expression before ‘int’\n    5 |     int a,b;\n      |     ^~~\njdoodle.cpp:5:5: error: expected ‘}’ before ‘int’\njdoodle.cpp:4:9: note: to match this ‘{’\n    4 | int main{\n      |         ^\njdoodle.cpp:6:5: error: ‘cin’ does not name a type\n    6 |     cin >> a >> b;\n      |     ^~~\njdoodle.cpp:7:5: error: ‘cout’ does not name a type\n    7 |     cout << a + b << endl;\n      |     ^~~~\njdoodle.cpp:8:1: error: expected declaration before ‘}’ token\n    8 | }\n      | ^",
+  "expected": "13\n",
+  "result": "CE",
+  "memory": "1024",
+  "cpu_time": "-1"
+}

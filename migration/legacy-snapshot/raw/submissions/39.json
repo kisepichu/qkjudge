@@ -1,0 +1,113 @@
+{
+  "id": 39,
+  "date": "2023-07-05 7:50:07.0",
+  "author": "hayatroid",
+  "problem_id": 4,
+  "problem_title": "Sum of Max",
+  "testcase_num": 25,
+  "tasks": [
+    {
+      "id": 264,
+      "result": "AC"
+    },
+    {
+      "id": 265,
+      "result": "AC"
+    },
+    {
+      "id": 266,
+      "result": "AC"
+    },
+    {
+      "id": 267,
+      "result": "AC"
+    },
+    {
+      "id": 268,
+      "result": "AC"
+    },
+    {
+      "id": 269,
+      "result": "AC"
+    },
+    {
+      "id": 270,
+      "result": "AC"
+    },
+    {
+      "id": 271,
+      "result": "AC"
+    },
+    {
+      "id": 272,
+      "result": "AC"
+    },
+    {
+      "id": 273,
+      "result": "AC"
+    },
+    {
+      "id": 274,
+      "result": "AC"
+    },
+    {
+      "id": 275,
+      "result": "AC"
+    },
+    {
+      "id": 276,
+      "result": "AC"
+    },
+    {
+      "id": 277,
+      "result": "AC"
+    },
+    {
+      "id": 278,
+      "result": "AC"
+    },
+    {
+      "id": 279,
+      "result": "AC"
+    },
+    {
+      "id": 280,
+      "result": "AC"
+    },
+    {
+      "id": 281,
+      "result": "AC"
+    },
+    {
+      "id": 282,
+      "result": "AC"
+    },
+    {
+      "id": 283,
+      "result": "AC"
+    },
+    {
+      "id": 284,
+      "result": "AC"
+    },
+    {
+      "id": 285,
+      "result": "AC"
+    },
+    {
+      "id": 286,
+      "result": "AC"
+    },
+    {
+      "id": 287,
+      "result": "AC"
+    },
+    {
+      "id": 288,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 1,
+  "source": "MOD = 998244353\ndef comb(n, r):\n    nu = 1\n    de = 1\n    for i in range(r):\n        nu = nu * (n - i) % MOD\n        de = de * (i + 1) % MOD\n    return nu * pow(de, -1, MOD) % MOD\n\n\nN, K = map(int, input().split())\nA = list(map(int, input().split()))\n\nA.sort()\nans = 0\nfor i in range(K - 1, N):\n    ans = (ans + A[i] * comb(i, i - K + 1)) % MOD\n\nprint(ans)\n"
+}

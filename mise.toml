@@ -1,0 +1,6 @@
+# プロジェクトの開発ツールを再現可能にピン留めする。
+# `mise install` で gitleaks / prek が入る。Rust ツールチェイン(cargo/clippy/rustfmt)は
+# グローバル mise 管理のため、ここでは扱わない。
+[tools]
+gitleaks = "8.30.1"
+prek = "0.4.1"

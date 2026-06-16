@@ -1,0 +1,17 @@
+# cloudflared (credentials-file モード) の tunnel ingress 設定。
+# 経路は二段: Cloudflare tunnel → cloudflared → Traefik(web:80) → app Service。
+# ホスト別の振り分けは Traefik(Ingress) が行うので、ここでは両ホストを Traefik へ向けるだけ。
+# prod / staging 共通の単一 tunnel でさばく (frontend は GitHub Pages なのでここには含めない)。
+#
+# tunnel: は UUID (secret ではない)。`cloudflared tunnel create qkjudge` で発行した値に差し替える
+# (README 参照)。credentials.json は secret なので cloudflared-credentials から別マウントする。
+tunnel: c74ac1f6-8f29-4b16-a573-9174ee7fe3d2
+credentials-file: /etc/cloudflared/creds/credentials.json
+no-autoupdate: true
+metrics: 0.0.0.0:2000
+ingress:
+  - hostname: qkjudge-api.kisen.one
+    service: http://traefik.kube-system.svc.cluster.local:80
+  - hostname: qkjudge-api-stg.kisen.one
+    service: http://traefik.kube-system.svc.cluster.local:80
+  - service: http_status:404

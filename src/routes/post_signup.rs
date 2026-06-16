@@ -16,7 +16,7 @@ async fn post_signup_handler(
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
     let pool = pool_data.lock().await;
-    if req.username == "" || req.password == "" {
+    if req.username.is_empty() || req.password.is_empty() {
         return HttpResponse::BadRequest().body("username or password cannot be empty");
     }
     let hashed_pass = hash(&req.password, DEFAULT_COST).unwrap();

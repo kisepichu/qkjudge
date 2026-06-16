@@ -30,7 +30,7 @@ async fn post_login_handler(
         .unwrap_or(Default::default());
     let hashed_pass = user.hashed_pass;
     let valid = verify(&req.password, &hashed_pass).unwrap_or(false);
-    if !valid || user.username == "" {
+    if !valid || user.username.is_empty() {
         return HttpResponse::Forbidden().body("username or password is wrong");
     }
 

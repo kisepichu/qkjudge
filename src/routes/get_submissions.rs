@@ -36,14 +36,6 @@ struct SubmissionSummaryInResponse {
 }
 
 #[derive(Serialize)]
-struct Problem {
-    problem_id: i32,
-    title: String,
-    author: String,
-    difficulty: i64,
-}
-
-#[derive(Serialize)]
 struct GetSubmissionsResponse {
     pages_number: i32,
     submissions: Vec<SubmissionSummaryInResponse>,
@@ -82,14 +74,14 @@ async fn get_submissions_handler(
     let pages_number = (submissions_number + submissions_in_page - 1) / submissions_in_page;
 
     HttpResponse::Ok().json(GetSubmissionsResponse {
-        pages_number: pages_number,
+        pages_number,
         submissions: submissions
             .iter()
             .map(|s| SubmissionSummaryInResponse {
-                id: s.id.clone(),
+                id: s.id,
                 date: s.date.to_string(),
                 author: s.author.clone(),
-                problem_id: s.problem_id.clone(),
+                problem_id: s.problem_id,
                 problem_title: s.problem_title.clone(),
                 result: s.result.clone(),
                 language_id: s.language_id,

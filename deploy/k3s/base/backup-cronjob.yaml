@@ -1,0 +1,60 @@
+# MariaDB の論理バックアップを毎日取得し PVC に保存する (将来 R2/B2 等のオフサイトに拡張余地)。
+# リストア手順は deploy/k3s/README.md 参照。
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: qkjudge-mariadb-backup
+spec:
+  # 毎日 18:00 UTC (= JST 翌 03:00)。
+  schedule: "0 18 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mariadb-dump
+              image: mariadb:11.4
+              env:
+                - name: MARIADB_HOSTNAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: qkjudge-config
+                      key: MARIADB_HOSTNAME
+                - name: MARIADB_DATABASE
+                  valueFrom:
+                    configMapKeyRef:
+                      name: qkjudge-config
+                      key: MARIADB_DATABASE
+                - name: MARIADB_ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: qkjudge-secrets
+                      key: MARIADB_ROOT_PASSWORD
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+                  ts="$(date +%Y%m%d-%H%M%S)"
+                  sql="/backup/qkjudge-${ts}.sql"
+                  echo "[backup] dumping ${MARIADB_DATABASE} from ${MARIADB_HOSTNAME} -> ${sql}.gz"
+                  # パイプ (dump | gzip) だと dash に pipefail が無く dump 失敗を取りこぼすため、
+                  # 一旦ファイルに書き出してから gzip する (set -e で dump 失敗を確実に検知)。
+                  mariadb-dump -h "${MARIADB_HOSTNAME}" -u root -p"${MARIADB_ROOT_PASSWORD}" \
+                    --single-transaction --routines --triggers "${MARIADB_DATABASE}" > "${sql}"
+                  gzip "${sql}"
+                  echo "[backup] pruning dumps older than 14 days"
+                  find /backup -name 'qkjudge-*.sql.gz' -mtime +14 -delete
+                  echo "[backup] done"
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: qkjudge-backup

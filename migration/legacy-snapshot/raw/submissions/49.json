@@ -1,0 +1,25 @@
+{
+  "id": 49,
+  "date": "2024-09-24 1:05:55.0",
+  "author": "むごっほ",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 308,
+      "result": "AC"
+    },
+    {
+      "id": 309,
+      "result": "AC"
+    },
+    {
+      "id": 310,
+      "result": "AC"
+    }
+  ],
+  "result": "AC",
+  "language_id": 117,
+  "source": "set buf [split [gets stdin]]\nputs [expr [lindex $buf 0] + [lindex $buf 1]]"
+}

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# クラスタ singleton (prod/staging で共有する単一 tunnel)。専用 namespace に置く。
+namespace: cloudflared
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+
+# tunnel ingress 設定を ConfigMap 化 (config.yaml はこのディレクトリ内なので load-restrictor 不要)。
+configMapGenerator:
+  - name: cloudflared-config
+    files:
+      - config.yaml

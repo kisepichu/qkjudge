@@ -1,0 +1,44 @@
+{
+  "problems": [
+    {
+      "id": 1,
+      "title": "A+B",
+      "author": "tqk",
+      "difficulty": 100,
+      "status": "NotLogged",
+      "last_submission": -1
+    },
+    {
+      "id": 9,
+      "title": "FizzBuzz",
+      "author": "tqk",
+      "difficulty": 100,
+      "status": "NotLogged",
+      "last_submission": -1
+    },
+    {
+      "id": 3,
+      "title": "Nkuth's Plus Notation",
+      "author": "tqk",
+      "difficulty": 100,
+      "status": "NotLogged",
+      "last_submission": -1
+    },
+    {
+      "id": 4,
+      "title": "Sum of Max",
+      "author": "tqk",
+      "difficulty": 400,
+      "status": "NotLogged",
+      "last_submission": -1
+    },
+    {
+      "id": 7,
+      "title": "Weirdo",
+      "author": "tqk",
+      "difficulty": 600,
+      "status": "NotLogged",
+      "last_submission": -1
+    }
+  ]
+}

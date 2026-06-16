@@ -1,0 +1,17 @@
+{
+  "id": 31,
+  "date": "2023-05-11 5:14:48.0",
+  "author": "bvv",
+  "problem_id": 9,
+  "problem_title": "FizzBuzz",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 226,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 1,
+  "source": "n = int(input())\nfor i in range(n):\n    if i%15==0:\n        print(\"FizzBuzz\")\n    elif i%3==0:\n        print(\"Fizz\")\n    elif i%5==0:\n        print(\"Buzz\")\n    else:\n        print(i)"
+}

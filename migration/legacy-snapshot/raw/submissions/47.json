@@ -1,0 +1,17 @@
+{
+  "id": 47,
+  "date": "2024-09-14 8:31:09.0",
+  "author": "a",
+  "problem_id": 1,
+  "problem_title": "A+B",
+  "testcase_num": 3,
+  "tasks": [
+    {
+      "id": 306,
+      "result": "WA"
+    }
+  ],
+  "result": "WA",
+  "language_id": 1,
+  "source": "A = input()\nB = input()\nprint(A + B)"
+}
