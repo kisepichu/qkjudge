@@ -9,6 +9,7 @@ use std::sync::*;
 use tokio::sync::Mutex;
 
 mod languages;
+mod legacy_store;
 mod routes;
 
 #[actix_rt::main]
@@ -96,6 +97,11 @@ async fn main() -> std::io::Result<()> {
         _ => true,
     };
 
+    // Fail fast at startup if the embedded legacy snapshot fails to deserialize,
+    // instead of letting the first /legacy/* request panic the worker.
+    let legacy_total = legacy_store::global().total_count();
+    log::info!("legacy snapshot loaded ({legacy_total} submissions)");
+
     HttpServer::new(move || {
         App::new()
             .app_data(Data::new(pool_data.clone()))
@@ -136,6 +142,9 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_submissions_sid_handler)
             .service(routes::get_submissions_handler)
             .service(routes::get_tasks_tid_handler)
+            .service(routes::get_legacy_submissions_handler)
+            .service(routes::get_legacy_submissions_sid_handler)
+            .service(routes::get_legacy_tasks_tid_handler)
             .service(routes::put_submissions_sid_handler)
             .service(routes::post_fetch_problems_handler)
     })
