@@ -28,9 +28,13 @@ TASK-001 のスナップショットを、新サーバーから read-only で配
 - ページング合成方針: server 側で合成せず、legacy 側は独立した `pages_number` を返す。
   UI 側で「新側の `pages_number` まで取りきったら legacy 側 page=1 から取り始める」と
   順次呼び出す。
-- 認証: 新側 `/submissions` は `actix_identity::Identity` 必須 (= ログイン要)。
-  「公開度を新側に合わせる」読み解きで legacy 側も `Identity` 必須にする。
-  (markdown 当初メモの「未ログイン可」は実コードと不一致だったため、新側挙動を優先。)
+- 認証: 新側 `/submissions*` / `/tasks/{tid}` は `Identity` を引数に取るだけで
+  `id.identity()` 呼び出しが無く、actix_identity の extractor の性質上 **未認証でも
+  通る** (`get_whoami` / `get_problems` のように `is_empty() → 403` する系とは別グループ)。
+  当初 markdown の「未ログイン可」が実態通り。legacy 側もこれに揃え、ハンドラから
+  ミスリードな `Identity` 引数を外して公開エンドポイントとして実装する。
+  (新側 `_id: Identity` のままにしている dead extractor も将来の整理対象だが、
+  TASK-005 スコープ外として別途扱う。)
 - ハンドラは薄いラッパ (ストアの page() / submission() / task() を呼ぶだけ) で、ロジックは
   ストアに集約してユニットテストで保証する。
 
@@ -64,3 +68,10 @@ TASK-001 のスナップショットを、新サーバーから read-only で配
   手元 docker compose での実機検証は DB / JDoodle 連携が無いメモリストアのみのため省略、
   staging deploy 後の動作確認に委ねる (`/legacy/submissions?page=1` の JSON shape と
   authn 挙動を新側と並べて確認すれば足りる)。
+- 2026-06-17 (PR #29 Copilot レビュー対応): 「`_id: Identity` を引数に取るだけでは
+  認証ガードにならない」を 4 件指摘される。事実その通りで、新側 `/submissions*` /
+  `/tasks/{tid}` も同じく Identity を取るだけ = guest 通過する実装になっており、
+  「新側 = ログイン要」と読んでいた私の理解が間違っていた (新側 markdown 当初メモの
+  「未ログイン可」が実態通り)。3 ハンドラから dead extractor `_id: Identity` を削除し、
+  task markdown の認証セクションを新側との対称性に合わせて修正。新側の dead extractor
+  整理は本タスクのスコープ外として別途扱う。

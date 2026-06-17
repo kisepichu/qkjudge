@@ -1,4 +1,3 @@
-use actix_identity::Identity;
 use actix_web::{get, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
@@ -28,7 +27,6 @@ struct GetLegacySubmissionsResponse {
 
 #[get("/legacy/submissions")]
 async fn get_legacy_submissions_handler(
-    _id: Identity,
     query: web::Query<LegacySubmissionsQuery>,
 ) -> impl Responder {
     let page = query.page.unwrap_or(1);

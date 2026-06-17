@@ -1,4 +1,3 @@
-use actix_identity::Identity;
 use actix_web::{get, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 
@@ -31,7 +30,6 @@ struct GetLegacySubmissionsSidResponse {
 
 #[get("/legacy/submissions/{submission_id}")]
 async fn get_legacy_submissions_sid_handler(
-    _id: Identity,
     path: web::Path<LegacySubmissionsSidPath>,
 ) -> impl Responder {
     let store = legacy_store::global();
