@@ -2,8 +2,9 @@
 
 ## 参照
 
-- `.github/workflows/deploy.yml` (現行 dev → staging の自動デプロイ。concurrency group を共有する)
-- `k8s/staging/` (staging Deployment マニフェスト)
+- `.github/workflows/deploy.yml` (現行 dev → staging の自動デプロイ。concurrency 構造の前提)
+- `deploy/k3s/overlays/staging/` および `deploy/k3s/base/` (staging Deployment マニフェスト、
+  Deployment 名 `qkjudge-app` / コンテナ名 `qkjudge`)
 - TASK-003 / TASK-004 (k3s と CI/CD の基盤)
 
 ## 概要
@@ -21,10 +22,19 @@
   2. `docker build` → GHCR push (タグは `branch-<sanitized_ref>-<sha>` のように衝突しない命名。
      `ref` に `/` を含むブランチ名 (`feature/foo` 等) は Docker tag 仕様で不正になるため、
      workflow 側で `/` → `-` 等に sanitize してから渡す前提)
-  3. `kubectl -n qkjudge-staging set image deploy/qkjudge qkjudge=<GHCR_TAG>`
-  4. `kubectl -n qkjudge-staging rollout status deploy/qkjudge --timeout=120s`
+  3. `kubectl -n qkjudge-staging set image deploy/qkjudge-app qkjudge=<GHCR_TAG>`
+     (Deployment 名 `qkjudge-app` / コンテナ名 `qkjudge` は `deploy/k3s/base/app-deployment.yaml` に一致)
+  4. `kubectl -n qkjudge-staging rollout status deploy/qkjudge-app --timeout=120s`
 - **競合制御**: `concurrency.group: staging-deploy` を dev auto-deploy と共有 (`cancel-in-progress: false`)。
   → dev push と手動 deploy が直列化され、image が予期せず上書きされない。
+  - **前提**: 現行 `.github/workflows/deploy.yml` は workflow-level で
+    `concurrency: { group: deploy-${{ github.ref }}, cancel-in-progress: true }` を使っている。
+    本 TASK で `staging-deploy` 共有グループを実現するには、いずれかが必要:
+    (a) `deploy.yml` の concurrency を **job-level** (staging deploy job 限定) に移して
+        `staging-deploy` グループに揃える、または
+    (b) staging deploy 専用の workflow に切り出して両 workflow で `staging-deploy` を共有。
+    また dev 側を `cancel-in-progress: true` のままにすると手動 deploy 中の dev push で
+    cancel が走るので、共有グループでは `false` に揃える。
 - **戻し方**: 同じ workflow を `ref: dev` で再 run すれば、dev の現行 tag に戻る。
 - **同時稼働**: 1 ブランチのみ (個人運用想定で十分)。複数並列が必要になったら namespace 切り替え方式へ拡張する。
 

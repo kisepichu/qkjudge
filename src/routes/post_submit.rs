@@ -1,7 +1,6 @@
 use actix_identity::Identity;
 use actix_rt::Arbiter;
 use actix_web::{post, web, HttpResponse, Responder};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fs::File;
@@ -244,12 +243,10 @@ async fn judge(
                 Ok(res) => res,
                 Err(err) => CompilerApiResponse {
                     output: Some("".to_string()),
-                    statusCode: err
-                        .status()
-                        .unwrap_or(StatusCode::from_u16(400).unwrap())
-                        .to_string()
-                        .parse::<i32>()
-                        .unwrap_or(400),
+                    // `StatusCode::Display` は "500 Internal Server Error" のように
+                    // 理由句を含む文字列で、`to_string().parse::<i32>()` だと常に
+                    // 400 に潰れて実際のステータスを失う。`as_u16()` で純粋な数値に変換する。
+                    statusCode: err.status().map(|s| s.as_u16() as i32).unwrap_or(400),
                     memory: Some("-1".to_string()),
                     cpuTime: Some("-1".to_string()),
                     isCompiled: Some(true),

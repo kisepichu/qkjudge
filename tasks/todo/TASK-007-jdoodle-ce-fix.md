@@ -30,9 +30,10 @@ JDoodle (`api.jdoodle.com/v1/execute`) が成功時に `cpuTime` を返さなく
   - **決定的シグナル**: `isCompiled` (CE 時 false / それ以外 true)。`cpuTime` は欠落、`statusCode` は両者とも 200 で区別不能。
   - **注意**: CE 時の `output` に `\n\n\n JDoodle - Timeout` 文字列が*中盤に*混入する。現状の TLE 判定は `starts_with` で先頭 `\n` 1 個だけ → false でたまたまセーフだが、フォーマット変化に耐えるよう CE 判定を TLE より**前**に置く。
 - **修正方針** (適用済):
-  - `CompilerApiResponse` に `isCompiled: Option<bool>` を追加。旧レスポンス互換のため `Option`、欠落時は `true` (=AC 側) にフォールバック。
+  - `CompilerApiResponse` に `isCompiled: Option<bool>` を追加。**`None` は JDoodle 仕様変化の signal とみなし `UE 200` で早期停止** (cpuTime 欠落と同根、PR #27 Copilot レビューで初期案 `unwrap_or(true)` から変更)。
   - 判定ロジックで CE 判定を `cpu_time == "-1"` → `!is_compiled` に差し替え、`TLE/OLE/OCI` より前に移動。
   - `cpu_time.parse::<f64>().unwrap()` を `.unwrap_or(-1.0)` に変更 (非数値文字列でも panic しない保険)。
+  - err 時の `statusCode` 復元を `StatusCode::Display::to_string().parse::<i32>()` (常に 400 に潰れる) から `s.as_u16() as i32` に変更 (PR #27 Copilot レビュー対応)。
 - 影響範囲: 判定の各分岐 (TLE/OLE/CE/MLE/RE/WA/AC) を、現行レスポンスで一通り検証 (staging で実機)。
 
 ## チェックリスト
