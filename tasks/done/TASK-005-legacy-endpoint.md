@@ -44,8 +44,8 @@ TASK-001 のスナップショットを、新サーバーから read-only で配
 - [x] `GET /legacy/submissions` / `/legacy/submissions/{id}` / `/legacy/tasks/{tid}` を実装
 - [x] author 表示は UI 側 `[legacy]` 前提 (サーバーは生値を返す)
 - [x] 新提出との id 衝突回避を UI と合意・実装 (URL prefix で分離、id は数値のまま)
-- [x] ユニットテスト (ページング境界・存在しない id、計 8 ケース)
-- [x] `cargo test` (17 passed) / `cargo clippy --all-targets --all-features -- -D warnings` (warning なし) / `cargo fmt --check` (clean)
+- [x] ユニットテスト (ページング境界・i32 overflow・存在しない id、計 9 ケース)
+- [x] `cargo test` (18 passed) / `cargo clippy --all-targets --all-features -- -D warnings` (warning なし) / `cargo fmt --check` (clean)
 
 ## 完了条件
 
@@ -63,8 +63,9 @@ TASK-001 のスナップショットを、新サーバーから read-only で配
   を新規追加し、新側 `get_submissions*` / `get_tasks_tid` と同形の JSON を返す。
   `main.rs` で起動時に `legacy_store::global()` をウォームアップして deserialize 失敗を
   fail-fast 化、3 ルートを `App::new().service(...)` に登録。
-  `cargo test` 17 passed (9 既存 + 8 新規)、clippy clean (sort_by → sort_by_key で
-  `clippy::unnecessary_sort_by` 1 件解消)、fmt clean。
+  `cargo test` は Round 2 の overflow guard test を含めて最終 18 passed (9 既存 +
+  9 新規)。実装初稿時点では 17 passed (9 既存 + 8 新規)、clippy clean
+  (sort_by → sort_by_key で `clippy::unnecessary_sort_by` 1 件解消)、fmt clean。
   手元 docker compose での実機検証は DB / JDoodle 連携が無いメモリストアのみのため省略、
   staging deploy 後の動作確認に委ねる (`/legacy/submissions?page=1` の JSON shape と
   authn 挙動を新側と並べて確認すれば足りる)。
