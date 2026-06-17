@@ -100,3 +100,66 @@ frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
 | `branch.dev.cname: dev_tqk_qkjudge.trap.games`                     | `dev`→`dev.qkjudge.kisen.one` (上記「決定事項」)               |
 
 problems リポジトリの取得元は旧 `tqkoh/qkjudge-problems` から `kisepichu/qkjudge-problems` に更新した。
+
+## 付録: 2026-06-16 mirror incident と webhook 後始末
+
+### 起きたこと
+
+PR #24 (`migrate/leafeon → dev`) と PR #25 (`dev → master`) が merge された約 5 時間後、
+**`2026-06-16T13:10:28Z` (同一秒) に `dev` と `master` が両方 force-push** され、
+2022 年の旧 traP gitea (`git.trap.jp/tqk/qkjudge`) 時代の状態に巻き戻った。
+
+- 巻き戻し後の HEAD の author は `tqkoh` (旧 traP user, email は省略)、
+  date は 2022-09 — まったく別系統の歴史。
+- GitHub の repository activity 上の actor は `kisepichu` と記録されているが、
+  これは **旧 traP gitea の push mirror が kisepichu の PAT を使って GitHub に
+  push している**ためで (kisepichu 本人ではない)、サークル退会で SSO は失効しても
+  個人 PAT は失効まで生きるため mirror サーバー側の cron がそのまま動き続けていた。
+
+### 復元 (2026-06-17)
+
+- `dev`: ローカル `0c60899` (= mirror 前の HEAD) で `--force-with-lease` 復元。
+- `master`: 本来の HEAD `739befc` (PR #25 merge commit) は `refs/pull/25/merge` が
+  既に削除済みで orphan、`git fetch` で取得不能。本リポは production deploy が
+  GHCR image tag base で master HEAD の sha 自体に依存しないため、**master を
+  `0c60899` (= dev と同 sha) に揃える**判断で復元した (`739befc` の merge commit
+  は失われるが tree は等価)。
+
+### 再発防止
+
+`dev` / `master` の両方に branch protection を投入:
+- `allow_force_pushes: false`
+- `enforce_admins: true` (admin/owner も force-push できない = mirror が admin 権限
+  の PAT を使っていても弾く)
+
+PAT を revoke する手段は持っていない (旧 traP の管理画面に入れない) が、
+GitHub 側の protection で mirror の force-push は確実に reject される
+(`git push` 経由では HTTP ステータスは直接見えないが、サーバー側で拒否される)。
+通常の fast-forward な `push` は通る一方、mirror が古い tip に巻き戻すのは必ず
+force-push 扱いになるため弾ける。
+
+### webhook URL/secret resync (関連)
+
+mirror incident と直接の因果はないが、`qkjudge-problems` の 2 つの webhook
+(staging/prod) が **PR #23 (`fix(infra): rename API hosts`) のホスト名 rename に
+追従していなかった**:
+
+- URL: `api.{dev.,}qkjudge.kisen.one` (Universal SSL カバー外の旧 2 階層 host) →
+  `qkjudge-api{-stg,}.kisen.one` に修正。
+- shared secret: GitHub webhook の `config.secret` と k8s `qkjudge-secrets` の
+  `GITHUB_WEBHOOK_TOKEN` (両者は同一値であるべき) が不整合だった (おそらく
+  TASK-004 の webhook auth harden 時点から完全には揃っていなかった) → 新値を
+  `openssl rand -hex 32` で生成して両側で再同期。
+
+`/fetch/problems` のハンドラ (`post_fetch_problems.rs`) は `X-Hub-Signature-256` を
+HMAC で検証し、ヘッダ欠落でも署名不一致でも 403 を返すため、webhook ping を送って
+204 が返れば webhook 側 `config.secret` と k8s 側 `GITHUB_WEBHOOK_TOKEN` が同期して
+いる証拠になる。
+
+### 後続のチェックポイント
+
+- `gh api repos/kisepichu/qkjudge-problems/hooks --jq '.[] | {url: .config.url, active}'`
+  で webhook URL を時々確認 (host rename を再びやる場合は webhook も同時に追従する)。
+- 旧 traP webhook (`tqk.trap.show/qkjudge/fetch/problems`) は history 保全のため残存。
+  もし旧 traP インフラに将来再アクセスできるようになったら、mirror 設定自体を
+  そちら側で止めるのが恒久対応。

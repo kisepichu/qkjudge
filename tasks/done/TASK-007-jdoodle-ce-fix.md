@@ -44,14 +44,14 @@ JDoodle (`api.jdoodle.com/v1/execute`) が成功時に `cpuTime` を返さなく
 - [x] 判定ロジックを `classify()` 純粋関数に抽出 (テスト容易化)
 - [x] `classify()` のユニットテスト 6 件追加 (AC / CE / 非数値 cpuTime / TLE / WA / `isCompiled` None UE 200)
 - [x] 手元 `docker compose` で実 JDoodle 呼び出しを含む AC / CE を 1 件ずつ確認 (PR #27 にて完了)
-- [ ] dev へ merge 後 staging で同じ検証
+- [x] dev へ merge 後 staging で同じ検証 (submission id 3=AC / 4=CE で確認、2026-06-17)
 - [x] `cargo test` (9 passed) / `cargo clippy --all-targets -- -D warnings` (warning なし)
 
 ## 完了条件
 
-- [ ] 正しい提出が AC になる (CE 誤判定が解消)
-- [ ] 実際のコンパイルエラーは CE と判定される
-- [ ] cpuTime が非数値文字列でも :175 で panic しない
+- [x] 正しい提出が AC になる (CE 誤判定が解消)
+- [x] 実際のコンパイルエラーは CE と判定される
+- [x] cpuTime が非数値文字列でも panic しない
 
 ## 手元検証手順 (compose, dev 未マージ前)
 
@@ -108,3 +108,12 @@ JDoodle は 1 リクエスト = 1 クレジット (200/日)。手元検証で 2-
   (`Display::to_string().parse::<i32>()` → `as_u16() as i32`)、`isCompiled` 欠落時の
   silent failure 防止 (`UE 200` 早期停止)、debug log の secret 漏洩対策
   (`println!("request: ...")` から clientSecret / source / stdin を除去しメタ情報のみに変更)。
+- 2026-06-17 (staging 実機検証): PR #27 merge 後の auto-deploy で staging に新コードが反映。
+  検証中に webhook URL / shared secret が PR #23 host rename + TASK-004 auth harden から放置されていた
+  ことが判明 (`api.{dev.,}qkjudge.kisen.one` のまま、k8s 側 `GITHUB_WEBHOOK_TOKEN` と
+  GitHub webhook 側 `config.secret` も不整合) → URL を `qkjudge-api-stg.kisen.one` /
+  `qkjudge-api.kisen.one` に修正 + shared secret を両側で再同期。webhook 経由で staging に問題 5 件 (`tqk` 由来) が register された後、
+  fresh user で AC submission (id=3, `result: "AC"`)、CE submission (id=4, `result: "CE"`)
+  を確認。古い試行 (id=1,2) の `UE 403` は round 2 で直した `statusCode` 復元修正の
+  恩恵で正しい HTTP ステータスがそのまま保存されている (旧コードなら `UE 400` に潰れる)。
+  詳細は `docs/MIGRATION.md` の付録「2026-06-16 mirror incident と webhook 後始末」参照。
