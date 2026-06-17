@@ -215,14 +215,15 @@ async fn judge(
             let expected = format_output(expected_raw.clone());
 
             let client = reqwest::Client::new();
-            println!("request: {}", &json!({
-                "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
-                "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
-                "script": req.source,
-                "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
-                "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
-                "stdin": input
-            }).to_string());
+            // JDoodle 要求ボディには clientSecret と提出ソース / stdin が含まれる。
+            // アプリログ (k8s pod log) には資格情報・提出内容を漏らさず、メタ情報のみ残す。
+            println!(
+                "request: language={} versionIndex={} source_len={} stdin_len={}",
+                LANGUAGES[req.language_id as usize].language_code,
+                LANGUAGES[req.language_id as usize].version_index,
+                req.source.len(),
+                input.len(),
+            );
             let res_or_err = client
                 .post("https://api.jdoodle.com/v1/execute")
                 .json(&json!({
