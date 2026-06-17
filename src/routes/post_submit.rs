@@ -51,6 +51,8 @@ struct CompilerApiResponse {
     // CE 判定のシグナル。JDoodle が cpuTime を返さなくなったため
     // 旧来の `cpuTime == "-1"` ヒューリスティックは AC も CE と誤判定する。
     // 代わりに `isCompiled` (CE 時 false / 実行成功時 true) を見る。
+    // 欠落 (`None`) は JDoodle 仕様変化の兆候とみなし、`classify()` 内で
+    // `UE 200` 早期停止して silent failure 化を防ぐ (cpuTime 欠落と同根)。
     isCompiled: Option<bool>,
 }
 
@@ -106,8 +108,6 @@ fn classify(
         .unwrap_or("1024".to_string())
         .parse::<i32>()
         .unwrap_or(1024);
-    // 古いレスポンス (isCompiled フィールド無し) では AC 側に倒す。
-    let is_compiled = res.isCompiled.unwrap_or(true);
 
     if res.statusCode == 429 {
         return Outcome {
@@ -127,6 +127,22 @@ fn classify(
             memory,
         };
     }
+
+    // isCompiled が欠落しているのは JDoodle 仕様変化の signal (cpuTime 欠落と同根)。
+    // 「未知」を黙って AC 側に倒さず、検知可能な UE 200 で早期停止する。
+    let is_compiled = match res.isCompiled {
+        Some(v) => v,
+        None => {
+            return Outcome {
+                result: "UE 200".to_string(),
+                will_continue: false,
+                display_output: "isCompiled missing in JDoodle response\n".to_string()
+                    + &output_raw,
+                cpu_time,
+                memory,
+            };
+        }
+    };
 
     // cpuTime 欠落時は "-1" でフォールバック済み。万一非数値文字列でも panic しないよう吸収する。
     let cpu_time_f = cpu_time.parse::<f64>().unwrap_or(-1.0);
@@ -464,6 +480,24 @@ mod test {
         let expected = format_output("13".to_string());
         let outcome = classify(res, &expected, "2.0", 1024);
         assert_eq!(outcome.result, "TLE");
+    }
+
+    #[test]
+    fn missing_is_compiled_returns_ue_200_for_safety() {
+        // Copilot 指摘 (PR #27): JDoodle が将来 isCompiled も返さなくなるような仕様変化を
+        // silent fail させないため、欠落時は AC 側に倒さず UE 200 で早期停止する。
+        let res = CompilerApiResponse {
+            output: Some("13".to_string()),
+            statusCode: 200,
+            memory: Some("3200".to_string()),
+            cpuTime: Some("0.01".to_string()),
+            isCompiled: None,
+        };
+        let expected = format_output("13".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "UE 200");
+        assert!(!outcome.will_continue);
+        assert!(outcome.display_output.starts_with("isCompiled missing"));
     }
 
     #[test]

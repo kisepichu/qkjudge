@@ -18,9 +18,11 @@
 - **Runner**: 既存の self-hosted (leafeon) runner。
 - **手順**:
   1. `actions/checkout@v4` で指定 ref を取得
-  2. `docker build` → GHCR push (タグは `branch-<ref>-<sha>` のように衝突しない命名)
+  2. `docker build` → GHCR push (タグは `branch-<sanitized_ref>-<sha>` のように衝突しない命名。
+     `ref` に `/` を含むブランチ名 (`feature/foo` 等) は Docker tag 仕様で不正になるため、
+     workflow 側で `/` → `-` 等に sanitize してから渡す前提)
   3. `kubectl -n qkjudge-staging set image deploy/qkjudge qkjudge=<GHCR_TAG>`
-  4. `kubectl rollout status deploy/qkjudge --timeout=120s`
+  4. `kubectl -n qkjudge-staging rollout status deploy/qkjudge --timeout=120s`
 - **競合制御**: `concurrency.group: staging-deploy` を dev auto-deploy と共有 (`cancel-in-progress: false`)。
   → dev push と手動 deploy が直列化され、image が予期せず上書きされない。
 - **戻し方**: 同じ workflow を `ref: dev` で再 run すれば、dev の現行 tag に戻る。
