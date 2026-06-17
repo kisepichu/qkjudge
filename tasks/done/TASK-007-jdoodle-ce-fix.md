@@ -110,9 +110,9 @@ JDoodle は 1 リクエスト = 1 クレジット (200/日)。手元検証で 2-
   (`println!("request: ...")` から clientSecret / source / stdin を除去しメタ情報のみに変更)。
 - 2026-06-17 (staging 実機検証): PR #27 merge 後の auto-deploy で staging に新コードが反映。
   検証中に webhook URL/secret が PR #23 host rename + TASK-004 auth harden から放置されていた
-  ことが判明 (`api.{dev.,}qkjudge.kisen.one` のまま、k8s secret と GitHub webhook 側 token も
-  不整合) → URL を `qkjudge-api-stg.kisen.one` / `qkjudge-api.kisen.one` に修正 + secret を
-  両側で再同期。webhook 経由で staging に問題 5 件 (`tqk` 由来) が register された後、
+  ことが判明 (`api.{dev.,}qkjudge.kisen.one` のまま、k8s 側 `GITHUB_WEBHOOK_TOKEN` と
+  GitHub webhook 側 `config.secret` も不整合) → URL を `qkjudge-api-stg.kisen.one` /
+  `qkjudge-api.kisen.one` に修正 + shared secret を両側で再同期。webhook 経由で staging に問題 5 件 (`tqk` 由来) が register された後、
   fresh user で AC submission (id=3, `result: "AC"`)、CE submission (id=4, `result: "CE"`)
   を確認。古い試行 (id=1,2) の `UE 403` は round 2 で直した `statusCode` 復元修正の
   恩恵で正しい HTTP ステータスがそのまま保存されている (旧コードなら `UE 400` に潰れる)。
