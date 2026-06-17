@@ -68,10 +68,15 @@ TASK-001 のスナップショットを、新サーバーから read-only で配
   手元 docker compose での実機検証は DB / JDoodle 連携が無いメモリストアのみのため省略、
   staging deploy 後の動作確認に委ねる (`/legacy/submissions?page=1` の JSON shape と
   authn 挙動を新側と並べて確認すれば足りる)。
-- 2026-06-17 (PR #29 Copilot レビュー対応): 「`_id: Identity` を引数に取るだけでは
+- 2026-06-17 (PR #29 Copilot レビュー Round 1): 「`_id: Identity` を引数に取るだけでは
   認証ガードにならない」を 4 件指摘される。事実その通りで、新側 `/submissions*` /
   `/tasks/{tid}` も同じく Identity を取るだけ = guest 通過する実装になっており、
   「新側 = ログイン要」と読んでいた私の理解が間違っていた (新側 markdown 当初メモの
   「未ログイン可」が実態通り)。3 ハンドラから dead extractor `_id: Identity` を削除し、
   task markdown の認証セクションを新側との対称性に合わせて修正。新側の dead extractor
   整理は本タスクのスコープ外として別途扱う。
+- 2026-06-17 (PR #29 Copilot レビュー Round 2): `legacy_store::page()` の
+  `(page - 1) * per_page` が i32 overflow し得る (release で wrap し得る) との指摘 →
+  `checked_mul` + `checked_add` で安全化、`i32::MAX` 入力で空を返す test を追加。
+  併せて PR description のテスト計画にあった「未認証時 401」が public 化後の実装と
+  矛盾するとの指摘 → PR description を public 前提 (guest でも 200) に書き直す。

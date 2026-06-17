@@ -85,11 +85,18 @@ impl LegacyStore {
         if page <= 0 || per_page <= 0 {
             return &[];
         }
-        let start = ((page - 1) * per_page) as usize;
+        // Compute in usize and guard against overflow (e.g. page=i32::MAX) so a release build
+        // can't wrap and hand back a bogus slice.
+        let Some(start) = ((page - 1) as usize).checked_mul(per_page as usize) else {
+            return &[];
+        };
         if start >= self.submissions.len() {
             return &[];
         }
-        let end = (start + per_page as usize).min(self.submissions.len());
+        let end = start
+            .checked_add(per_page as usize)
+            .unwrap_or(self.submissions.len())
+            .min(self.submissions.len());
         &self.submissions[start..end]
     }
 
@@ -151,6 +158,14 @@ mod tests {
         let s = store();
         assert!(s.page(7, PER_PAGE).is_empty());
         assert!(s.page(100, PER_PAGE).is_empty());
+    }
+
+    #[test]
+    fn page_at_overflow_is_empty() {
+        // (page-1) * per_page would overflow i32 / usize on huge inputs; guard must return empty.
+        let s = store();
+        assert!(s.page(i32::MAX, PER_PAGE).is_empty());
+        assert!(s.page(i32::MAX, i32::MAX).is_empty());
     }
 
     #[test]
