@@ -39,7 +39,7 @@ qkjudge サーバーは traP の NeoShowcase 上で、gitea `git.trap.jp/tqk/qkj
 | 項目                 | 決定                                                                                                                                                                           |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | オーケストレーション | k3s on leafeon。最初から prod / staging のマルチ環境 (旧 Showcase のブランチ別デプロイを踏襲)                                                                                  |
-| 環境マッピング       | `master`→prod (`qkjudge.kisen.one` / API `qkjudge-api.kisen.one`)、`dev`→staging (`dev.qkjudge.kisen.one` / `qkjudge-api-stg.kisen.one`)                                       |
+| 環境マッピング       | `master`→prod (`qkjudge.kisen.one` / API `qkjudge-api.kisen.one`)、`dev`→staging (`qkjudge-stg.kisen.one` / `qkjudge-api-stg.kisen.one`、Universal SSL の 1 階層制約に合わせる) |
 | コンテナレジストリ   | GHCR (`ghcr.io/kisepichu/qkjudge`)                                                                                                                                             |
 | デプロイ反映         | leafeon 上のセルフホスト GitHub Actions Runner が `kubectl` 適用 (k3s API を外部公開しない)。**セキュリティ堅牢化必須**。GitOps(Argo/Flux) は将来移行                          |
 | 公開                 | cloudflared を k3s 内 Deployment として動かし、tunnel ingress 設定も k3s マニフェストで管理する (鯖機を直接設定せず pull+反映で完結)。DNS は Cloudflare に CNAME               |
@@ -97,7 +97,7 @@ frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
 | `http_proxy: 8080`                                                 | Dockerfile `EXPOSE 8080` / Service (TASK-003)                  |
 | `https: on`                                                        | cloudflared + Ingress (TASK-003)                               |
 | `use_mariadb: true`                                                | compose の `mariadb` サービス / k3s StatefulSet (TASK-003)     |
-| `branch.dev.cname: dev_tqk_qkjudge.trap.games`                     | `dev`→`dev.qkjudge.kisen.one` (上記「決定事項」)               |
+| `branch.dev.cname: dev_tqk_qkjudge.trap.games`                     | `dev`→`qkjudge-stg.kisen.one` (上記「決定事項」)               |
 
 problems リポジトリの取得元は旧 `tqkoh/qkjudge-problems` から `kisepichu/qkjudge-problems` に更新した。
 

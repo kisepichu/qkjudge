@@ -14,7 +14,7 @@ configMapGenerator:
   - name: qkjudge-config
     behavior: merge
     literals:
-      - CORS_ALLOW_ORIGIN=https://dev.qkjudge.kisen.one
+      - CORS_ALLOW_ORIGIN=https://qkjudge-stg.kisen.one
 
 images:
   - name: ghcr.io/kisepichu/qkjudge
