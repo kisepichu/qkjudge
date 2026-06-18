@@ -53,12 +53,12 @@ qkjudge サーバーは traP の NeoShowcase 上で、gitea `git.trap.jp/tqk/qkj
 
 ```
 prod namespace                         staging namespace
-  qkjudge (deploy, image :master)        qkjudge (deploy, image :dev)
-  mariadb (statefulset + PVC)            mariadb (statefulset + PVC)
-  secret (JDoodle/DB/webhook/cookie)     secret (...)
-  ingress qkjudge-api.kisen.one          ingress qkjudge-api-stg.kisen.one
+  qkjudge (Deployment, image :master)    qkjudge (Deployment, image :dev)
+  mariadb (StatefulSet + PVC)            mariadb (StatefulSet + PVC)
+  Secret (JDoodle/DB/webhook/cookie)     Secret (...)
+  Ingress qkjudge-api.kisen.one          Ingress qkjudge-api-stg.kisen.one
 
-cloudflared (deploy)
+cloudflared (Deployment)
   ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
 
 frontend: Cloudflare Pages — k3s 外
