@@ -74,39 +74,45 @@
 
 ## 作業ログ
 
+実装は Phase A → B → D → C の順で行った (Phase D = prod cutover を先に通して本番動作確認
+してから、Phase C = 旧ドメインのリダイレクト先を新ドメインに切り替える流れ)。以下は読み手の
+都合で Phase 名順 (A → B → C → D) に並べてある。
+
 - 2026-05-31: タスク生成。
-- 2026-06-18 Phase A: staging frontend host を `qkjudge-stg.kisen.one` に確定
+- 2026-06-18 Phase A (staging CORS): staging frontend host を `qkjudge-stg.kisen.one` に確定
   (Universal SSL の 1 階層制約のため `dev.qkjudge.kisen.one` は使わず、
   `qkjudge-api-stg.kisen.one` と命名を揃える)。`deploy/k3s/overlays/staging/kustomization.yaml`
   の `CORS_ALLOW_ORIGIN` を新ホストに更新 (PR #31)。configMap は CD で apply されない
   ため leafeon 上で手動 `kubectl apply -k overlays/staging` + `rollout restart` が必要だった
   (Issue #32 として追跡)。
-- 2026-06-18 Phase B: qkjudge-UI 側を Cloudflare Pages に移行。GitHub Pages workflow と
-  CNAME・コミット済み `dist/` を削除、`public/_redirects` を追加 (PR #8)。提出一覧に legacy
-  末尾連結 + `/legacy/submissions/:id` ルート + Home に再登録告知も同 PR に同梱。
-  Copilot review で SPA navigation 系の race / useEffect 依存抜けを 8 round に渡って指摘され、
-  AbortController + `setTimeout` cleanup を全 fetch に展開する形で対応。
-- 2026-06-18 Phase B (続き): PR merge 後の staging が 404 を返したため原因調査 →
-  Cloudflare Pages の env vars value 欄に `VITE_API_URL=https://...` (key 接頭辞ごと)
-  を貼っていたことが判明、bundle 内で `const a = "VITE_API_URL=https://..."` になり
-  リクエスト URL が壊れていた。env を直して再 deploy + Problems.tsx の `setLoading(true)`
-  typo (元コード) + `res.data?.foo ?? []` の defensive guard を PR #9 で投入し、復旧。
-  ついでに Home 告知バナーをヒーロー直下に移動。
-- 2026-06-18 Phase B (続き): PR preview URL (`<hash>.qkjudge-ui.pages.dev`) からの fetch が
-  staging API CORS に蹴られて preview デバッグできない問題が判明 → 別 issue (#33) として
-  qkjudge メインで `CORS_ALLOW_ORIGIN` を CSV + wildcard suffix 対応に拡張し
-  `https://*.qkjudge-ui.pages.dev` を staging だけ許可 (PR #34)。これで PR ブランチごとの
-  preview URL でも staging API を叩ける。
-- 2026-06-18 Phase B (続き): UI 微調整として「新側 pages_number 最終ページに legacy 先頭で
-  埋めて 10 件にし、以降は legacy をシフトしてページング」と「legacy ID 表示を `#L-<id>` に」
-  を PR #10 で実装。Copilot review で `Math.max(0, ...)` ガード / `Promise.all` per-page
-  catch / `<Pagination page>` clamp の 3 round対応。
-- 2026-06-18 Phase D: qkjudge-UI dev→master (PR #11) と qkjudge dev→master (PR #35) を merge
-  し、Cloudflare Pages Production deploy + prod k8s rollout で `qkjudge.kisen.one` を新 UI
-  に切替。prod overlay は configMap 変更なしのため image set 反映のみで完結。
-- 2026-06-18 Phase C: kisepichu/qkjudge-UI に orphan branch `legacy-redirect` を作成し
-  `index.html` (JS 即時 + meta refresh 3 秒 fallback + 告知)、`404.html` (同 redirect)、
-  `CNAME=judge.tqk.blue` を配置。`gh api PUT /repos/.../pages` で source を
-  `legacy-redirect` + `build_type=legacy` に切替、初回は build が自動で trigger されないため
-  `gh api POST .../pages/builds` で手動キック。`judge.tqk.blue` から `qkjudge.kisen.one`
-  への遷移を確認、TASK-006 全体クローズ。
+- 2026-06-18 Phase B (qkjudge-UI 切替 + 機能追加):
+  - PR #8: Cloudflare Pages に移行。GitHub Pages workflow と CNAME・コミット済み `dist/` を
+    削除、`public/_redirects` を追加。提出一覧に legacy 末尾連結 + `/legacy/submissions/:id`
+    ルート + Home に再登録告知も同 PR に同梱。Copilot review で SPA navigation 系の race
+    / useEffect 依存抜けを 8 round に渡って指摘され、AbortController + `setTimeout` cleanup
+    を全 fetch に展開する形で対応。
+  - PR #8 merge 後の staging が壊れて原因調査 → Cloudflare Pages の env vars value 欄に
+    `VITE_API_URL=https://...` (key 接頭辞ごと) を貼っていたことが判明、bundle 内で
+    `const a = "VITE_API_URL=https://..."` になりリクエスト URL が壊れていた。env を直して
+    再 deploy + Problems.tsx の `setLoading(true)` typo (元コード) + `res.data?.foo ?? []`
+    の defensive guard を PR #9 で投入し、復旧。ついでに Home 告知バナーをヒーロー直下に
+    移動。
+  - PR preview URL (`<hash>.qkjudge-ui.pages.dev`) からの fetch が staging API CORS に
+    蹴られて preview デバッグできない問題が判明 → 別 issue (#33) として qkjudge メインで
+    `CORS_ALLOW_ORIGIN` を CSV + wildcard suffix 対応に拡張し `https://*.qkjudge-ui.pages.dev`
+    を staging だけ許可 (PR #34)。これで PR ブランチごとの preview URL でも staging API を
+    叩ける。
+  - PR #10: UI 微調整として「新側 pages_number 最終ページに legacy 先頭で埋めて 10 件にし、
+    以降は legacy をシフトしてページング」と「legacy ID 表示を `#L-<id>` に」を実装。
+    Copilot review で `Math.max(0, ...)` ガード / `Promise.all` per-page catch /
+    `<Pagination page>` clamp の 3 round 対応。
+- 2026-06-18 Phase C (judge.tqk.blue リダイレクト、Phase D 完了後に実施):
+  kisepichu/qkjudge-UI に orphan branch `legacy-redirect` を作成し `index.html` (JS 即時
+  + meta refresh 3 秒 fallback + 告知)、`404.html` (同 redirect)、`CNAME=judge.tqk.blue` を
+  配置。`gh api PUT /repos/.../pages` で source を `legacy-redirect` + `build_type=legacy` に
+  切替、初回は build が自動で trigger されないため `gh api POST .../pages/builds` で手動
+  キック。`judge.tqk.blue` から `qkjudge.kisen.one` への遷移を確認、TASK-006 全体クローズ。
+- 2026-06-18 Phase D (prod cutover、Phase C より先に実施):
+  qkjudge-UI dev→master (PR #11) と qkjudge dev→master (PR #35) を merge し、Cloudflare
+  Pages Production deploy + prod k8s rollout で `qkjudge.kisen.one` を新 UI に切替。prod
+  overlay は configMap 変更なしのため image set 反映のみで完結。
