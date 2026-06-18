@@ -66,6 +66,29 @@ async fn main() -> std::io::Result<()> {
                     "CORS_ALLOW_ORIGIN entries must not be bare '*' \
                      (wildcard is incompatible with Access-Control-Allow-Credentials: true)"
                 );
+                if s.contains('*') {
+                    assert!(
+                        s.matches('*').count() == 1,
+                        "CORS_ALLOW_ORIGIN pattern must contain exactly one '*': {s:?}"
+                    );
+                    let idx = s.find('*').unwrap();
+                    let prefix = &s[..idx];
+                    let suffix = &s[idx + 1..];
+                    assert!(
+                        prefix.ends_with("://"),
+                        "CORS_ALLOW_ORIGIN wildcard must follow 'scheme://' \
+                         (e.g. 'https://*.example.com'), got {s:?}"
+                    );
+                    assert!(
+                        suffix.starts_with('.'),
+                        "CORS_ALLOW_ORIGIN wildcard suffix must start with '.' \
+                         (e.g. '*.example.com'), got {s:?}"
+                    );
+                    assert!(
+                        !suffix.contains('/'),
+                        "CORS_ALLOW_ORIGIN wildcard pattern must not include a path, got {s:?}"
+                    );
+                }
             })
             .collect(),
     );
