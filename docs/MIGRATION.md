@@ -58,7 +58,11 @@ prod namespace                         staging namespace
   secret (JDoodle/DB/webhook/cookie)     secret (...)
   ingress qkjudge-api.kisen.one          ingress qkjudge-api-stg.kisen.one
 cloudflared (deploy) ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
-frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
+frontend: Cloudflare Pages — k3s 外
+  Production branch  master → qkjudge.kisen.one
+  Preview branch     dev    → qkjudge-stg.kisen.one (branch alias)
+旧 judge.tqk.blue: GitHub Pages の `legacy-redirect` branch から meta refresh + JS
+  リダイレクトのみ配信 (qkjudge-UI repo の orphan branch)
 ```
 
 ## ブランチ運用

@@ -20,7 +20,10 @@ Cloudflare tunnel ──► cloudflared (Deployment, ns: cloudflared)
     backup CronJob               backup CronJob
 ```
 
-- frontend (`qkjudge.kisen.one`) は GitHub Pages 配信で **k3s 外**。tunnel には含めない。
+- frontend (`qkjudge.kisen.one` / preview `qkjudge-stg.kisen.one`) は Cloudflare Pages
+  配信で **k3s 外**。tunnel には含めない。旧 `judge.tqk.blue` は GitHub Pages の
+  `qkjudge-UI:legacy-redirect` orphan branch でリダイレクトのみ配信 (新ドメインへ
+  meta refresh + JS 遷移)。
 - TLS 終端は Cloudflare edge。クラスタ内は平文 http (Traefik `web` entrypoint)。
 - prod / staging は単一 tunnel・単一 Traefik を共有し、namespace で分離する。
 
