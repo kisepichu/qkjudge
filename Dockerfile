@@ -14,8 +14,10 @@ RUN mkdir src && echo 'fn main() {}' > src/main.rs \
     && rm -rf src
 
 # 本体ビルド。sqlx-data.json があるため実 DB 不要 (SQLX_OFFLINE=true)。
+# legacy-snapshot は legacy_store.rs が include_str! で取り込むため build に必要。
 COPY src ./src
 COPY sqlx-data.json ./sqlx-data.json
+COPY migration/legacy-snapshot ./migration/legacy-snapshot
 ENV SQLX_OFFLINE=true
 RUN touch src/main.rs && cargo build --release --locked
 

@@ -21,7 +21,8 @@
   なので `SameSite=Lax; Secure` + `withCredentials` で問題なく動く。Cookie は **API ホスト上で host-only に完結**し
   (Domain 属性で親に広げない)、**HTTPS / `Secure` 前提**。これらが満たされることを確認する。
 - **ドメイン/公開**: GitHub Pages の独自ドメインを `qkjudge.kisen.one` に (CNAME ファイル + Cloudflare DNS)。
-  staging フロントは `dev.qkjudge.kisen.one` (別 Pages か k3s 配信かは TASK-003/004 と整合)。
+  staging フロントは `qkjudge-stg.kisen.one` (Cloudflare Universal SSL は 1 階層サブドメインのみカバーするため
+  `dev.qkjudge.kisen.one` のような 2 階層は使わず、API 側の `qkjudge-api-stg.kisen.one` と命名規則を揃える)。
 - **再登録告知**: トップページに「旧 judge.tqk.blue のアカウントは移行されていません。再登録してください」を表示。
 - **legacy 表示**: 提出一覧で新提出が尽きた後に TASK-005 の `/legacy/*` を表示、author に `[legacy]` prefix。
   旧サーバー CORS は `judge.tqk.blue` 限定のため**ブラウザ直叩きはしない** (必ず新サーバーの legacy
@@ -35,7 +36,7 @@
 - [ ] `.env`/`.env.development` の `VITE_API_URL` を新 API に更新
 - [ ] ログイン/whoami/submit/submissions が新 API + `SameSite=Lax` cookie で動く
 ### ドメイン公開
-- [ ] CNAME + Cloudflare DNS で `qkjudge.kisen.one` 公開、(可能なら) `dev.` も
+- [ ] CNAME + Cloudflare DNS で `qkjudge.kisen.one` 公開、staging 用 `qkjudge-stg.kisen.one` も
 ### UI 変更
 - [ ] トップに再登録告知
 - [ ] 提出一覧末尾に legacy 表示 (`[legacy]` prefix、TASK-005 と整合)
@@ -51,3 +52,9 @@
 ## 作業ログ
 
 - 2026-05-31: タスク生成。
+- 2026-06-18: Phase A 着手。staging frontend host を `qkjudge-stg.kisen.one` に確定
+  (Universal SSL の 1 階層制約のため `dev.qkjudge.kisen.one` は使わず、`qkjudge-api-stg.kisen.one`
+  と命名を揃える)。`deploy/k3s/overlays/staging/kustomization.yaml` の `CORS_ALLOW_ORIGIN`
+  を新ホストに更新。prod overlay は `https://qkjudge.kisen.one` で既に正。
+  Cloudflare DNS は別途手動で CNAME `qkjudge-stg.kisen.one` / `qkjudge.kisen.one` →
+  `kisepichu.github.io` を追加する (agent では触らない)。

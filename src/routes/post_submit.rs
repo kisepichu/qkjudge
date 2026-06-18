@@ -1,7 +1,6 @@
 use actix_identity::Identity;
 use actix_rt::Arbiter;
 use actix_web::{post, web, HttpResponse, Responder};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fs::File;
@@ -48,6 +47,12 @@ struct CompilerApiResponse {
     statusCode: i32,
     memory: Option<String>,
     cpuTime: Option<String>,
+    // CE 判定のシグナル。JDoodle が cpuTime を返さなくなったため
+    // 旧来の `cpuTime == "-1"` ヒューリスティックは AC も CE と誤判定する。
+    // 代わりに `isCompiled` (CE 時 false / 実行成功時 true) を見る。
+    // 欠落 (`None`) は JDoodle 仕様変化の兆候とみなし、`classify()` 内で
+    // `UE 200` 早期停止して silent failure 化を防ぐ (cpuTime 欠落と同根)。
+    isCompiled: Option<bool>,
 }
 
 fn files<P: AsRef<Path>>(path: P) -> io::Result<Vec<String>> {
@@ -75,6 +80,105 @@ fn format_output(s: String) -> String {
         whitespace = c == ' ';
     }
     ret
+}
+
+// 判定 1 ケース分の結論。`judge()` ループ側は DB 書き込みと whole_result の更新だけ担当する。
+struct Outcome {
+    result: String,
+    will_continue: bool,
+    display_output: String,
+    cpu_time: String,
+    memory: i32,
+}
+
+// JDoodle の execute レスポンスから 1 テストケースの判定を返す純粋関数。
+// `judge()` 内に inline していた if/else if チェーンと同等の挙動を保つ。
+fn classify(
+    res: CompilerApiResponse,
+    expected_formatted: &str,
+    problem_time_limit_str: &str,
+    problem_memory_limit: i32,
+) -> Outcome {
+    let output_raw = res.output.unwrap_or("".to_string());
+    let output_formatted = format_output(output_raw.clone());
+    let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
+    let memory = res
+        .memory
+        .unwrap_or("1024".to_string())
+        .parse::<i32>()
+        .unwrap_or(1024);
+
+    if res.statusCode == 429 {
+        return Outcome {
+            result: "KK".to_string(),
+            will_continue: false,
+            display_output: output_raw,
+            cpu_time,
+            memory,
+        };
+    }
+    if res.statusCode != 200 {
+        return Outcome {
+            result: format!("UE {}", res.statusCode),
+            will_continue: false,
+            display_output: output_raw,
+            cpu_time,
+            memory,
+        };
+    }
+
+    // isCompiled が欠落しているのは JDoodle 仕様変化の signal (cpuTime 欠落と同根)。
+    // 「未知」を黙って AC 側に倒さず、検知可能な UE 200 で早期停止する。
+    let is_compiled = match res.isCompiled {
+        Some(v) => v,
+        None => {
+            return Outcome {
+                result: "UE 200".to_string(),
+                will_continue: false,
+                display_output: "isCompiled missing in JDoodle response\n".to_string()
+                    + &output_raw,
+                cpu_time,
+                memory,
+            };
+        }
+    };
+
+    // cpuTime 欠落時は "-1" でフォールバック済み。万一非数値文字列でも panic しないよう吸収する。
+    let cpu_time_f = cpu_time.parse::<f64>().unwrap_or(-1.0);
+    let time_limit = problem_time_limit_str.parse::<f64>().unwrap_or(2.0);
+    let memory_limit = problem_memory_limit * 1000;
+
+    // CE 時 JDoodle の output には "JDoodle - Timeout" 文言が中盤に混入することがあるため、
+    // TLE/OLE/RE などの output ベース判定より先に isCompiled を見る。
+    let (result, will_continue, display_output) = if !is_compiled {
+        ("CE".to_string(), false, output_raw)
+    } else if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
+        ("TLE".to_string(), false, "(TLE)".to_string())
+    } else if output_raw.ends_with("JDoodle - output Limit reached.\n") {
+        ("OLE".to_string(), false, "(OLE)".to_string())
+    } else if output_raw.starts_with("OCI runtime exec failed") {
+        (
+            "UE 200".to_string(),
+            false,
+            "error in judge system:\n".to_string() + &output_raw,
+        )
+    } else if memory_limit < memory {
+        ("MLE".to_string(), false, "(MLE)".to_string())
+    } else if output_raw.find("Command terminated by signal").is_some() {
+        ("RE".to_string(), false, "RE:\n".to_string() + &output_raw)
+    } else if output_formatted != expected_formatted {
+        ("WA".to_string(), false, output_raw)
+    } else {
+        ("AC".to_string(), true, output_raw)
+    };
+
+    Outcome {
+        result,
+        will_continue,
+        display_output,
+        cpu_time,
+        memory,
+    }
 }
 
 async fn judge(
@@ -110,18 +214,16 @@ async fn judge(
                 .expect("something went wrong reading the file");
             let expected = format_output(expected_raw.clone());
 
-            let mut result = "AC".to_string();
-            let mut will_continue = true;
-
             let client = reqwest::Client::new();
-            println!("request: {}", &json!({
-                "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
-                "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
-                "script": req.source,
-                "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
-                "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
-                "stdin": input
-            }).to_string());
+            // JDoodle 要求ボディには clientSecret と提出ソース / stdin が含まれる。
+            // アプリログ (k8s pod log) には資格情報・提出内容を漏らさず、メタ情報のみ残す。
+            println!(
+                "request: language={} versionIndex={} source_len={} stdin_len={}",
+                LANGUAGES[req.language_id as usize].language_code,
+                LANGUAGES[req.language_id as usize].version_index,
+                req.source.len(),
+                input.len(),
+            );
             let res_or_err = client
                 .post("https://api.jdoodle.com/v1/execute")
                 .json(&json!({
@@ -142,72 +244,26 @@ async fn judge(
                 Ok(res) => res,
                 Err(err) => CompilerApiResponse {
                     output: Some("".to_string()),
-                    statusCode: err
-                        .status()
-                        .unwrap_or(StatusCode::from_u16(400).unwrap())
-                        .to_string()
-                        .parse::<i32>()
-                        .unwrap_or(400),
+                    // `StatusCode::Display` は "500 Internal Server Error" のように
+                    // 理由句を含む文字列で、`to_string().parse::<i32>()` だと常に
+                    // 400 に潰れて実際のステータスを失う。`as_u16()` で純粋な数値に変換する。
+                    statusCode: err.status().map(|s| s.as_u16() as i32).unwrap_or(400),
                     memory: Some("-1".to_string()),
                     cpuTime: Some("-1".to_string()),
+                    isCompiled: Some(true),
                 },
             };
 
-            let mut output_raw = res.output.unwrap_or("".to_string());
-            let output = format_output(output_raw.clone());
-            let cpu_time = res.cpuTime.unwrap_or("-1".to_string());
-            let memory = res
-                .memory
-                .unwrap_or("1024".to_string())
-                .parse::<i32>()
-                .unwrap_or(1024);
-
-            if res.statusCode == 429 {
-                result = "KK".to_string();
-                whole_result = "KK".to_string();
-                will_continue = false;
-            } else if res.statusCode == 200 {
-                let cpu_time_f = cpu_time.parse::<f64>().unwrap();
-                let time_limit = problem.time_limit.parse::<f64>().unwrap_or(2.0);
-                let memory_limit = problem.memory_limit * 1000;
-                if output_raw.starts_with("\n\n\n JDoodle - Timeout") || time_limit < cpu_time_f {
-                    result = "TLE".to_string();
-                    whole_result = "TLE".to_string();
-                    output_raw = "(TLE)".to_string();
-                    will_continue = false;
-                } else if output_raw.ends_with("JDoodle - output Limit reached.\n") {
-                    result = "OLE".to_string();
-                    whole_result = "OLE".to_string();
-                    output_raw = "(OLE)".to_string();
-                    will_continue = false;
-                } else if output_raw.starts_with("OCI runtime exec failed") {
-                    result = "UE 200".to_string();
-                    whole_result = "UE 200".to_string();
-                    output_raw = "error in judge system:\n".to_string() + &output_raw;
-                    will_continue = false;
-                } else if cpu_time == "-1" {
-                    result = "CE".to_string();
-                    whole_result = "CE".to_string();
-                    will_continue = false;
-                } else if memory_limit < memory {
-                    result = "MLE".to_string();
-                    whole_result = "MLE".to_string();
-                    output_raw = "(MLE)".to_string();
-                    will_continue = false;
-                } else if output_raw.find("Command terminated by signal").is_some() {
-                    result = "RE".to_string();
-                    whole_result = "RE".to_string();
-                    output_raw = "RE:\n".to_string() + &output_raw;
-                    will_continue = false;
-                } else if output != expected {
-                    result = "WA".to_string();
-                    whole_result = "WA".to_string();
-                    will_continue = false;
-                }
-            } else {
-                result = format!("UE {}", res.statusCode);
-                whole_result = format!("UE {}", res.statusCode);
-                will_continue = false;
+            let Outcome {
+                result,
+                will_continue,
+                display_output: output_raw,
+                cpu_time,
+                memory,
+            } = classify(res, &expected, &problem.time_limit, problem.memory_limit);
+            // 初期値 "AC" のままにしておきたい AC 以外で whole_result を更新する。
+            if result != "AC" {
+                whole_result = result.clone();
             }
 
             println!("{}", result);
@@ -361,4 +417,98 @@ async fn post_submit_handler(
 
     // println!("submit 5")
     HttpResponse::Ok().json(SubmitResponse { id: submission_id })
+}
+
+#[cfg(test)]
+mod test {
+    use super::{classify, format_output, CompilerApiResponse};
+
+    fn parse_fixture(json: &str) -> CompilerApiResponse {
+        serde_json::from_str(json).expect("fixture JSON should deserialize")
+    }
+
+    #[test]
+    fn captured_success_response_is_ac() {
+        // 2026-06-17 キャプチャ: 正しい C++ A+B (stdin "6 7") の実レスポンス。
+        let res = parse_fixture(include_str!(
+            "../../migration/jdoodle-response-success.json"
+        ));
+        let expected = format_output("13\n".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "AC");
+        assert!(outcome.will_continue);
+    }
+
+    #[test]
+    fn captured_ce_response_is_ce_even_with_timeout_text_in_output() {
+        // CE のレスポンス output には `\n\n\n JDoodle - Timeout` が中盤に混入するが、
+        // isCompiled=false の判定が TLE より前に走るため CE と判定されること (= 判定順序の保証)。
+        let res = parse_fixture(include_str!("../../migration/jdoodle-response-ce.json"));
+        let expected = format_output("13\n".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "CE");
+        assert!(!outcome.will_continue);
+    }
+
+    #[test]
+    fn non_numeric_cpu_time_does_not_panic_and_falls_back_to_neg_one() {
+        // JDoodle 仕様変化のリグレッション保険。`unwrap_or(-1.0)` で吸収される。
+        let res = CompilerApiResponse {
+            output: Some("13".to_string()),
+            statusCode: 200,
+            memory: Some("3200".to_string()),
+            cpuTime: Some("not-a-number".to_string()),
+            isCompiled: Some(true),
+        };
+        let expected = format_output("13".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        // -1.0 にフォールバック → time_limit (2.0) < -1.0 は false で TLE 回避 → AC。
+        assert_eq!(outcome.result, "AC");
+    }
+
+    #[test]
+    fn cpu_time_exceeding_time_limit_is_tle() {
+        let res = CompilerApiResponse {
+            output: Some("anything".to_string()),
+            statusCode: 200,
+            memory: Some("3200".to_string()),
+            cpuTime: Some("5.0".to_string()),
+            isCompiled: Some(true),
+        };
+        let expected = format_output("13".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "TLE");
+    }
+
+    #[test]
+    fn missing_is_compiled_returns_ue_200_for_safety() {
+        // Copilot 指摘 (PR #27): JDoodle が将来 isCompiled も返さなくなるような仕様変化を
+        // silent fail させないため、欠落時は AC 側に倒さず UE 200 で早期停止する。
+        let res = CompilerApiResponse {
+            output: Some("13".to_string()),
+            statusCode: 200,
+            memory: Some("3200".to_string()),
+            cpuTime: Some("0.01".to_string()),
+            isCompiled: None,
+        };
+        let expected = format_output("13".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "UE 200");
+        assert!(!outcome.will_continue);
+        assert!(outcome.display_output.starts_with("isCompiled missing"));
+    }
+
+    #[test]
+    fn output_mismatch_is_wa() {
+        let res = CompilerApiResponse {
+            output: Some("42".to_string()),
+            statusCode: 200,
+            memory: Some("3200".to_string()),
+            cpuTime: Some("0.01".to_string()),
+            isCompiled: Some(true),
+        };
+        let expected = format_output("13".to_string());
+        let outcome = classify(res, &expected, "2.0", 1024);
+        assert_eq!(outcome.result, "WA");
+    }
 }

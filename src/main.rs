@@ -1,6 +1,8 @@
+use actix_cors::Cors;
 use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_rt::{self, Arbiter};
 use actix_web::cookie::SameSite;
+use actix_web::http::header;
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};
 use rand::Rng;
@@ -9,6 +11,7 @@ use std::sync::*;
 use tokio::sync::Mutex;
 
 mod languages;
+mod legacy_store;
 mod routes;
 
 #[actix_rt::main]
@@ -43,25 +46,57 @@ async fn main() -> std::io::Result<()> {
     let arbiter = Arbiter::new();
     let arbiter_data = Arc::new(Mutex::new(arbiter));
 
-    // CORS 許可オリジン: Access-Control-Allow-Credentials: true 併用のためワイルドカード不可・単一値のみ。
-    // 1 環境 1 オリジンで割り切り、prod/staging は env で分離する (未設定時はローカル開発用フロント)。
-    // trim して空なら開発用デフォルトへ。前後の空白や改行が header 値に混ざると
-    // DefaultHeaders::add が panic しうるため、ここで正規化しておく。
-    let cors_allow_origin = env::var("CORS_ALLOW_ORIGIN")
+    // CORS 許可オリジン: CSV で複数オリジン / ワイルドカードサフィックス (*) を指定可。
+    // 例: "https://qkjudge-stg.kisen.one,https://*.qkjudge-ui.pages.dev"
+    // Access-Control-Allow-Credentials: true と両立させるためベア "*" は不可。
+    // マッチした origin のみ ACAO を返し、wildcard 反射はしない。
+    let cors_allow_origin_raw = env::var("CORS_ALLOW_ORIGIN")
         .ok()
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "http://localhost:3000".to_string());
-    // 起動時に検証して設定ミスを早期に分かりやすく落とす:
-    // - `*` は Access-Control-Allow-Credentials: true と両立しないので拒否。
-    // - 無効な header 文字を含むと実行時に DefaultHeaders::add が panic するので、ここで弾く。
-    assert!(
-        cors_allow_origin != "*",
-        "CORS_ALLOW_ORIGIN must be a single concrete origin, not '*' \
-         (wildcard is incompatible with Access-Control-Allow-Credentials: true)"
+    let cors_origins: Arc<Vec<String>> = Arc::new(
+        cors_allow_origin_raw
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .inspect(|s| {
+                assert!(
+                    s != "*",
+                    "CORS_ALLOW_ORIGIN entries must not be bare '*' \
+                     (wildcard is incompatible with Access-Control-Allow-Credentials: true)"
+                );
+                if s.contains('*') {
+                    assert!(
+                        s.matches('*').count() == 1,
+                        "CORS_ALLOW_ORIGIN pattern must contain exactly one '*': {s:?}"
+                    );
+                    let idx = s.find('*').unwrap();
+                    let prefix = &s[..idx];
+                    let suffix = &s[idx + 1..];
+                    assert!(
+                        prefix.ends_with("://"),
+                        "CORS_ALLOW_ORIGIN wildcard must follow 'scheme://' \
+                         (e.g. 'https://*.example.com'), got {s:?}"
+                    );
+                    assert!(
+                        suffix.starts_with('.'),
+                        "CORS_ALLOW_ORIGIN wildcard suffix must start with '.' \
+                         (e.g. '*.example.com'), got {s:?}"
+                    );
+                    assert!(
+                        !suffix.contains('/'),
+                        "CORS_ALLOW_ORIGIN wildcard pattern must not include a path, got {s:?}"
+                    );
+                }
+            })
+            .collect(),
     );
-    actix_web::http::header::HeaderValue::from_str(&cors_allow_origin)
-        .expect("CORS_ALLOW_ORIGIN must be a valid HTTP header value");
+    assert!(
+        !cors_origins.is_empty(),
+        "CORS_ALLOW_ORIGIN must not be empty"
+    );
+    log::info!("CORS allowed origins: {:?}", *cors_origins);
 
     // cookie 署名鍵: SESSION_KEY (64 hex = 32 byte) を渡すと再起動でログイン状態を維持できる。
     // 未設定時のみランダム生成 (開発用。再起動で全員ログアウトする)。
@@ -96,20 +131,37 @@ async fn main() -> std::io::Result<()> {
         _ => true,
     };
 
+    // Fail fast at startup if the embedded legacy snapshot fails to deserialize,
+    // instead of letting the first /legacy/* request panic the worker.
+    let legacy_total = legacy_store::global().total_count();
+    log::info!("legacy snapshot loaded ({legacy_total} submissions)");
+
     HttpServer::new(move || {
+        let cors_origins_fn = cors_origins.clone();
+        let cors = Cors::default()
+            .allowed_origin_fn(move |origin, _req_head| {
+                let origin_str = match origin.to_str() {
+                    Ok(s) => s,
+                    Err(_) => return false,
+                };
+                cors_origins_fn.iter().any(|pattern| {
+                    if let Some(idx) = pattern.find('*') {
+                        let prefix = &pattern[..idx];
+                        let suffix = &pattern[idx + 1..];
+                        origin_str.starts_with(prefix) && origin_str.ends_with(suffix)
+                    } else {
+                        origin_str == pattern.as_str()
+                    }
+                })
+            })
+            .allowed_methods(vec!["GET", "POST", "DELETE", "PUT", "OPTIONS"])
+            .allowed_header(header::CONTENT_TYPE)
+            .supports_credentials();
+
         App::new()
             .app_data(Data::new(pool_data.clone()))
             .app_data(Data::new(arbiter_data.clone()))
-            .wrap(
-                middleware::DefaultHeaders::new()
-                    .add(("Access-Control-Allow-Origin", cors_allow_origin.clone()))
-                    .add(("Access-Control-Allow-Credentials", "true"))
-                    .add((
-                        "Access-Control-Allow-Methods",
-                        "GET, POST, DELETE, PUT, OPTIONS",
-                    ))
-                    .add(("Access-Control-Allow-Headers", "Content-Type")),
-            )
+            .wrap(cors)
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
                     .name("auth")
@@ -136,6 +188,9 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_submissions_sid_handler)
             .service(routes::get_submissions_handler)
             .service(routes::get_tasks_tid_handler)
+            .service(routes::get_legacy_submissions_handler)
+            .service(routes::get_legacy_submissions_sid_handler)
+            .service(routes::get_legacy_tasks_tid_handler)
             .service(routes::put_submissions_sid_handler)
             .service(routes::post_fetch_problems_handler)
     })
