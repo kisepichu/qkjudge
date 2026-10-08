@@ -10,6 +10,10 @@ use tokio::sync::Mutex;
 
 mod languages;
 mod routes;
+mod security;
+
+#[cfg(test)]
+mod security_tests;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
@@ -47,26 +51,14 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(Data::new(pool_data.clone()))
             .app_data(Data::new(arbiter_data.clone()))
-            .wrap(
-                middleware::DefaultHeaders::new()
-                    .add(("Access-Control-Allow-Origin", "https://judge.tqk.blue"))
-                    .add(("Access-Control-Allow-Credentials", "true"))
-                    .add((
-                        "Access-Control-Allow-Methods",
-                        "GET, POST, DELETE, PUT, OPTIONS",
-                    ))
-                    .add(("Access-Control-Allow-Headers", "Content-Type")),
-            )
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&private_key)
                     .name("auth")
                     .same_site(SameSite::None)
                     .secure(true),
             ))
+            .wrap(security::cors())
             .wrap(middleware::Logger::default())
-            .service(routes::options_0_handler)
-            .service(routes::options_1_handler)
-            .service(routes::options_2_handler)
             .service(routes::get_index_handler)
             .service(routes::post_signup_handler)
             .service(routes::post_login_handler)

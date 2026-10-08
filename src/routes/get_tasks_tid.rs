@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 use tokio::sync::Mutex;
 
-extern crate yaml_rust;
 
 #[derive(Deserialize)]
 struct TasksTidPath {
@@ -26,7 +25,7 @@ struct Task {
 }
 
 #[get("/tasks/{task_id}")]
-async fn get_tasks_tid_handler(
+pub async fn get_tasks_tid_handler(
     _id: Identity,
     path: web::Path<TasksTidPath>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,

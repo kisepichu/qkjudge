@@ -6,8 +6,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 use tokio::sync::Mutex;
 
-extern crate yaml_rust;
-
 #[derive(Deserialize)]
 struct SubmissionsQuery {
     page: Option<i32>,
@@ -50,7 +48,7 @@ struct GetSubmissionsResponse {
 }
 
 #[get("/submissions")]
-async fn get_submissions_handler(
+pub async fn get_submissions_handler(
     _id: Identity,
     query: web::Query<SubmissionsQuery>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
@@ -67,7 +65,7 @@ async fn get_submissions_handler(
         r#"SELECT submissions.id, date, submissions.author, problem_id, title AS problem_title, result, language_id
         FROM submissions INNER JOIN problems ON submissions.problem_id=problems.id
         ORDER BY id DESC LIMIT ?, ?;"#,
-        submissions_in_page * (page - 1),
+        i64::from(submissions_in_page) * (i64::from(page) - 1),
         submissions_in_page
     )
     .fetch_all(&*pool)

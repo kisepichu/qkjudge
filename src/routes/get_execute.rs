@@ -30,12 +30,15 @@ struct ExecuteResponse {
 }
 
 #[get("/execute")]
-async fn get_execute_handler(id: Identity) -> impl Responder {
+pub async fn get_execute_handler(id: Identity) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
     if username == "" {
         return HttpResponse::Forbidden().body("not logged in".to_owned());
     }
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .unwrap();
     let res = client
         .post("https://api.jdoodle.com/v1/credit-spent")
         .json(&json!({
@@ -43,7 +46,13 @@ async fn get_execute_handler(id: Identity) -> impl Responder {
             "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
         }))
         .send()
-        .await
-        .unwrap().text().await.unwrap();
+        .await;
+    let res = match res {
+        Ok(response) => match response.text().await {
+            Ok(body) => body,
+            Err(_) => return HttpResponse::BadGateway().finish(),
+        },
+        Err(_) => return HttpResponse::BadGateway().finish(),
+    };
     HttpResponse::Ok().body(res)
 }

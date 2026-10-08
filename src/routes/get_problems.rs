@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 use std::sync::*;
 use tokio::sync::Mutex;
 
-extern crate yaml_rust;
 
 #[derive(Default, Serialize)]
 enum SolutionStatus {
@@ -47,7 +46,7 @@ struct GetProblemsResponse {
 }
 
 #[get("/problems")]
-async fn get_problems_handler(
+pub async fn get_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {

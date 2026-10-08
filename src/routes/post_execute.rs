@@ -1,7 +1,6 @@
 use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse, Responder};
 
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
@@ -33,11 +32,17 @@ struct ExecuteResponse {
 }
 
 #[post("/execute")]
-async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> impl Responder {
-    // let username = id.identity().unwrap_or("".to_owned());
-    // if username == "" {
-    //     return HttpResponse::Forbidden().body("not logged in".to_owned());
-    // }
+pub async fn post_execute_handler(req: web::Json<ExecuteRequest>, id: Identity) -> impl Responder {
+    if id.identity().is_none() {
+        return HttpResponse::Forbidden().body("not logged in");
+    }
+    let language = match usize::try_from(req.language_id)
+        .ok()
+        .and_then(|index| LANGUAGES.get(index))
+    {
+        Some(language) => language,
+        None => return HttpResponse::BadRequest().body("invalid language_id"),
+    };
     if req.source == "" {
         return HttpResponse::BadRequest().json(ExecuteResponse {
             output: "".to_string(),
@@ -48,33 +53,32 @@ async fn post_execute_handler(req: web::Json<ExecuteRequest>, _id: Identity) -> 
         });
     }
 
-    let client = reqwest::Client::new();
-    let res_or_err = client
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .unwrap();
+    let response = client
         .post("https://api.jdoodle.com/v1/execute")
         .json(&json!({
             "clientId": std::env::var("COMPILER_API_CLIENT_ID").expect("COMPILER_API_CLIENT_ID is not set"),
             "clientSecret": std::env::var("COMPILER_API_CLIENT_SECRET").expect("COMPILER_API_CLIENT_SECRET is not set"),
             "script": req.source,
-            "language": LANGUAGES[req.language_id as usize].language_code.to_string(),
-            "versionIndex": LANGUAGES[req.language_id as usize].version_index.to_string(),
+            "language": language.language_code,
+            "versionIndex": language.version_index,
             "stdin": req.input
         }))
         .send()
-        .await
-        .unwrap()
-        .json::<CompilerApiResponse>()
         .await;
+    let res_or_err = match response {
+        Ok(response) => response.json::<CompilerApiResponse>().await,
+        Err(error) => Err(error),
+    };
 
     let res = match res_or_err {
         Ok(res) => res,
         Err(err) => CompilerApiResponse {
             output: Some("".to_string()),
-            statusCode: err
-                .status()
-                .unwrap_or(StatusCode::from_u16(400).unwrap())
-                .to_string()
-                .parse::<i32>()
-                .unwrap_or(400),
+            statusCode: i32::from(err.status().map(|status| status.as_u16()).unwrap_or(502)),
             memory: Some("-1".to_string()),
             cpuTime: Some("-1".to_string()),
         },

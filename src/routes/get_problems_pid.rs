@@ -6,8 +6,6 @@ use std::io::prelude::*;
 use std::sync::*;
 use tokio::sync::Mutex;
 
-extern crate yaml_rust;
-
 #[derive(Default, Serialize)]
 enum SolutionStatus {
     #[default]
@@ -50,7 +48,7 @@ struct GetProblemsPidResponse {
 }
 
 #[get("/problems/{problem_id}")]
-async fn get_problems_pid_handler(
+pub async fn get_problems_pid_handler(
     id: Identity,
     problem_id: web::Path<i32>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
@@ -78,11 +76,15 @@ async fn get_problems_pid_handler(
         return HttpResponse::NotFound().finish();
     }
 
-    let statement_path = std::env::var("PROBLEMS_ROOT")
+    let root = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
-        .replace("\r", "")
-        + &problem.path
-        + "/statement.md";
+        .replace("\r", "");
+    let statement_path = match crate::security::problem_directory(&root, &problem.path)
+        .and_then(|directory| crate::security::problem_file(&directory, "statement.md"))
+    {
+        Ok(path) => path,
+        Err(_) => return HttpResponse::InternalServerError().body("invalid problem path"),
+    };
     let mut statement_file = match File::open(statement_path) {
         Ok(f) => f,
         Err(_e) => return HttpResponse::InternalServerError().body("statement file not found"),

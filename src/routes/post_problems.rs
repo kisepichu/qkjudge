@@ -1,7 +1,6 @@
+use actix_identity::Identity;
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
-use std::fs::File;
 
 use std::sync::*;
 use tokio::sync::Mutex;
@@ -23,10 +22,22 @@ struct PostProblemsResponse {
 }
 
 #[post("/problems")]
-async fn post_problems_handler(
+pub async fn post_problems_handler(
+    id: Identity,
     req: web::Json<ProblemNewRequest>,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
 ) -> impl Responder {
+    if !matches!(id.identity().as_deref(), Some("admin" | "tqk")) {
+        return HttpResponse::Forbidden().body("administrator required");
+    }
+    let root = std::env::var("PROBLEMS_ROOT")
+        .expect("PROBLEMS_ROOT not set")
+        .replace("\r", "");
+    let file = crate::security::problem_directory(&root, &req.path)
+        .and_then(|directory| crate::security::problem_file(&directory, "problem.yaml"));
+    if file.is_err() {
+        return HttpResponse::BadRequest().body("invalid problem path");
+    }
     let pool = pool_data.lock().await;
     let count = sqlx::query!(
         r#"SELECT COUNT(*) as value FROM problems WHERE path=? LIMIT 1;"#,
@@ -43,22 +54,6 @@ async fn post_problems_handler(
             req.path.to_owned()
         ));
     }
-
-    let path = std::env::var("PROBLEMS_ROOT")
-        .expect("PROBLEMS_ROOT not set")
-        .replace("\r", "")
-        + &req.path
-        + "/problem.yaml";
-    println!("{:?}", path);
-    match File::open(path) {
-        Ok(_file) => true,
-        Err(e) => {
-            return HttpResponse::BadRequest().body(format!(
-                "upload to problems repository before register. err: {}",
-                e
-            ));
-        }
-    };
 
     let problem_id = sqlx::query!("INSERT INTO problems (path) VALUES (?);", req.path)
         .execute(&*pool)

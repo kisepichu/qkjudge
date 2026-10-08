@@ -6,13 +6,12 @@ use actix_web::{
     web::{self, Bytes},
     HttpRequest, HttpResponse, Responder,
 };
-use hmac::{digest::MacError, Hmac, Mac};
-use sha1::Sha1;
+use hmac::{Hmac, Mac};
 use sha2::Sha256;
 use sqlx::{query, query_as};
 use std::collections::HashMap;
 use tokio::sync::Mutex;
-use yaml_rust::{Yaml, YamlLoader};
+use yaml_rust2::{Yaml, YamlLoader};
 
 struct ProblemSummary {
     id: i32,
@@ -30,29 +29,30 @@ fn yaml(path: String) -> Result<Yaml, HttpResponse> {
         }
     };
     let mut info_raw = String::new();
-    info_file
-        .read_to_string(&mut info_raw)
-        .expect("something went wrong reading the file");
-    let docs = YamlLoader::load_from_str(&info_raw).unwrap();
-    Ok(docs[0].to_owned())
+    if info_file.read_to_string(&mut info_raw).is_err() {
+        return Err(HttpResponse::InternalServerError().body("cannot read YAML"));
+    }
+    let docs = YamlLoader::load_from_str(&info_raw)
+        .map_err(|_| HttpResponse::InternalServerError().body("invalid YAML"))?;
+    docs.into_iter()
+        .next()
+        .ok_or_else(|| HttpResponse::InternalServerError().body("empty YAML"))
 }
 
 type HmacSha256 = Hmac<Sha256>;
-type HmacSha1 = Hmac<Sha1>;
-use hex;
 
 pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
+    let mut digest = [0u8; 32];
+    if hex::decode_to_slice(signature, &mut digest).is_err() {
+        return false;
+    }
     let mut hmac = HmacSha256::new_from_slice(secret).expect("HMAC can take key of any size");
     hmac.update(message);
-    let expected = hex::encode(hmac.finalize().into_bytes());
-    println!("expected: {}", expected);
-    let got = String::from_utf8(signature.to_vec()).unwrap();
-    println!("got: {}", got);
-    return crypto::util::fixed_time_eq(expected.as_bytes(), got.as_bytes());
+    hmac.verify_slice(&digest).is_ok()
 }
 
 #[post("/fetch/problems")]
-async fn post_fetch_problems_handler(
+pub async fn post_fetch_problems_handler(
     id: Identity,
     pool_data: web::Data<Arc<Mutex<sqlx::Pool<sqlx::MySql>>>>,
     req: HttpRequest,
@@ -60,27 +60,25 @@ async fn post_fetch_problems_handler(
 ) -> impl Responder {
     let username = id.identity().unwrap_or("".to_owned());
 
-    if username == "tqk" {
-        println!("login")
-    } else {
-        let sign_github = match req.headers().get("X-Hub-Signature-256") {
-            Some(s) => s.to_str().expect("to_str failed")[7..].as_bytes(),
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
+    if username != "tqk" || !crate::security::trusted_origin(&req) {
+        let signature = match req
+            .headers()
+            .get("X-Hub-Signature-256")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.strip_prefix("sha256="))
+        {
+            Some(value)
+                if value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit()) =>
+            {
+                value
+            }
+            _ => return HttpResponse::Forbidden().body("invalid signature"),
         };
-        let sign_github_sha1 = match req.headers().get("X-Hub-Signature") {
-            Some(s) => s.to_str().expect("to_str failed")[5..].as_bytes(),
-            None => return HttpResponse::Forbidden().body("signature is not set in header"),
+        let secret = match std::env::var("GITHUB_WEBHOOK_TOKEN") {
+            Ok(secret) if !secret.is_empty() => secret,
+            _ => return HttpResponse::InternalServerError().body("webhook not configured"),
         };
-
-        let message = String::from_utf8(bytes.to_vec()).unwrap();
-        // println!("message: {}", message);
-        let secret =
-            std::env::var("GITHUB_WEBHOOK_TOKEN").expect("env GITHUB_WEBHOOK_TOKEN not set");
-
-        if (validate(secret.as_bytes(), sign_github, message.as_bytes())) {
-            println!("ok");
-        } else {
-            println!("ng");
+        if !validate(secret.as_bytes(), signature.as_bytes(), &bytes) {
             return HttpResponse::Forbidden().body("verify failed");
         }
     }
@@ -99,10 +97,16 @@ async fn post_fetch_problems_handler(
         return HttpResponse::InternalServerError().body("git pull failed");
     }
 
-    let config_path = std::env::var("PROBLEMS_ROOT")
+    let root = std::env::var("PROBLEMS_ROOT")
         .expect("PROBLEMS_ROOT not set")
-        .replace("\r", "")
-        + "/qkjudge.yaml";
+        .replace("\r", "");
+    let config_path = match std::path::Path::new(&root)
+        .canonicalize()
+        .and_then(|directory| crate::security::problem_file(&directory, "qkjudge.yaml"))
+    {
+        Ok(path) => path.to_string_lossy().into_owned(),
+        Err(_) => return HttpResponse::InternalServerError().body("invalid catalog path"),
+    };
 
     let info = match yaml(config_path) {
         Ok(p) => p,
@@ -138,11 +142,15 @@ async fn post_fetch_problems_handler(
             return HttpResponse::InternalServerError().body("post_fetch_problems_handler: 2");
         }
         let problem_path = problem_path_yaml.as_str().unwrap();
-        let problem_path_long = std::env::var("PROBLEMS_ROOT")
+        let root = std::env::var("PROBLEMS_ROOT")
             .expect("PROBLEMS_ROOT not set")
-            .replace("\r", "")
-            + problem_path.clone()
-            + "/problem.yaml";
+            .replace("\r", "");
+        let problem_path_long = match crate::security::problem_directory(&root, problem_path)
+            .and_then(|directory| crate::security::problem_file(&directory, "problem.yaml"))
+        {
+            Ok(path) => path.to_string_lossy().into_owned(),
+            Err(_) => return HttpResponse::BadRequest().body("invalid problem path"),
+        };
         let probleminfo = match yaml(problem_path_long.clone()) {
             Ok(p) => p,
             Err(e) => {
@@ -175,7 +183,8 @@ async fn post_fetch_problems_handler(
                 .as_str()
                 .unwrap()
                 .parse::<f64>()
-                .is_err()
+                .map(|value| !value.is_finite() || value <= 0.0)
+                .unwrap_or(true)
         {
             println!(
                 "time_limit is not defined correctly in {}",
@@ -184,7 +193,10 @@ async fn post_fetch_problems_handler(
             return HttpResponse::InternalServerError().body("post_fetch_problems_handler: 3");
         }
         let problem_time_limit = probleminfo["time_limit"].as_str().unwrap();
-        if probleminfo["memory_limit"].as_i64().is_none() {
+        if !matches!(
+            probleminfo["memory_limit"].as_i64(),
+            Some(1..=2_147_483_647)
+        ) {
             println!(
                 "memory_limit is not defined correctly in {}",
                 problem_path_long
@@ -197,7 +209,7 @@ async fn post_fetch_problems_handler(
         let pool = pool_data.lock().await;
         let count = query!(
             "SELECT COUNT(*) AS value FROM problems WHERE path=? LIMIT 1;",
-            problem_path.clone()
+            problem_path
         )
         .fetch_one(&*pool)
         .await
@@ -275,41 +287,33 @@ async fn post_fetch_problems_handler(
 }
 
 #[cfg(test)]
-mod test {
-    use hmac::{Hmac, Mac};
-    use sha1::Sha1;
-    use sha2::Sha256;
+mod tests {
+    use super::validate;
 
-    type HmacSha256 = Hmac<Sha256>;
-    type HmacSha1 = Hmac<Sha1>;
-
-    pub fn validate(secret: &[u8], signature: &[u8], message: &[u8]) -> bool {
-        let mut hmac = HmacSha1::new_from_slice(secret).expect("HMAC can take key of any size");
-        hmac.update(message);
-        hmac.verify_slice(signature).is_ok()
+    #[test]
+    fn sha256_verification_authenticates_the_exact_body() {
+        let signature = b"757107ea0eb2509fc211221cce984b8a37570b6d7586c22c46f4379c8b043e17";
+        assert!(validate(
+            b"It's a Secret to Everybody",
+            signature,
+            b"Hello, World!"
+        ));
+        assert!(!validate(
+            b"It's a Secret to Everybody",
+            signature,
+            b"Hello, World?"
+        ));
+        assert!(!validate(b"wrong secret", signature, b"Hello, World!"));
+        assert!(!validate(b"secret", b"x", b"body"));
+        assert!(!validate(b"secret", &[0xff; 64], b"body"));
     }
 
     #[test]
-    fn it_returns_true_when_signature_and_message_match() {
-        let signature = &vec![
-            0x73, 0x6d, 0x7f, 0x93, 0x42, 0xf2, 0xa7, 0xd2, 0x39, 0xaf, 0xa5, 0x51, 0x3a, 0x4b,
-            0xb2, 0x28, 0x3e, 0x0e, 0x15, 0x88,
-        ];
-        let secret = b"some-secret";
-        let message = b"blah-blah-blah";
-
-        assert_eq!(validate(secret, signature, message), true);
-    }
-
-    #[test]
-    fn it_returns_false_when_signature_and_message_do_not_match() {
-        let signature = &vec![
-            0x31, 0x30, 0x2b, 0x00, 0xba, 0xd4, 0xd6, 0xd1, 0x10, 0xa1, 0x18, 0x82, 0x77, 0xc4,
-            0xd1, 0x06, 0x0c, 0xb2, 0xc3, 0x73,
-        ];
-        let secret = b"some-secret";
-        let message = b"blah-blah-blah?";
-
-        assert_eq!(validate(secret, signature, message), false);
+    fn verification_accepts_signed_non_utf8_body_bytes() {
+        assert!(validate(
+            b"audit-secret",
+            b"dd860f166d0663d5092b14f74fb52924e7a8311c43dfb2beb9bef5ebe40cab77",
+            &[0xff, 0xfe]
+        ));
     }
 }
