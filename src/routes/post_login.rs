@@ -34,6 +34,9 @@ async fn post_login_handler(
         return HttpResponse::Forbidden().body("username or password is wrong");
     }
 
-    id.remember(req.username.to_owned());
+    // 入力ではなく DB の username を覚える。username の照合順序は大文字小文字・アクセント・
+    // 末尾の空白を区別しないので、入力をそのまま使うと "ADMIN" で登録した人が "admin" として
+    // ログインでき、put_submissions_sid の admin 判定を通ってしまう。
+    id.remember(user.username);
     HttpResponse::Ok().finish()
 }

@@ -21,6 +21,9 @@ mod post_signup;
 mod post_submit;
 mod put_submissions_sid;
 
+/// 他人の提出も再ジャッジできる特権ユーザー名。公開 signup では予約している (post_signup)。
+const ADMIN_USERNAME: &str = "admin";
+
 pub use self::get_execute::get_execute_handler;
 pub use self::get_hello::get_hello_handler;
 pub use self::get_index::get_index_handler;
