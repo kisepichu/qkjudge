@@ -182,7 +182,6 @@ async fn main() -> std::io::Result<()> {
             .service(routes::get_execute_handler)
             .service(routes::post_execute_handler)
             .service(routes::get_problems_handler)
-            .service(routes::post_problems_handler)
             .service(routes::get_problems_pid_handler)
             .service(routes::post_submit_handler)
             .service(routes::get_submissions_sid_handler)

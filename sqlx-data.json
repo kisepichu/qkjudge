@@ -397,16 +397,6 @@
     },
     "query": "SELECT submissions.id, date, submissions.author, problem_id, title AS problem_title, testcase_num, result, language_id, source\n            FROM submissions INNER JOIN problems ON submissions.problem_id=problems.id WHERE submissions.id=?"
   },
-  "63fa591e7cf22b5cc9b6974be77a5b0407bd5d3f64810e0eeeb1f12a15de9ae1": {
-    "describe": {
-      "columns": [],
-      "nullable": [],
-      "parameters": {
-        "Right": 1
-      }
-    },
-    "query": "INSERT INTO problems (path) VALUES (?);"
-  },
   "7a7ed517ef773a4db8c5c07109921c56ea54d4e6b2c2f9d9434990fd22ef25aa": {
     "describe": {
       "columns": [
@@ -717,31 +707,6 @@
       }
     },
     "query": "INSERT INTO tasks (submission_id, input, output, expected, result, memory, cpu_time) VALUES (?, ?, ?, ?, ?, ?, ?);"
-  },
-  "bb08fff8fb595d9d027ca7a165edfc58f61d07f00b8bfd9745136666cd7828a0": {
-    "describe": {
-      "columns": [
-        {
-          "name": "value",
-          "ordinal": 0,
-          "type_info": {
-            "char_set": 63,
-            "flags": {
-              "bits": 129
-            },
-            "max_size": 21,
-            "type": "LongLong"
-          }
-        }
-      ],
-      "nullable": [
-        false
-      ],
-      "parameters": {
-        "Right": 1
-      }
-    },
-    "query": "SELECT COUNT(*) as value FROM problems WHERE path=? LIMIT 1;"
   },
   "c946b33bf9bc1c1fab0f6244429750790bad339813fd93bb9ab637154333ea84": {
     "describe": {
