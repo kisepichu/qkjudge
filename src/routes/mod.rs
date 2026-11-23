@@ -16,10 +16,12 @@ mod post_execute;
 mod post_fetch_problems;
 mod post_login;
 mod post_logout;
-mod post_problems;
 mod post_signup;
 mod post_submit;
 mod put_submissions_sid;
+
+/// 他人の提出も再ジャッジできる特権ユーザー名。公開 signup では予約している (post_signup)。
+const ADMIN_USERNAME: &str = "admin";
 
 pub use self::get_execute::get_execute_handler;
 pub use self::get_hello::get_hello_handler;
@@ -41,7 +43,6 @@ pub use self::post_execute::post_execute_handler;
 pub use self::post_fetch_problems::post_fetch_problems_handler;
 pub use self::post_login::post_login_handler;
 pub use self::post_logout::post_logout_handler;
-pub use self::post_problems::post_problems_handler;
 pub use self::post_signup::post_signup_handler;
 pub use self::post_submit::post_submit_handler;
 pub use put_submissions_sid::put_submissions_sid_handler;

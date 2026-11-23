@@ -53,12 +53,21 @@ qkjudge サーバーは traP の NeoShowcase 上で、gitea `git.trap.jp/tqk/qkj
 
 ```
 prod namespace                         staging namespace
-  qkjudge (deploy, image :master)        qkjudge (deploy, image :dev)
-  mariadb (statefulset + PVC)            mariadb (statefulset + PVC)
-  secret (JDoodle/DB/webhook/cookie)     secret (...)
-  ingress qkjudge-api.kisen.one          ingress qkjudge-api-stg.kisen.one
-cloudflared (deploy) ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
-frontend: GitHub Pages (kisen.one 独自ドメイン) — k3s 外
+  qkjudge (Deployment, image :master)    qkjudge (Deployment, image :dev)
+  mariadb (StatefulSet + PVC)            mariadb (StatefulSet + PVC)
+  Secret (JDoodle/DB/webhook/cookie)     Secret (...)
+  Ingress qkjudge-api.kisen.one          Ingress qkjudge-api-stg.kisen.one
+
+cloudflared (Deployment)
+  ── tunnel ── Cloudflare ── qkjudge-api.kisen.one / qkjudge-api-stg.kisen.one
+
+frontend: Cloudflare Pages — k3s 外
+  master → qkjudge.kisen.one
+  dev    → qkjudge-stg.kisen.one (preview branch alias)
+
+旧 judge.tqk.blue: GitHub Pages の legacy-redirect orphan branch
+  index.html + 404.html で meta refresh + JS リダイレクトのみ配信
+  (qkjudge-UI repo)
 ```
 
 ## ブランチ運用
