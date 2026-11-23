@@ -12,6 +12,7 @@ use std::path::Path;
 use std::{fs, sync::Arc};
 use tokio::sync::Mutex;
 
+use super::ADMIN_USERNAME;
 use crate::languages::LANGUAGES;
 extern crate yaml_rust;
 
@@ -310,7 +311,7 @@ async fn put_submissions_sid_handler(
         if req.result == "WJ" {
             return HttpResponse::BadRequest().body("judging");
         }
-        if req.author != username && username != "admin" {
+        if req.author != username && username != ADMIN_USERNAME {
             return HttpResponse::Forbidden()
                 .body("only submittion author or admin can trigger rejudge");
         }
